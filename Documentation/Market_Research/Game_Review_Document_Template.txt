@@ -1,0 +1,382 @@
+================================================================================
+GAME REVIEW DOCUMENT TEMPLATE
+Market Research for Educational Trivia Game Development
+================================================================================
+
+GAME NAME: [Insert game name here]
+DATE REVIEWED: [Insert date]
+REVIEWER: [Insert your name]
+
+================================================================================
+1. CORE MECHANIC
+================================================================================
+
+What's the primary gameplay loop?
+- 
+
+How does answering questions translate to game progression?
+- 
+
+Time pressure vs self-paced?
+- 
+
+Win conditions:
+- 
+
+Additional notes:
+- 
+
+
+================================================================================
+2. SUB MECHANICS
+================================================================================
+
+Power-ups, upgrades, sabotage options:
+- 
+
+Variety modes/game types:
+- 
+
+Strategic elements beyond just answering questions:
+- 
+
+Additional notes:
+- 
+
+
+================================================================================
+3. QUESTION SET INTEGRATION
+================================================================================
+
+How do teachers create/import questions?
+- 
+
+Can they use pre-made question banks?
+- 
+
+Can they mix multiple subjects in one game?
+- 
+
+Question formats supported (multiple choice, true/false, open-ended?):
+- 
+
+How are questions assigned (same for all vs individualized)?
+- 
+
+Additional notes:
+- 
+
+
+================================================================================
+4. ART STYLE
+================================================================================
+
+Color palette and visual tone:
+- 
+
+Character/avatar design approach:
+- 
+
+UI clarity for 4th graders (rate 1-10):
+- 
+
+Animations and visual feedback:
+- 
+
+Screenshots/visual examples: [Attach or describe 3-5 screenshots]
+- 
+
+Additional notes:
+- 
+
+
+================================================================================
+5. PLAYER/TEACHER ACCOUNT
+================================================================================
+
+TEACHER FEATURES:
+Dashboard capabilities:
+- 
+
+Game creation process:
+- 
+
+Student management tools:
+- 
+
+Reports available:
+- 
+
+STUDENT FEATURES:
+Login process (or no login required?):
+- 
+
+Profile customization options:
+- 
+
+Stats tracking for students:
+- 
+
+Additional notes:
+- 
+
+
+================================================================================
+6. STUDENT PERFORMANCE INSIGHTS
+================================================================================
+
+What data does the teacher see? (individual scores, class averages, question difficulty):
+- 
+
+Real-time vs post-game reports?
+- 
+
+Can students see their own progress over time?
+- 
+
+Standards/curriculum alignment tracking?
+- 
+
+Additional notes:
+- 
+
+
+================================================================================
+7. EXTRA WEB PAGES (OUTSIDE OF GAME)
+================================================================================
+
+Marketing site structure:
+- 
+
+Blog/resources section:
+- 
+
+Help/tutorial content:
+- 
+
+Community features (forums, sharing question sets?):
+- 
+
+Additional notes:
+- 
+
+
+================================================================================
+8. PRICING
+================================================================================
+
+Free vs paid tiers:
+- 
+
+What features are paywalled?
+- 
+
+Pricing structure (per teacher, per school, per student?):
+- 
+
+What's worth paying for (perceived value)?
+- 
+
+Additional notes:
+- 
+
+
+================================================================================
+9. STUDIO RESEARCH
+================================================================================
+
+Company size/team:
+- 
+
+Funding history:
+- 
+
+User base size:
+- 
+
+Launch timeline and growth:
+- 
+
+Notable milestones:
+- 
+
+Additional notes:
+- 
+
+
+================================================================================
+10. TUTORIALS
+================================================================================
+
+How do new players learn the game?
+- 
+
+How do new teachers learn to set it up?
+- 
+
+First-time user experience quality (rate 1-10):
+- 
+
+Is there a demo/practice mode?
+- 
+
+Additional notes:
+- 
+
+
+================================================================================
+11. ACCESSIBILITY
+================================================================================
+
+Text size options:
+- 
+
+Color-blind friendly design?
+- 
+
+Language support:
+- 
+
+Screen reader compatibility:
+- 
+
+Works on what devices? (Chromebook, iPad, phones):
+- 
+
+Additional notes:
+- 
+
+
+================================================================================
+12. SAFETY
+================================================================================
+
+How do they prevent inappropriate usernames/content?
+- 
+
+Teacher controls over student interaction:
+- 
+
+Privacy/COPPA compliance:
+- 
+
+Student data protection:
+- 
+
+Technical performance notes (load times, lag, browser compatibility):
+- 
+
+Internet requirement (works offline?):
+- 
+
+Mobile vs desktop experience differences:
+- 
+
+Additional notes:
+- 
+
+
+================================================================================
+13. ISSUES
+================================================================================
+
+PAIN POINTS (from reviews and user feedback):
+
+Top 3 teacher complaints:
+1. 
+2. 
+3. 
+
+Top 3 student complaints:
+1. 
+2. 
+3. 
+
+Missing features users want:
+- 
+
+Bugs/issues noticed during testing:
+- 
+
+Our opportunity to differentiate:
+- 
+
+Additional notes:
+- 
+
+
+================================================================================
+SYNTHESIS & ANALYSIS
+================================================================================
+
+FEATURES WE SHOULD STEAL:
+1. 
+2. 
+3. 
+4. 
+5. 
+
+FEATURES WE SHOULD AVOID:
+1. 
+2. 
+3. 
+
+UNIQUE DIFFERENTIATOR IDEAS:
+(What could we do that they don't?)
+1. 
+2. 
+3. 
+
+ENGAGEMENT HOOKS OBSERVED:
+What makes students want to play again?
+- 
+
+Rewards/incentive systems:
+- 
+
+Leaderboards (class-wide, global, friends-only?):
+- 
+
+Progress visualization:
+- 
+
+SOCIAL/MULTIPLAYER STRUCTURE:
+How do students join games? (code system, links, etc.):
+- 
+
+Live multiplayer vs asynchronous?
+- 
+
+Team modes?
+- 
+
+Chat/communication features?
+- 
+
+
+================================================================================
+OVERALL IMPRESSION
+================================================================================
+
+First impression (1 paragraph summary):
+
+
+Strengths:
+- 
+
+Weaknesses:
+- 
+
+Best feature overall:
+- 
+
+Biggest missed opportunity:
+- 
+
+Relevance to our project (how does this inform our design?):
+- 
+
+
+================================================================================
+END OF REVIEW
+================================================================================

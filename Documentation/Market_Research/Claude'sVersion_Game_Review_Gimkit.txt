@@ -1,0 +1,386 @@
+================================================================================
+GAME REVIEW DOCUMENT - GIMKIT (CLASSIC & TEAM MODES)
+================================================================================
+
+GAME NAME: Gimkit
+MODES REVIEWED: Tycoon (Classic) and Team Tycoon
+DATE REVIEWED: January 25, 2026
+FOCUS: Traditional quiz-based economy modes
+
+================================================================================
+1. CORE MECHANIC
+================================================================================
+
+**TYCOON (CLASSIC MODE):**
+Answer questions correctly → earn virtual cash → buy upgrades/powerups → earn more cash faster. Individual competition.
+
+Starting: $3 per correct answer, lose money on incorrect answers.
+
+Win conditions: Time limit (most money wins), Race (first to goal amount), or All In (class collectively reaches goal).
+
+**TEAM TYCOON:**
+Identical to Tycoon except teams of students share a collective bank account. All teammates contribute to/spend from shared pool. Team with most money wins.
+
+Key difference from other platforms: Students directly control their economic strategy through upgrade purchasing, not just passive rewards.
+
+================================================================================
+2. SUB MECHANICS
+================================================================================
+
+**UPGRADES (Permanent improvements):**
+- Money Per Question: Increase base earnings (10 levels)
+- Streak Bonus: Earn more for consecutive correct answers (10 levels)
+- Multiplier: Multiply all earnings by 2x, 5x, 10x, up to 100x (10 levels)
+- Insurance: Reduce money lost on incorrect answers (10 levels)
+- Discount: Reduce upgrade costs (10 levels)
+
+Strategic depth: Upgrade order matters. Common strategy: Streak Bonus → Money Per Question → Multiplier.
+
+**POWERUPS (Single-use items):**
+Offensive: Ice player (freeze for 15s), Nuke (reset player's balance), Decrease rate
+Defensive: Shield (protect from attacks), Second Chance (retry question), Mega Bonus
+Utility: Rebooter (regenerate purchased powerups), Music (plays on host screen)
+
+**TYCOON TWISTS (Variations):**
+- Super Rich Mode: Everything worth 500x more
+- Boss Battle: One player vs entire class
+- Hidden Mode: Leaderboard hidden until end
+- Drained Mode: Balances decrease over time
+- Infinity Mode: Endless upgrade levels
+
+Question format: Multiple choice, true/false, short answer
+Self-paced: Students answer at own speed on own devices
+
+Team Mode specifics: Shared economy creates cooperation/coordination challenges. One student spending recklessly affects whole team.
+
+================================================================================
+3. QUESTION SET INTEGRATION
+================================================================================
+
+Creation: Built-in editor, import from Quizlet/Gimkit Library/spreadsheet
+Library: Browse community-created "Kits" by subject/grade
+Formats: Multiple choice, true/false, short answer (text input)
+Images/Audio: Pro feature only
+Mixing subjects: Yes, no restrictions
+
+Students see questions individually on devices. Same question set for all, but self-paced progression.
+
+================================================================================
+4. ART STYLE
+================================================================================
+
+Theme: Clean, minimal, corporate/game show aesthetic
+Colors: Blue/white primary, gold accents for currency
+UI: Simple shop interface, clear upgrade buttons, real-time leaderboard
+Animations: Smooth transitions, celebration effects for purchases
+Characters: None (text-based player names)
+
+Clarity: 9/10 for 4th graders - very readable, large buttons, clear hierarchy
+Visual feedback: Cash counter prominent, upgrade levels visibly tracked
+
+Less visually playful than Blooket/Kahoot. More "professional" feel.
+
+================================================================================
+5. PLAYER/TEACHER ACCOUNT
+================================================================================
+
+**TEACHER:**
+Dashboard: Create Kits, organize classes (rostering), host games, view reports
+Setup: Select Kit → Choose mode (Tycoon/Team) → Set win condition → Generate code
+Classes: Optional rostering for instant-join and better reporting
+Student management: Can't remove mid-game; assign to teams manually or randomize
+
+**STUDENT:**
+No account required to play
+Optional accounts: Save progress, personalization
+Join: Go to gimkit.com/join, enter 4-digit code, type name
+Profile: Name/nickname only, no avatar customization
+
+**REPORTS:**
+Real-time: Leaderboard, current balances
+Post-game: Individual accuracy, questions answered, class averages
+Detailed: Question-by-question breakdown, time per question (available for all)
+
+================================================================================
+6. STUDENT PERFORMANCE INSIGHTS
+================================================================================
+
+Data available:
+- Individual accuracy percentages
+- Questions answered correctly/incorrectly
+- Class statistics and averages
+- Time on task
+- Question-level difficulty analysis (which questions missed most)
+
+Real-time: Leaderboard monitoring during play
+Post-game: Exportable reports (CSV/PDF)
+
+Student tracking: With accounts, can see personal stats history
+
+Gimkit strength: Not luck-based like Blooket Gold Quest. Success directly tied to accuracy + strategic upgrade purchasing.
+
+================================================================================
+7. EXTRA WEB PAGES
+================================================================================
+
+Main site: gimkit.com
+Help Center: help.gimkit.com with guides and FAQs
+Blog: Updates and feature announcements
+KitCollab: Community question sharing
+
+Mode labels: Each mode tagged with descriptors (Strategic, Competitive, Calm, etc.) to help teachers choose
+
+No formal community forum
+No certification program
+
+================================================================================
+8. PRICING
+================================================================================
+
+**GIMKIT BASIC (FREE):**
+- Unlimited students (500 live player hard cap)
+- Featured game modes (3 rotated modes, unlimited players)
+- Other modes: 5 player limit
+- Create unlimited Kits
+- Class rostering
+- Reports and analytics
+
+**GIMKIT PRO ($14.99/month or $59.88/year):**
+- All game modes unlocked (unlimited players per mode)
+- Assignments (homework/async play)
+- Upload images to questions
+- Add audio to questions
+- Priority support
+- 14-day free trial for new educators
+
+**GROUP PLANS:**
+- Department: ~$650/year (up to 20 teachers)
+- School: ~$1,000/year (whole school)
+
+Key note: Tycoon and Team Tycoon typically included in free featured rotation. Pro mainly unlocks 2D modes and Assignments.
+
+Compared to competitors: More generous free tier than Kahoot ($3-17/mo), cheaper Pro than Kahoot's premium tiers.
+
+================================================================================
+9. STUDIO RESEARCH
+================================================================================
+
+Founded: High school student Josh Feinsilber created Gimkit as junior year project (2017)
+Company: Team Gimkit (small ed-tech startup)
+
+Evolution: Started as Classic mode only, expanded to 25+ modes over time
+User base: Widely adopted in K-12, especially middle school
+
+Philosophy: Skill-based progression (not luck), student agency through economic choices
+
+FERPA/COPPA compliant
+Students can play without accounts
+
+================================================================================
+10. TUTORIALS
+================================================================================
+
+Onboarding: Intuitive dashboard, minimal learning curve
+First-time setup: 5 minutes to create Kit and host first game
+Help resources: Comprehensive guides, mode picker explains each mode
+
+Demo: No formal demo, but free account allows full testing with featured modes
+
+Student learning curve: 2-3 questions to understand upgrade system. Strategic depth emerges over multiple games.
+
+Teacher support: Mode labels, recommended player counts, ideal time estimates
+
+================================================================================
+11. ACCESSIBILITY
+================================================================================
+
+Text size: Browser zoom, no built-in adjuster
+Color-blind: Not explicitly designed for (relies on color for some UI)
+Languages: Interface English only, questions can be any language
+Screen reader: Not documented
+
+Devices: Web-based (any browser), iOS/Android apps, Chromebooks, tablets, phones
+Works best on: Desktop/tablet for students, any device for joining
+
+Internet: Required, no offline mode
+Performance: Generally fast, handles 500 players well
+
+Reading level: Questions visible on student devices. Text-heavy interface. Self-paced helps struggling readers.
+
+================================================================================
+12. SAFETY
+================================================================================
+
+Content moderation: Teachers control all content, no public sharing required
+Usernames: Teacher can enable random name generator to prevent inappropriate names
+Player interaction: No chat, no direct communication between students
+
+Offensive powerups: "Clean Powerups Only" setting disables attack powerups (Ice, Nuke, Decrease)
+
+Privacy: COPPA compliant, students under 13 can play without accounts
+Data: No personal info required to join games
+
+Technical: Stable, rare lag even with large groups (up to 500)
+Google SSO: For under-18 district accounts, admin may need to mark Gimkit as trusted app
+
+Competitive environment: Powerups like Ice/Nuke can create frustration for targeted students (optional to disable)
+
+================================================================================
+13. ISSUES
+================================================================================
+
+**TEACHER COMPLAINTS:**
+1. Some modes locked behind Pro paywall (though rotating free modes generous)
+2. Team mode coordination difficult - one careless teammate tanks whole team
+3. Students can get far behind economically and lose motivation
+
+**STUDENT COMPLAINTS:**
+1. Attack powerups feel unfair (being Nuked/Iced frustrating)
+2. Learning upgrade strategy takes time - new students disadvantaged
+3. Repetitive if same Kit used frequently
+
+**MISSING FEATURES:**
+- Team customization (manual team selection, balanced teams)
+- Mid-game teacher controls (pause, adjust timer)
+- More question formats (matching, sequencing, image labeling)
+- In-game hints for struggling students
+
+**BUGS/ISSUES:**
+- Occasional disconnect with poor internet
+- Rare leaderboard display glitches
+- Mobile keyboard sometimes covers question text
+
+**DIFFERENTIATION OPPORTUNITIES:**
+- Adaptive question difficulty
+- Scaffold hints for struggling students
+- More collaborative modes (less competitive)
+- Built-in reading support (text-to-speech)
+- Simpler economy mode for younger students (fewer upgrade types)
+- Balance mechanisms for runaway leaders
+
+================================================================================
+SYNTHESIS & ANALYSIS
+================================================================================
+
+**FEATURES TO STEAL:**
+
+1. **Economic strategy layer** - Upgrade purchasing creates depth beyond just answering questions. Students make meaningful choices.
+
+2. **Self-paced within live game** - Competitive environment without forced synchronization. Students go at own speed.
+
+3. **Strategic depth** - Optimal upgrade order creates learning curve and replay value.
+
+4. **Clean powerup system** - Single-use items create tactical moments without overwhelming.
+
+5. **Shared team economy** (Team mode) - Forces coordination and cooperation naturally.
+
+**FEATURES TO AVOID:**
+
+1. **Attack powerups** - Ice/Nuke mechanics create frustration and negative social dynamics (though can be disabled).
+
+2. **Runaway economy problem** - Rich get richer through multipliers. Leaders pull away dramatically.
+
+3. **Complex upgrade optimization** - Casual players don't understand optimal strategy and fall behind.
+
+4. **Free tier mode rotation** - Rotating which modes are free creates inconsistent teacher experience.
+
+5. **Minimal visual theming** - Lacks personality compared to Blooket's themed modes.
+
+**UNIQUE DIFFERENTIATOR IDEAS:**
+
+1. **Cooperative economy modes** - Team works toward shared goal, not competition.
+
+2. **Catch-up mechanics** - Trailing players get bonus earning potential.
+
+3. **Simplified upgrade paths** - Clearer optimal choices for younger students.
+
+4. **Visual themes** - Wrap economy mechanics in engaging worlds (space station, medieval kingdom, etc.).
+
+5. **Question format variety** - Beyond multiple choice, incorporate matching, sequencing, image tasks.
+
+6. **Adaptive difficulty** - Easier questions for struggling students, harder for advanced.
+
+**ENGAGEMENT HOOKS:**
+
+What makes students want to play again?
+- Mastering upgrade strategy (learning optimal paths)
+- Reaching new economic milestones (first $1M, max multiplier)
+- Revenge against attacking players
+- Perfecting question streak bonuses
+- Team coordination in Team mode
+
+Rewards: Virtual cash, upgrade levels, leaderboard placement
+No collectibles/unlockables (unlike Blooket)
+No persistent progression between games
+
+**SOCIAL/MULTIPLAYER:**
+
+Joining: gimkit.com/join + 4-digit code, or rostered instant-join
+Live only for these modes (Assignments feature separate)
+Team mode: Random or manual team assignment
+No chat/communication beyond gameplay
+
+Competitive dynamics: Individual leaderboard creates pressure. Attack powerups add social element.
+
+================================================================================
+OVERALL IMPRESSION
+================================================================================
+
+**Summary:**
+Gimkit's Tycoon and Team modes create engaging quiz experiences through economic strategy. The upgrade system transforms repetitive question-answering into a resource management game where students make meaningful tactical decisions. Self-paced questioning within live competition perfectly balances pressure and accessibility. However, the economic mechanics create runaway winner problems, attack powerups frustrate targeted students, and the minimal visual theming lacks the personality of competitors like Blooket.
+
+**STRENGTHS:**
+- Skill-based progression (not luck)
+- Strategic depth through upgrade choices
+- Self-paced questioning reduces anxiety
+- Generous free tier
+- Clean, simple interface
+- Direct connection between accuracy and success
+- Team mode encourages cooperation
+- Strong reporting and analytics
+
+**WEAKNESSES:**
+- Runaway economy (leaders dominate)
+- Attack powerups create negative dynamics
+- Steep learning curve for upgrade strategy
+- Minimal visual personality/theming
+- Mode rotation in free tier inconsistent
+- No catch-up mechanics for trailing students
+- Complex for younger students (below 3rd grade)
+
+**BEST FEATURE:**
+Economic strategy layer - upgrade purchasing creates meaningful student agency and tactical depth beyond just answering questions correctly.
+
+**BIGGEST MISSED OPPORTUNITY:**
+No catch-up mechanics or balancing - trailing students have little hope of comeback once leaders establish multiplier advantage.
+
+**RELEVANCE TO OUR PROJECT:**
+
+**ADOPT:**
+- Economic/resource strategy layer adding depth
+- Self-paced questioning within live competitive environment
+- Upgrade progression system
+- Strategic choice-making beyond just answering questions
+- Clean UI with clear hierarchy
+
+**AVOID:**
+- Runaway winner problems (rich get richer)
+- Attack mechanics that feel punishing
+- Mode paywalls
+- Minimal visual theming
+
+**DIFFERENTIATE:**
+- Add catch-up mechanics for trailing students
+- Create cooperative goal-oriented modes
+- Simplify strategy for younger audiences
+- Wrap mechanics in engaging visual themes
+- Multiple question formats
+- Adaptive difficulty
+- Built-in scaffolding for struggling students
+
+**KEY INSIGHT:**
+Gimkit proves students engage deeply with economic/strategic systems when given agency over progression path. The upgrade choices create investment and replayability. However, pure competition without balancing mechanics disadvantages weaker students. Our opportunity: combine Gimkit's strategic depth with cooperative structures and catch-up mechanics that keep all students engaged regardless of skill level.
+
+================================================================================
+END OF REVIEW
+================================================================================

@@ -1,0 +1,831 @@
+================================================================================
+GAME REVIEW DOCUMENT - BLOOKET (3 LIVE GROUP MODES ONLY)
+================================================================================
+
+GAME NAME: Blooket
+MODES REVIEWED: Gold Quest, Crypto Hack, Deceptive Dinos
+DATE REVIEWED: January 25, 2026
+SCOPE: Live group competitive modes only
+
+================================================================================
+1. CORE MECHANIC
+================================================================================
+
+All three modes share a common formula:
+1. Answer multiple choice questions correctly to earn opportunities
+2. Choose from hidden options revealing rewards/consequences  
+3. Compete against other players to accumulate the most currency
+4. Self-paced questioning (students answer on own devices at own speed)
+5. Competitive, luck-based races with strategic elements
+
+**GOLD QUEST:**
+- Answer questions → pick 1 of 3 mystery chests → collect gold
+- Chests contain: fixed gold (10, 25, 40, 100), multipliers (2x, 3x), steal mechanics (take % from others), swap mechanics (trade totals with another player), or penalties (lose 25% or 50% of gold)
+- Winner has most gold when time/goal is reached
+- Pure luck-based according to developers
+- Extremely chaotic and fast-paced
+- Special Blook bonuses: Wizard (take 25%), Elf (take 10%), Fairy (nothing), Slime Monster (lose 25%), Jester (double), Dragon (lose 50%), Unicorn (triple), King (swap)
+
+**CRYPTO HACK:**
+- At game start, choose password from 5 options
+- Answer questions → pick 1 of 3 hidden options OR choose "hack" option
+- Hidden options give crypto amounts
+- "Hack" option: select player + guess their password to steal ALL their crypto
+- Includes Among Us-style task completions (slow you down but grant rewards)
+- Memory element: track password options and failed hack attempts
+- No percentage loss or swap mechanics (cleaner than Gold Quest)
+- Winner has most crypto at end
+
+**DECEPTIVE DINOS:**
+- Answer questions → choose "excavate" or "investigate"
+- Excavate: pick 1 of 3 rocks (contain fossils/multipliers) OR click "cheat" button to peek at all 3 rocks before choosing
+- Investigate: view player list, select someone to scan - if they cheated recently, catch them and they lose large % of fossils
+- Risk/reward: cheating reveals best options but risks getting caught
+- Social deduction element: who's cheating?
+- Fossil multipliers stack infinitely
+- No double/triple bonuses or percentage steals (unlike Gold Quest/Crypto)
+- Winner has most fossils at end
+
+Win conditions:
+- All modes: Time-based (most currency when timer ends) OR goal-based (first to reach X amount)
+- Teacher sets these parameters before game starts
+
+
+================================================================================
+2. SUB MECHANICS
+================================================================================
+
+**Question Format:**
+- Multiple choice ONLY across all three modes (major limitation)
+- Self-paced prompting with high frequency questioning
+- Students answer on individual devices
+- No synced questioning (unlike Kahoot)
+- Incorrect answers = no reward, move to next question
+
+**Gold Quest Specific Mechanics:**
+- Mystery chest system with 8 different outcomes
+- Steal mechanics: target specific players to take their gold
+- Swap mechanics: trade entire totals with another player (can backfire)
+- Percentage loss penalties: -25% or -50% from bad chests
+- Multiplier chests: 2x or 3x current gold
+- Fixed gold chests: 10, 25, 40, or 100 gold
+- Special Blook passive abilities enhance chest outcomes
+- No strategy according to developers ("purposefully all luck-based")
+
+**Crypto Hack Specific Mechanics:**
+- Password selection creates asymmetric information
+- 5 password options at start (players choose privately)
+- Hack mechanic: 
+  * Select target player
+  * Guess their password from 5 options
+  * Correct guess = steal ALL their crypto
+  * Wrong guess = see correct answer for next attempt
+- Task completion system (Among Us reference):
+  * Complete mini-tasks for bonus crypto
+  * Tasks slow down question answering
+  * Examples: wire connecting, card swiping, sample scanning
+- Memory game: remembering password options and tracking attempts
+- No direct loss mechanics (only lose if hacked)
+- Strategic targeting: who has most crypto? Who picked obvious password?
+
+**Deceptive Dinos Specific Mechanics:**
+- Dual-choice system: excavate vs investigate
+- Excavate options:
+  * Pick rock blindly (contains fossil amount or multiplier)
+  * Use "cheat" button to reveal all 3 rocks' contents first
+  * Cheating allows informed choice but creates risk
+- Investigation mechanics:
+  * View full player list
+  * Select one player to scan
+  * If they cheated recently, catch them
+  * Caught players lose large % of fossils (punishment varies)
+- Risk assessment: when to cheat vs play safe?
+- Social reads: who's accumulating too fast (likely cheating)?
+- Multiplier stacking creates exponential growth potential
+- No "nothing" outcomes (every rock has value)
+- Detective board interface for tracking investigations
+
+**Shared Across All Modes:**
+- Self-paced timing allows catch-up opportunities
+- High question frequency (ideal: 7-8 min games)
+- Individual competition (no team variants for these 3 modes)
+- Real-time leaderboard visible to all players
+- Celebration animations for big wins/steals/catches
+
+
+================================================================================
+3. QUESTION SET INTEGRATION
+================================================================================
+
+How do teachers create/import questions?
+- Built-in question creator
+- Import from Quizlet (major time-saver)
+- Browse/search 20+ million public question sets
+- Cannot edit others' sets without Plus subscription (must duplicate first)
+
+Can they use pre-made question banks?
+- Yes, extensive library of user-created sets searchable by subject/topic
+- Public sets cover all K-12 subjects
+- Quality varies (user-generated content)
+
+Can they mix multiple subjects in one game?
+- Yes, no restrictions on subject mixing in custom question sets
+- Could have math, science, history all in one set
+
+Question formats supported:
+- Multiple choice ONLY
+- Can add: text, images, math symbols
+- Audio questions available with Plus subscription
+- No true/false, open-ended, matching, sequencing, etc.
+
+How are questions assigned?
+- Same question set for all players
+- Self-paced: students progress through at different speeds
+- Questions cycle/repeat if students answer faster than set size
+- Randomized order option available
+
+Integration notes:
+- Question sets work identically across all 3 modes
+- Teacher picks set, then picks game mode
+- Same set can be reused in different modes for variety
+- Students see questions + answer options on their own devices
+
+
+================================================================================
+4. ART STYLE
+================================================================================
+
+**Gold Quest:**
+- Theme: Vibrant gold mine/treasure hunt
+- Colors: Gold, orange, yellow, purple (warm rich tones)
+- Visual elements: Treasure chests (mystery boxes), gold coins, gem effects
+- Animations: Chest opening reveals, gold shower effects, sparkle particles
+- UI: Large colorful chest buttons, bold gold counter
+- Character design: "Blooks" (blob creatures) with gold-themed variants
+- Aesthetic: Playful treasure adventure
+- UI clarity for 4th graders: 9/10 (very clear, large targets)
+
+**Crypto Hack:**
+- Theme: Cyberpunk/hacker terminal
+- Colors: Green, black, blue, neon accents (Matrix-style)
+- Visual elements: Digital readouts, password fields, circuit boards
+- Animations: Hacking progress bars, data streams, terminal text effects
+- UI: "Terminal Hacking Portal" aesthetic, clean tech interface
+- Character design: Bot Pack Blooks (robot creatures)
+- Music: "The Spacex Cyberpunk" by Yuri Petrovski
+- Aesthetic: Futuristic hacker simulation
+- UI clarity for 4th graders: 8/10 (slightly more complex than Gold Quest)
+
+**Deceptive Dinos:**
+- Theme: Paleontology/excavation site
+- Colors: Earthy browns, greens, bone white, fossil gray
+- Visual elements: Rock formations, fossils, excavation tools, detective board
+- Animations: Rock breaking, fossil reveals, investigation scans
+- UI: Detective board for investigation phase, clear excavate/investigate choice
+- Character design: Dino Pack Blooks (dinosaur creatures)
+- Music: Jurassic Park/World-inspired theme (heavily altered)
+- Aesthetic: Archaeological dig meets mystery investigation
+- UI clarity for 4th graders: 8/10 (dual-choice system clear but requires strategic thinking)
+
+**Shared Visual Design:**
+- Large touch-friendly buttons
+- Color-coded answer blocks for questions
+- Real-time leaderboard always visible
+- Smooth transitions between question → reward → next question
+- Celebration effects for big moments (stealing, catching cheaters, multipliers)
+- Cute, non-threatening character designs
+- Clean, uncluttered interfaces
+
+Overall aesthetic: Cartoonish, playful, approachable for elementary students
+
+
+================================================================================
+5. PLAYER/TEACHER ACCOUNT
+================================================================================
+
+TEACHER FEATURES:
+
+Dashboard capabilities:
+- Create/edit question sets
+- Organize sets in folders (Plus feature)
+- Host live games
+- View performance reports
+- No permanent class rosters needed
+
+Game creation process:
+1. Select or create question set
+2. Choose game mode (Gold Quest, Crypto Hack, or Deceptive Dinos)
+3. Set parameters:
+   - Time limit (typical: 7-8 min)
+   - OR goal amount (e.g., 500 gold, 1000 crypto, 50 fossils)
+4. Generate game code/link
+5. Students join via code
+6. Start game when ready
+
+Student management tools:
+- Kick players during lobby (before game starts)
+- No mid-game removal
+- Export results after game
+- No permanent class tracking (session-based only)
+
+Reports available:
+- Post-game leaderboard (ranking by currency)
+- Individual accuracy percentages
+- Total correct/incorrect per student
+- Question-by-question breakdown (Plus feature only)
+- Class averages
+
+STUDENT FEATURES:
+
+Login process:
+- No account required to play
+- Optional accounts save:
+  * Coins earned across games
+  * Unlocked Blooks (collectible avatars)
+  * Personal stats
+- Account creation available but not necessary
+
+Profile customization:
+- Choose Blook avatar before each game
+- Nickname choice (per game or saved with account)
+- Unlock rarer Blooks with coins
+
+Stats tracking for students:
+- With account: coins earned, Blooks unlocked, games played
+- Without account: single-session performance only
+- No long-term progress tracking in free tier
+
+Additional notes:
+- Students under 13 require parental/school supervision (COPPA)
+- Anonymous play supported for privacy
+
+
+================================================================================
+6. STUDENT PERFORMANCE INSIGHTS
+================================================================================
+
+What data does the teacher see?
+
+**During Game (Real-time):**
+- Live leaderboard showing current standings
+- Who's answering questions (activity indicators)
+- Current currency totals for each student
+
+**Post-Game Reports (Free Tier):**
+- Final leaderboard/rankings
+- Individual accuracy percentages
+- Total questions answered
+- Total correct/incorrect counts
+- Class average accuracy
+
+**Post-Game Reports (Plus Tier):**
+- Question-by-question breakdown per student
+- Which questions were missed most often
+- Individual question difficulty analysis
+- Time spent per question
+- Answer distribution
+
+Real-time vs post-game?
+- Real-time: leaderboard and activity monitoring only
+- Detailed analytics: post-game only
+
+Can students see their own progress over time?
+- With accounts: yes, cumulative coins and Blooks unlocked
+- Without accounts: no long-term tracking
+- No built-in "mastery tracker" for specific topics
+
+Standards/curriculum alignment tracking?
+- Not built into platform
+- Teacher-driven based on question set tags/organization
+
+Notes on these 3 modes specifically:
+- Currency totals visible but don't directly indicate learning
+- Student could have high gold/crypto/fossils but low accuracy (luck factor)
+- Teacher must look at accuracy metrics separately from game performance
+- Reports don't distinguish between earned currency and stolen/swapped currency
+
+
+================================================================================
+7. EXTRA WEB PAGES (OUTSIDE OF GAME)
+================================================================================
+
+Marketing site structure:
+- Main site: blooket.com
+- Login/dashboard: direct access after sign-in
+- Help Center: help.blooket.com with FAQs and guides
+- Game mode previews showing difficulty, ideal time, player counts
+
+Blog/resources section:
+- Help articles organized by topic
+- Game mode guides with strategy tips
+- How-to content for teachers
+- Feature announcements
+
+Help/tutorial content:
+- Comprehensive Help Center
+- Step-by-step hosting guides
+- Joining game instructions for students
+- Game mode preview pages with:
+  * Difficulty rating
+  * Ideal time
+  * Player count recommendations
+  * Core mechanics explanation
+
+Community features:
+- Public question set library (20+ million sets)
+- Search and browse others' sets by:
+  * Subject
+  * Grade level
+  * Keywords
+  * Creator
+- Share created sets publicly (opt-in)
+- No formal forum or discussion boards
+- No teacher community hub identified
+
+Additional notes for these 3 modes:
+- Game mode preview pages describe each as:
+  * Gold Quest: "Speed & Luck, Simple difficulty, 7 min ideal"
+  * Crypto Hack: "Memory & Speed, Normal difficulty, 8 min ideal"
+  * Deceptive Dinos: "Strategy & Speed, Normal difficulty, 7 min ideal"
+
+
+================================================================================
+8. PRICING
+================================================================================
+
+Free Tier:
+- Unlimited question sets
+- Host up to 60 players per game
+- All 12 game modes (including Gold Quest, Crypto Hack, Deceptive Dinos)
+- Basic post-game reports
+- 20+ million public question sets
+
+Plus Tier ($4.99/month annual OR $9.99/month):
+- Up to 300 players per game
+- Enhanced reports (question-by-question breakdown)
+- Folder organization for question sets
+- Copy and edit other users' question sets
+- Audio questions
+- Priority support
+
+What features are paywalled specifically for these 3 modes?
+- 300 player capacity (vs 60 free)
+- Detailed question-by-question reports
+- Ability to duplicate and edit popular public sets
+- Otherwise, core gameplay identical between free and Plus
+
+Pricing structure:
+- Individual teacher subscriptions
+- School/district licenses available (quote-based)
+- Non-refundable subscriptions
+
+Value assessment for these 3 modes:
+- Free tier: Very generous, all 3 modes fully playable with 60 players
+- Plus tier: Main value is enhanced reporting and higher player count
+- For small classes (<60), free tier completely sufficient
+- For data-driven teachers, Plus reporting worth the investment
+
+
+================================================================================
+9. STUDIO RESEARCH
+================================================================================
+
+Company info:
+- Founded: 2018
+- Founders: Tom and Ben Stewart (brothers)
+- Note: Limited public information available beyond founding year/founders
+
+Product evolution:
+- Started as simple quiz platform
+- Evolved to 25+ game modes
+- Regular seasonal mode updates
+- Community-driven growth (user-created question sets)
+
+User base:
+- 20+ million question sets created (indicates large teacher adoption)
+- Used in K-12 classrooms globally
+- Strong social media presence (TikTok, YouTube)
+
+Specific to these 3 modes:
+- Gold Quest: Noted as student favorite in multiple teacher reviews
+- Crypto Hack: Released May 18, 2021 (Season 2)
+- Deceptive Dinos: Released May 9, 2022 (Season 3) with Dino Pack
+- Gold Quest consistently mentioned as most popular mode
+- Crypto Hack appeals to older elementary (4th-5th grade)
+- Deceptive Dinos adds strategic depth with cheat/investigate mechanics
+
+
+================================================================================
+10. TUTORIALS
+================================================================================
+
+How do new teachers learn to set it up?
+- Help Center with step-by-step guides
+- Game mode preview pages explain mechanics
+- Dashboard layout intuitive (minimal learning curve)
+- Hosting process: select set → pick mode → set parameters → share code
+
+First-time user experience quality (rate 1-10):
+- 9/10 - Very intuitive
+- Question set creation straightforward
+- Game hosting process simple
+- Students catch on immediately
+
+Is there a demo/practice mode?
+- No formal demo mode
+- Free account allows full testing with up to 60 players
+- Teachers can create test games to preview modes
+- Can join own games to experience student view
+
+Learning curve for these 3 specific modes:
+
+**Gold Quest:**
+- Easiest to understand: answer → pick chest → get gold
+- Students grasp immediately (1-2 questions to learn)
+- No strategic thinking required (pure luck)
+- Teacher setup: 2 minutes
+
+**Crypto Hack:**
+- Slightly more complex: password selection + hacking mechanic
+- Students need brief explanation of hacking (3-4 minutes)
+- Memory element adds depth
+- Teacher setup: 3 minutes (need to explain passwords)
+
+**Deceptive Dinos:**
+- Most complex of the three: excavate/investigate choice
+- Students need explanation of cheating mechanic (5 minutes)
+- Social deduction element requires maturity
+- Teacher setup: 4 minutes (need to explain risk/reward)
+
+Recommendation: Start with Gold Quest for first-timers
+
+
+================================================================================
+11. ACCESSIBILITY
+================================================================================
+
+Text size options:
+- Adjustable via browser zoom
+- In-game settings allow volume control
+- No built-in text size slider
+
+Color-blind friendly design?
+- Not explicitly documented
+- Relies primarily on color-coded elements
+- No shape differentiation for color-blind users
+- Potential issue for distinguishing answer options
+
+Language support:
+- Interface: English only
+- Questions: Can be created in any language by teacher
+- No automatic translation features
+
+Screen reader compatibility:
+- Not explicitly documented in help center
+- No ARIA labels mentioned
+- Likely limited accessibility for visually impaired
+
+Works on what devices?
+- Web-based (any modern browser)
+- iOS devices (phones, tablets)
+- Android devices (phones, tablets)
+- Chromebooks
+- Desktop/laptop computers
+- Tablets ideal for 4th graders (larger touch targets)
+- Phones playable but smaller screen less ideal
+
+Internet requirement:
+- Internet required for all gameplay
+- No offline mode
+- Live connection needed throughout game
+
+Notes specific to these 3 modes:
+- All three require reading comprehension (questions + game mechanics)
+- No audio options in free tier
+- Visual-heavy (chests, rocks, terminal interfaces)
+- Fast-paced nature may challenge students with processing delays
+- Self-paced questioning helps reduce pressure vs Kahoot
+
+
+================================================================================
+12. SAFETY
+================================================================================
+
+How do they prevent inappropriate usernames/content?
+- Teacher can kick players during lobby phase
+- Random nickname generator option (prevents offensive names)
+- Public question set moderation not extensively detailed
+- Teacher responsibility to review question sets before use
+
+Teacher controls over student interaction:
+- No player-to-player chat (eliminates cyberbullying risk)
+- No direct communication features
+- Teacher controls game flow
+- Can remove disruptive players before game starts (not during)
+
+Privacy/COPPA compliance:
+- COPPA compliant
+- Students under 13 require adult supervision
+- No personal data required to play without account
+- Email required only for account creation (optional)
+
+Student data protection:
+- Privacy policy compliant with educational standards
+- Students can play completely anonymously
+- No selling of student data (stated in privacy policy)
+- Minimal data collection for non-account players
+
+Technical performance notes:
+- Generally fast load times
+- Occasional lag with maximum player counts (300 Plus tier)
+- Works on modern browsers (Chrome, Firefox, Safari, Edge)
+- Mobile performance solid on newer devices
+
+Specific to these 3 modes:
+- Gold Quest: Fast-paced may cause frustration for perfectionist students
+- Crypto Hack: Hacking/stealing mechanics emotionally safe (virtual currency)
+- Deceptive Dinos: "Cheating" mechanic needs framing (it's part of game, not real cheating)
+- All three: Competitive nature may upset loss-averse students
+- Teacher should emphasize learning over winning
+
+
+================================================================================
+13. ISSUES
+================================================================================
+
+PAIN POINTS (from reviews and user feedback):
+
+Top 3 teacher complaints:
+1. Limited to multiple choice questions only - no open-ended, matching, sequencing, etc.
+2. Enhanced reports locked behind paywall - free reports too basic for data-driven instruction
+3. Game mechanics can overshadow learning - students focus on winning rather than accuracy
+
+Top 3 student complaints:
+1. Luck factor in Gold Quest frustrates students who study hard but lose to lucky guesses
+2. Fast pace can be stressful despite self-paced questioning
+3. Requires many questions to avoid repetition in longer sessions
+
+Missing features users want:
+- Question format variety (true/false, open-ended, matching)
+- Mid-game teacher controls (pause, skip question)
+- Better free-tier reporting
+- Reading support for struggling readers
+- Team variants of these modes
+
+Bugs/issues noticed during testing:
+- Occasional disconnections in live games
+- Lag with very large groups (200+ players)
+- Rare leaderboard display glitches
+
+SPECIFIC ISSUES FOR THESE 3 MODES:
+
+**Gold Quest:**
+- Too luck-based: skilled students frustrated by RNG (random number generation)
+- Swap mechanic can feel punishing (lose all progress randomly)
+- Steal mechanics can create negative social dynamics
+- No actual strategy (developer admits it's "purposefully all luck")
+- Students may focus entirely on chest choice rather than question accuracy
+
+**Crypto Hack:**
+- Password guessing can feel tedious if memory is poor
+- Hacking success relies heavily on luck (guessing)
+- Task completion mechanic slows down pace (some students skip tasks)
+- More complex ruleset may confuse younger students
+- Memory element disadvantages students with working memory challenges
+
+**Deceptive Dinos:**
+- Cheat mechanic teaches "cheating is rewarded" (needs careful framing)
+- Social deduction difficult for younger students (3rd-4th grade may struggle)
+- Investigation feels like "policing" other students
+- Risk/reward calculation may be too complex for some
+- Students who never cheat fall behind those who cheat successfully
+
+Our opportunity to differentiate:
+1. Multiple question formats (not just multiple choice)
+2. Reduce luck dependency - reward accuracy more directly
+3. Collaborative modes that de-emphasize individual competition
+4. Better scaffolding for mixed-ability groups
+5. Stronger free-tier reporting tools
+6. Built-in reading support (text-to-speech, adjustable text)
+7. Mid-game teacher controls (pause, adjust difficulty)
+8. Transparent skill-based progression (less RNG)
+
+Additional notes:
+- These 3 modes praised for engagement but criticized for luck > skill
+- Teachers report using them primarily for review, not assessment
+- Work best for reinforcement and motivation, not initial instruction
+- Students love them but learning outcomes can be shallow
+
+
+================================================================================
+SYNTHESIS & ANALYSIS
+================================================================================
+
+FEATURES WE SHOULD STEAL:
+
+1. **Self-paced question answering within live games**
+   - Reduces pressure and anxiety
+   - Allows differentiation naturally
+   - Students answer on own devices at own speed
+   - Maintains competitive element without forced synchronization
+
+2. **Mystery reward system** (Gold Quest chest concept)
+   - Adds excitement and anticipation
+   - Visual satisfaction of "opening" rewards
+   - Can incorporate educational variations (not just luck)
+
+3. **Real-time leaderboard always visible**
+   - Motivates students to keep trying
+   - Shows progress relative to peers
+   - Creates healthy competition
+
+4. **Simple game code joining system**
+   - No permanent accounts required to play
+   - Quick access (enter code, pick name, start)
+   - Low barrier to entry
+
+5. **Themed visual design specific to game mode**
+   - Each mode feels distinct
+   - Visuals match mechanics (gold mine, hacker terminal, excavation site)
+   - Maintains student interest through variety
+
+FEATURES WE SHOULD AVOID:
+
+1. **Pure luck-based mechanics** (Gold Quest)
+   - Frustrates skilled students
+   - Doesn't reward learning
+   - Can teach "effort doesn't matter"
+
+2. **Multiple choice only limitation**
+   - Restricts depth of assessment
+   - Encourages guessing
+   - Limits pedagogical flexibility
+
+3. **Minimal free reporting**
+   - Forces teachers to pay for basic data
+   - Creates frustration for data-driven instruction
+   - Should offer more insights in free tier
+
+4. **Steal/swap mechanics that feel punishing** (Gold Quest)
+   - Can create negative social dynamics
+   - Losing all progress randomly feels unfair
+   - May discourage continued play
+
+5. **Teaching "cheating" as game mechanic** (Deceptive Dinos)
+   - Requires very careful framing
+   - Young students may not distinguish game cheating from real cheating
+   - Could send wrong message
+
+UNIQUE DIFFERENTIATOR IDEAS:
+(What could we do that they don't?)
+
+1. **Skill-based progression with minimal luck**
+   - Accuracy determines advancement directly
+   - Reduce RNG (random rewards)
+   - Transparent connection between learning and game success
+
+2. **Multiple question formats**
+   - Open-ended responses
+   - Matching
+   - Sequencing
+   - Diagram labeling
+   - Audio questions
+
+3. **Collaborative team modes**
+   - Players work together toward shared goal
+   - Less focus on individual competition
+   - Emphasize cooperation over rivalry
+
+4. **Adaptive difficulty**
+   - Questions adjust to student performance
+   - Maintains challenge level for all students
+   - Prevents frustration and boredom
+
+5. **Built-in reading support**
+   - Text-to-speech for questions
+   - Adjustable text size (built-in, not browser zoom)
+   - Visual supports for vocabulary
+
+6. **Mid-game teacher controls**
+   - Pause for discussion
+   - Skip questions
+   - Adjust time
+   - Provide hints to struggling students
+
+7. **Stronger free-tier reporting**
+   - Question-by-question breakdown for all teachers
+   - Progress over time tracking
+   - Standards alignment
+
+ENGAGEMENT HOOKS OBSERVED:
+
+What makes students want to play again?
+- **Gold Quest:** Thrill of mystery chests, hope for big multiplier, revenge on stealers
+- **Crypto Hack:** Satisfaction of successful hacks, outwitting opponents, memory challenge
+- **Deceptive Dinos:** Risk/reward of cheating, catching cheaters, strategic decision-making
+- **All modes:** Real-time competition, leaderboard climbing, collectible Blooks
+
+Rewards/incentive systems:
+- In-game currency (gold, crypto, fossils)
+- Blook avatar collection (earned with coins across games)
+- Leaderboard placement
+- Visual celebration effects
+
+Leaderboards:
+- Game-specific leaderboards during play
+- Final rankings at end
+- No global/persistent leaderboards across games
+- No friends-only filtering
+
+Progress visualization:
+- Currency counter always visible
+- Leaderboard position updates in real-time
+- Visual progress bar toward goal (if goal-based)
+- Celebration animations for milestones
+
+SOCIAL/MULTIPLAYER STRUCTURE:
+
+How do students join games?
+- Game code entry (6-digit code)
+- Direct link clicking (for remote learning)
+- QR code scanning (teacher can display)
+
+Live multiplayer vs asynchronous?
+- These 3 modes: Live/synchronous only
+- All students play simultaneously
+- No asynchronous option for Gold Quest/Crypto Hack/Deceptive Dinos
+
+Team modes?
+- None for these 3 specific modes
+- All individual competition
+- No cooperative variants
+
+Chat/communication features?
+- None
+- No player-to-player interaction
+- Communication only through gameplay (stealing, hacking, investigating)
+
+
+================================================================================
+OVERALL IMPRESSION
+================================================================================
+
+First impression (1 paragraph summary):
+These three Blooket modes represent different approaches to gamifying quiz review: Gold Quest emphasizes pure luck and chaos, Crypto Hack adds memory and strategic targeting, and Deceptive Dinos introduces social deduction and risk management. All three successfully engage students through self-paced competition and compelling reward systems, but their heavy reliance on luck over skill creates frustration for effort-oriented learners. The multiple choice-only format and minimal free reporting limit pedagogical value, though the low barrier to entry and generous free tier make them accessible starting points for gamification in education.
+
+Strengths:
+- **Extremely engaging** - students consistently request these modes
+- **Low barrier to entry** - no accounts required, simple game codes
+- **Self-paced questioning** - reduces pressure vs Kahoot
+- **Visual appeal** - distinct themes for each mode
+- **Free tier includes everything** - all 3 modes playable with 60 students
+- **Fast setup** - teacher can launch game in 2-3 minutes
+- **Variety** - 3 distinct experiences from same question set
+
+Weaknesses:
+- **Luck > Skill** - Gold Quest especially rewards random chance over learning
+- **Multiple choice only** - limits assessment depth
+- **Free reporting too basic** - teachers need more data
+- **Social dynamics** - steal/swap/hack mechanics can create negativity
+- **No mid-game controls** - teacher can't pause or adjust
+- **Accessibility gaps** - no reading support, minimal color-blind accommodation
+- **Shallow learning** - focus on winning over mastery
+
+Best feature overall for these 3 modes:
+- **Self-paced question answering within competitive live game** creates perfect balance: students feel competitive pressure (leaderboard, time limit) but answer at own speed (reduces anxiety, allows differentiation)
+
+Biggest missed opportunity for these 3 modes:
+- **Replacing luck with skill-based progression** - Gold Quest's pure RNG frustrates students who study hard; could redesign to reward accuracy, speed, and strategic thinking while maintaining excitement
+
+Relevance to our project:
+
+**ADOPT:**
+- Self-paced questioning within live competitive environment
+- Mystery reward reveals (visual satisfaction)
+- Distinct thematic presentation
+- Simple joining process (code-based)
+- Real-time leaderboards
+
+**AVOID:**
+- Pure luck mechanics (Gold Quest's RNG)
+- Multiple choice only limitation
+- Paywall for basic reporting
+- Social mechanics that feel punishing (steal/swap)
+- "Cheating" as game mechanic
+
+**DIFFERENTIATE:**
+- Question format variety (beyond multiple choice)
+- Skill-based progression (accuracy matters more than luck)
+- Collaborative team modes
+- Adaptive difficulty
+- Built-in reading support
+- Stronger free-tier teacher tools
+- Mid-game teacher controls
+
+**KEY INSIGHT:**
+Blooket proves themed game modes dramatically increase engagement over bare quiz formats, but success requires balancing fun with learning. Our opportunity: create equally engaging modes that transparently connect effort → mastery → game success, avoiding the "lucky guess beats hard work" problem that frustrates both students and teachers.
+
+
+================================================================================
+END OF REVIEW
+================================================================================
