@@ -1,164 +1,136 @@
-# Software Requirements Specification (SRS)
+# Software Requirements Specification (SRS) - Card Clash
+1. Introduction
+1.1 Purpose
+The purpose of this document is to define the functional and non-functional requirements for "Card Clash," an educational party-style game. This system gamifies classroom assessments by allowing teachers to host competitive sessions where students utilize knowledge-based "battle" mechanics. The system uniquely integrates a Lightweight LLM (e.g., Ollama) to generate post-game performance summaries, identify student knowledge gaps, and provide question-generation assistance.
 
-# **1\. Introduction**
+1.2 Scope
+The Card Clash system consists of three distinct subsystems:
 
-## **1.1 Purpose**
+Teacher Dashboard (Web Client): A React-based interface for account management, quiz creation, lobby control, and AI analytics review.
 
-The system shall track user transactions and categorize them into a secure financial portfolio for everyday use.
+Student Client (Unity WebGL): A browser-based 2D game client where students join lobbies, customize decks, answer questions, and execute battle commands.
 
-## **1.2 Scope**
+Backend Infrastructure:
 
-The purpose of the financial portfolio tracking system is to make analyzing and categorizing user transactions faster and easier. The system is based on local encrypted databases that keep user transaction history for budget and spending analytics. Using Artificial Intelligence to categorize transactions from bank statements makes it much simpler for the everyday person to use. Overall, we hope to provide a clean and simple way to track an individual’s spending habits.
+Game Logic: Synchronized via Photon PUN 2 (Unity) with the Teacher's client acting as the "Master Client" authority.
 
-## **1.3 Definitions, Acronyms, and Abbreviations**
+Persistence & API: A Node.js/Express application hosted on OSU Servers (Linux) managing user accounts and database transactions.
 
-List technical terms and their meanings.
+Data Storage: MySQL database for relational data (users, quizzes, logs).
 
-## **1.4 References**
+AI Module: An inference interface (Ollama) processing session logs to produce natural language feedback.
 
-Link to related documents, standards, or sources.
+1.3 Definitions, Acronyms, and Abbreviations
+Host/Master Client: The Teacher’s instance of the application, which holds authoritative game state (timer, score calculation) via PUN 2.
 
-- TinyLlama: Lightweight Large Language Model for transaction categorizing. 
+MVP: Minimum Viable Product (Target: 4 simultaneous players + 1 Host).
 
-# **2\. Overall Description**
+CCU: Concurrent Users.
 
-## **2.1 Product Perspective**
+PUN 2: Photon Unity Networking 2 (Middleware for multiplayer synchronization).
 
-This new system has similar competitors that offer some, but not all, of our features. Artificial Intelligence transaction categorizing and parsing bank statements are relatively unique features to our application. 
+Ollama: Framework for running local Large Language Models (LLMs).
 
-## **2.2 Product Functions**
+OSU Server: The university-provided Linux hosting environment (HTTP only).
 
-The product will display multiple functionalities. Firstly, it shall display a clean Graphical User Interface for interacting with the program. Secondly, it shall store user spending and budget information in a secure database. Third, it shall track information about user-specified stock holdings. Fourth, it shall allow users to update this information. Finally, it shall display summaries of this information in a convenient, readable manner.
+---
 
-## **2.3 User Classes and Characteristics**
+## 2. Overall Description
 
-Any user with an interest to conveniently manage and track their finances will be able to use this application, their experience levels should not matter as anybody will have the ability to use our product efficiently once oriented. 
+### 2.1 Product Perspective
 
-## **2.4 Operating Environment**
+Card Clash is a hybrid web/game application. Unlike standard quiz tools (e.g., Kahoot), it decouples the "Question Phase" from the "Action Phase," allowing for strategic deck-building gameplay. It operates on a split-topology:
 
-Hardware, software, and network requirements.
+- **Real-time Gameplay**: Peer-to-Peer/Relay via Photon Cloud
+- **Persistent Data**: Client-Server via REST API (Node.js)
 
-Connection to the internet
+### 2.2 Product Functions
 
-Any OS system from Windows 10 and beyond, Mac OS, etc.
+- **Session Management**: The Host creates a lobby code; the system synchronizes game states (Lobby → Quiz → Battle → Results) across all connected clients
+- **Assessment & Combat**: Student correctness on multiple-choice questions converts directly into "Action Points" or "Damage" in the game simulation
+- **AI Analysis**: The system aggregates session logs (response times, accuracy per tag) to generate a "Class Summary" and individual "Student Metrics" via LLM inference
+- **Content Management**: Teachers can create, edit, and save quiz decks to the MySQL database
 
-## **2.5 Design and Implementation Constraints**
+### 2.3 User Classes and Characteristics
 
-Programming languages, databases, regulations, etc.
+- **Teacher (Admin/Host)**: Low-to-high technical literacy. Requires a desktop/laptop environment (Windows/Mac) to act as the Master Client
+- **Student (Player)**: Variable literacy. Accessing via low-power devices (Chromebooks). Requires a simplified, highly visual interface with minimal text input
 
-- Python  
-- SQLite Database
+### 2.4 Operating Environment
 
-## **2.6 Assumptions and Dependencies**
+**Client Hardware:**
+- **Teacher**: Laptop/Desktop with >8GB RAM (to support Host Unity instance + React Dashboard)
+- **Student**: Chromebooks (4GB RAM) or standard mobile devices
 
-Anything assumed to be true, or external systems relied on.
+**Server Constraints:**
+- OSU Student Server (Linux, Limited CPU/RAM)
 
-Database is always updated
+**Network:**
+- HTTPS (GitHub Pages) for Frontend; HTTP (OSU Server) for Backend
+- Note: Requires CORS configuration or Proxy to prevent Mixed Content errors
 
-Stock prices accurate to last time updated
+---
 
-# **3\. Specific Requirements**
+## 3. Specific Requirements
 
-## **3.1 Functional Requirements**
+### 3.1 Functional Requirements
 
-(1st) FR-1: The system shall allow users to log in using a valid username and password.
+#### 3.1.1 Authentication & Accounts
 
-FR-2: The system shall allow users to reset their password using security questions.
+- **FR-1**: The system shall allow Teachers to register and log in using a unique email and password
+- **FR-2**: The Node.js backend shall issue a secure token (JWT) upon successful login to maintain session state for the Dashboard
+- **FR-3**: Students shall join game sessions via a 4-6 character alphanumeric "Room Code" without requiring permanent account creation
 
-FR-3: The system shall authenticate User using a stored hash of the associated password. 
+#### 3.1.2 Gameplay Mechanics (Unity/PUN)
 
-FR-4: The system shall allow users to be created with a unique username and password.
+- **FR-4 (Lobby)**: The Master Client shall broadcast a "Game Start" event that transitions all connected clients from the Lobby Scene to the Gameplay Scene
+- **FR-5 (Lock-Step)**: The system shall enforce a synchronized state machine; no student may advance to the "Battle Phase" until the Host closes the "Question Phase"
+- **FR-6 (Deck System)**: Students shall be able to select a pre-defined "Deck" (Avatar/Card Set) prior to the match start
+- **FR-7 (Combat Logic)**: The Master Client shall calculate damage values based on:
+  - Correctness of the answer
+  - Speed of the answer (optional multiplier)
+  - Card stats associated with the student's chosen deck
 
-FR-5: The system shall allow users to input transactions manually.
+#### 3.1.3 AI & Analytics
 
-FR-6: The system shall store the formatted transaction into the local database.
+- **FR-8 (Data Collection)**: The Master Client shall export a JSON log of the session (Student Name, Question ID, Time_to_Answer, Correct/Incorrect) to the Node.js backend upon game completion
+- **FR-9 (Performance Summary)**: The backend shall transmit session logs to the LLM (Ollama) to generate a 3-paragraph natural language summary of class performance
+- **FR-10 (Tutoring/Review)**: The system shall identify the "Most Missed Question" and prompt the LLM to generate a brief explanation/tutoring tip for that specific topic
 
-FR-7: The system shall allow the user to upload transaction files.
+#### 3.1.4 Teacher Dashboard (React)
 
-FR-8: The system shall allow users to upload bank statements
+- **FR-11**: The Dashboard shall allow teachers to Create, Read, Update, and Delete (CRUD) quiz sets stored in the MySQL database
+- **FR-12**: The Dashboard shall display historical session data fetched from the backend
 
-FR-9: The system shall parse transaction files into transactions.
+### 3.2 Non-Functional Requirements
 
-FR-10: The system shall parse bank statements.
+#### 3.2.1 Performance & Reliability
 
-FR-11: The system shall give the option to automatically categorize transactions.
+- **NFR-1 (Latency)**: Gameplay actions (e.g., locking in an answer) must synchronize across all 4 MVP clients within 200ms under normal network conditions
+- **NFR-2 (Memory)**: The Student Unity WebGL build must not exceed 250MB (Heap) to prevent crashing Chrome tabs on Chromebooks
+- **NFR-3 (AI Latency)**: LLM inference for the post-game summary must complete within 60 seconds
 
-FR-12: The system shall save transactions to the database.
+#### 3.2.2 Scalability (MVP Constraints)
 
-FR- 13:The system shall display Transaction History.
+- **NFR-4**: The system architecture shall support a minimum of 5 concurrent connections (1 Host + 4 Students) for the Capstone MVP demonstration
 
-FR-14: The system shall calculate statistics on spending-to-budget
+#### 3.2.3 Security
 
-FR-15: The system shall display statistics on spending-to-budget
+- **NFR-5**: Passwords shall be hashed (e.g., bcrypt) before storage in the MySQL database
+- **NFR-6**: The API shall validate all incoming data to prevent SQL Injection attacks
 
-FR-16: The system shall allow the user to edit the budget.
+---
 
-FR-17: The system shall allow the user to input new stock holdings.
+## 4. System Interface Requirements
 
-FR-18: The system shall allow the user to add to existing stock holdings.
+### 4.1 Communication Interfaces
 
-FR-19: The system shall allow the user to sell stock holdings.
+- **Unity-to-Unity**: Photon User Datagram Protocol (UDP) or WebSocket Secure (WSS) via Photon Cloud for gameplay data
+- **Unity-to-Backend**: HTTP/REST requests for fetching Quiz Data (JSON) and uploading Game Logs
+- **React-to-Backend**: HTTP/REST requests for User Authentication and History management
 
-FR-20: The system shall pull stock information from API.
+### 4.2 Software Interfaces
 
-FR-21: The system shall display stock performance.
-
-FR-22: The system shall take inputted goals from the user. 
-
-FR-23: The system shall store budget goals in the database. 
-
-FR-24: The system shall compare user statistics to recorded goals.
-
-FR-25: The system shall keep a local database for user data.
-
-FR-26: The system shall take an encrypted database. 
-
-FR-27: The system shall display a monthly report.
-
-## **3.2 Non-Functional Requirements**
-
-NFR-1: The system shall only handle one concurrent user.
-
-NFR-2: The UI shall follow WCAG accessibility standards.
-
-NFR-3: The system shall convert user PDFs to text within 5 seconds.
-
-NFR-4: The system shall categorize transactions using AI at a rate of 10 transactions within 7 seconds.
-
-## **3.3 Use Cases / User Stories**
-
-Use Case: Submit Spending History  
-Actors: Registered User  
-Steps:  
-1\. User inputs transactions.  
-2\. Clicks ‘Submit Transactions’  
-3\. System parses, stores, and categorizes transactions.
-
-Use Case: Edit Budget  
-Actors: Registered User  
-Steps:  
-1\. User clicks ‘Edit Budget’  
-2\. User enters budget goals for each category.  
-3\. User clicks ‘Save Changes’  
-4\. System saves new budget goals.
-
-Use Case: Submit Stock Holdings  
-Actors: Registered User  
-Steps:   
-1\. User inputs stock holdings.  
-2\. Clicks ‘Submit Holdings’  
-3\. System tracks and shows stock portfolio performance.
-
-Use Case: Get Reports  
-Actors: Registered User  
-Steps:  
-1\. User clicks ‘Reports’  
-2\. User selects from ‘Monthly Budget Report/Monthly Stock Portfolio Report’  
-3\. Systems provided the requested report.
-
-# **4\. Appendices**
-
-Glossary  
-UI mockups  
-Diagrams (e.g., context or flow diagrams)
-
+- **Database**: MySQL 8.0+
+- **AI Engine**: Ollama API (Compatible with OpenAI Chat Completion Schema)
+- **Web Server**: Nginx or Apache (OSU Server default) acting as a reverse proxy for the Node.js application
