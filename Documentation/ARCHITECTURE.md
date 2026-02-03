@@ -8,18 +8,18 @@
 
 ### Clients
 * **Student Client:** Unity WebGL build (Browser).
-* **Teacher Dashboard:** React web app (Browser).
+* **Teacher Dashboard:** Server-Side Rendered Web App (Node.js/EJS).
 
 ### Backend
-* **API:** Node.js + Express (OSU Server).
-* **Database:** MySQL (OSU Server).
+* **Server:** Node.js + Express (OSU Server).
+* **Database:** Microsoft SQL Server (utilizing JSON columns for flexibility).
 * **Networking:** Photon PUN 2 (Photon Cloud) for real-time sync.
 * **AI:** Ollama (Local or Server) for post-game analysis.
 
 ### MVP Targets
 * **Scale:** 1 Teacher, 4 Students.
-* **Odd Teams:** If we have fewer than 4 players, we'll add an AI bot or implement a team balancing system to keep gameplay fair and competitive.
-* **Flow:** Teacher creates session -> Students join Photon Room -> Game Loop -> Teacher submits Logs to API -> API triggers AI Report.
+* **Odd Teams:** If we have fewer than 4 players, we will add an AI bot or implement a team balancing system to keep gameplay fair and competitive.
+* **Flow:** Teacher creates session (Web) -> Launches Game (Unity) -> Students join Photon Room -> Game Loop -> Teacher submits Logs to API -> API triggers AI Report.
 
 ---
 
@@ -34,37 +34,44 @@
 
 ## 3. Domain Model
 
-### Session
-* `sessionId` (UUID): Internal Database ID.
+### Session (Stored in MS SQL)
+* `sessionId` (PK): Internal Database ID.
 * `sessionCode` (String): 6-char code (e.g., "AF492B") used for Photon Room Name.
-* `teacherSecret` (String): Temporary token for the React Dashboard to authorize API calls.
+* `gameLogJson` (NVARCHAR MAX): The full history of the game (rounds, answers, scores).
+* `aiSummary` (NVARCHAR MAX): The generated text report.
 
 ### The "Split" State Model
 * **Lobby/Game State:** Live in Photon Cloud (Ephemeral).
-* **Historical Data:** Live in MySQL (Persistent).
-* **Bridge:** The Teacher's Unity Client acts as the "Recorder," sending Game Logs to the Node.js API at the end of the match.
+* **Historical Data:** Live in MS SQL (Persistent).
+* **Bridge:** The Teacher's Unity Client acts as the "Recorder," sending the full Game Log JSON to the Node.js API at the end of the match.
 
 ---
 
 ## 4. API Contracts (Node.js)
 
-### Auth & Session Management
-* **POST** `/api/sessions`
-    * *Input:* `{ "teacherName": "Mr. Smith" }`
-    * *Output:* `{ "sessionId": "...", "sessionCode": "AF492B", "teacherToken": "..." }`
-* **POST** `/api/sessions/:code/end`
-    * *Input:* Full Game Log JSON (See Reporting Schema).
-    * *Output:* `{ "reportId": "...", "status": "PENDING" }`
+Since the backend renders HTML directly, the API is simplified to Auth and Data Upload.
 
-### Reporting
-* **GET** `/api/reports/:reportId`
-    * *Output:* `{ "status": "READY", "summary": "...", "metrics": {...} }`
+### Web Routes (Browser)
+* **GET** `/` - Login Page.
+* **GET** `/dashboard` - Teacher Home (View History, Start Game).
+* **GET** `/game/play?deckId=1` - Serves the Unity WebGL Client.
+* **GET** `/report/:id` - View the AI Summary and metrics.
+
+### Data Routes (JSON)
+* **POST** `/api/login`
+    * *Input:* `{ "username": "...", "password": "..." }`
+    * *Output:* Session Cookie.
+* **POST** `/api/upload-log`
+    * *Input:* `{ "deckId": 1, "log": { ...huge json object... } }`
+    * *Action:* Saves JSON to MS SQL -> Triggers Async Ollama Process.
+    * *Output:* `{ "reportId": 101, "status": "PROCESSING" }`
 
 ---
 
 ## 5. Realtime Protocol (Photon PUN 2)
 
 **Room Name:** Equal to `sessionCode`.
+**Authority:** The Teacher's Client is the Master Client and handles scoring logic.
 
 ### Event Codes (Byte)
 * `1` **START_GAME**: Master Client -> All (Load Game Scene).
@@ -76,6 +83,6 @@
 ## 6. AI Report Specification
 
 **Trigger:** The Teacher's Unity Client sends the game log to Node.js.
-**Process:** Node.js calculates stats -> Sends prompt to Ollama -> Saves result to MySQL.
+**Process:** Node.js calculates stats -> Sends prompt to Ollama -> Saves result to MS SQL.
 **Output:** 3 Paragraphs (Class Performance, Knowledge Gaps, Recommendations).
 **Timeout:** 60 Seconds.
