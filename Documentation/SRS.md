@@ -78,27 +78,46 @@ Card Clash is a unified web application. Unlike distributed systems that separat
 
 #### 3.1.1 Authentication & Accounts
 
-- **FR-1**: The system shall allow Teachers to register and log in using a username and password
-- **FR-2**: The Node.js backend shall use Session Cookies to maintain authenticated state across dashboard pages
-- **FR-3**: Students shall join game sessions via a 6-character alphanumeric "Room Code" without requiring account creation
+- **FR-1**: The system shall allow Teachers to register and log in using a username and password.
+- **FR-2**: The Node.js backend shall use Session Cookies to maintain authenticated state across dashboard pages.
+- **FR-3**: Students shall join game sessions via a 6-character alphanumeric "Room Code" without requiring account creation.
 
 #### 3.1.2 Gameplay Mechanics (Unity/PUN)
 
 - **FR-4 (Lobby)**: The Master Client shall broadcast a "Game Start" event that transitions all connected clients from the Lobby Scene to the Gameplay Scene
-- **FR-5 (Lock-Step)**: The system shall enforce a synchronized state machine; no student may advance to the "Battle Phase" until the Host closes the "Question Phase"
-- **FR-6 (Deck System)**: Students shall be able to select a pre-defined "Deck" (Avatar/Card Set) prior to the match start
-- **FR-7 (Combat Logic)**: The Master Client (Teacher) shall calculate damage values based on answer correctness and speed, ensuring a single source of truth for scoring
+- **FR-5 (Lock-Step)**: The Master Client shall have the ability to control game progress at anytime; Pause, End, Restart, Kick Player.
+- **FR-6 (Deck System)**: Students shall have the ability to purchase cards with the points they gain from answer questions.
+- **FR-7 (Combat Logic)**: The Master Client (Teacher) shall automatically calculate player question scores based on answer correctness and speed, ensuring a single source of truth for scoring. (In some question set formats)
+- **FR-8 (Combat Logic)**: The clients should automatically calculate question scores based on answer correctness and speed, for real-time dependent questions, like randomized mathematical equations. (In some question set formats)
+
+
 
 #### 3.1.3 AI & Analytics
 
-- **FR-8 (Data Collection)**: The Master Client shall upload a single JSON blob containing the full game log (Student Name, Questions, Timestamps, Scores) to the Node.js backend upon game completion
-- **FR-9 (Performance Summary)**: The backend shall transmit this JSON log to the LLM (Ollama) to generate a 3-paragraph natural language summary of class performance
-- **FR-10 (Review)**: The system shall store the raw metrics alongside the AI summary for historical review
+- **FR-9 (Data Collection)**: The Master Client shall upload a single JSON blob containing the full game log (Student Name, Questions, Timestamps, Scores) to the Node.js backend upon game completion.
+- **FR-10 (Performance Summary)**: The backend shall transmit the JSON log to the LLM (Ollama) to generate a 3-paragraph natural language summary of class performance.
+- **FR-11 (Review)**: The system shall store the raw metrics alongside the AI summary for historical review.
 
 #### 3.1.4 Teacher Dashboard (Web Portal)
 
-- **FR-11**: The Dashboard shall be rendered serverside (EJS) and allow teachers to Create, Read, Update, and Delete (CRUD) quiz sets stored in the database
-- **FR-12**: The Dashboard shall display a list of past sessions, allowing the teacher to click into them to view the stored AI Reports
+- **FR-12**: The Dashboard shall be rendered server side (EJS) and allow teachers to Create, Read, Update, and Delete (CRUD) quiz sets stored in the database
+- **FR-13**: The Dashboard shall display a list of past sessions, allowing the teacher to click into them to view the stored AI Reports
+
+#### 3.1.4 Game Details
+
+- **FR-14**: The game shall include a welcome scene with the list of players in the lobby, the lobby code, and the start button.
+- **FR-15**: The game shall include a round 1, where players answer as many questions as they can from the set in a certain time limit, or race to answer a set number of questions the fastest. 
+- **FR-16**: The game shall include a round 2 shop interface that allows players to choose from a selection of cards.
+- **FR-17**: The game shall include a round 2, where players can exchange their round 1 points for cards. (See functional requirement #6)
+- **FR-18**: The game shall include a round 3, where players use their deck to battle against a boss or each other.
+
+
+(Additional Requirements if time permits)
+#### 3.1.5 Question Set Explore Page(Web page)
+
+- **FR-19**: The explore page must pull public question sets that teachers have created, and display those in a nice format for teachers to use in their own game.
+- **FR-20**: The explore page must have a "Trending" section of popularly used question sets.
+
 
 ### 3.2 Non-Functional Requirements
 
