@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Join Game | Card Clash</title>
+		<link rel="stylesheet" href="/styles.css" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+	</head>
+	<body class="page">
+		<div class="background-glow"></div>
+        
+        <header class="top-bar">
+			<div class="brand">
+				<div class="brand-title">Card Clash</div>
+				<div class="brand-subtitle">Student Client</div>
+			</div>
+            </header>
+
+		<main class="page-shell">
+			<section class="panel">
+				<div class="unity-frame">
+                    <iframe src="<%= unityPath %>" title="Card Clash Game"></iframe>
+				</div>
+                <div style="margin-top: 1rem; text-align: center;">
+                    <a href="/" class="btn btn-ghost btn-small">Exit to Home</a>
+                </div>
+			</section>
+		</main>
+	</body>
+</html>

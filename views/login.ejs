@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= pageTitle %> | Card Clash</title>
+    <!-- 
+    	We link to the styles here so the page looks polished.
+    	This is the main stylesheet.
+    -->
+    <link rel="stylesheet" href="/styles.css" />
+    <!-- Loading font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="page page-login">
+    <!-- 
+    	This decorative background shape sits behind everything.
+    	It's positioned so the login form stays clickable on top.
+    -->
+    <div class="background-glow"></div>
+    <main class="page-shell">
+      <!-- The login form box sits in the center -->
+      <section class="panel hero-panel login-panel">
+        <div>
+          <h1>Card Clash Teacher Login</h1>
+          <p>
+            Sign in to manage quiz decks, launch the Unity game and review
+            AI session summaries.
+          </p>
+        </div>
+        <!-- 
+        	A simple form to enter username and password.
+        	It will eventually connect to a real login system.
+        -->
+        <form class="form" method="get" action="/dashboard">
+          <label class="form-field">
+            <span>Username</span>
+            <input type="text" name="username" placeholder="teacher@example" />
+          </label>
+          <label class="form-field">
+            <span>Password</span>
+            <input type="password" name="password" placeholder="••••••••" />
+          </label>
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Enter Dashboard</button>
+            <a class="btn btn-ghost" href="/">Back to Home</a>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

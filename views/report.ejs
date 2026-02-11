@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= pageTitle %> | Card Clash</title>
+    <!-- 
+    	We link to the styles here so the page looks polished.
+    	This is the main stylesheet.
+    -->
+    <link rel="stylesheet" href="/styles.css" />
+    <!-- Loading font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="page">
+    <!-- 
+    	This decorative background element sits behind everything.
+    	It's positioned so buttons and content stay clickable on top.
+    -->
+    <div class="background-glow"></div>
+    <!-- 
+    	Nav menu at the top. You can go back to the dashboard,
+    	play the game again, or log out.
+    -->
+    <header class="top-bar">
+      <div class="brand">
+        <div class="brand-title">Card Clash</div>
+        <div class="brand-subtitle">Session Report</div>
+      </div>
+      <nav class="top-nav">
+        <a class="nav-link" href="/dashboard">Dashboard</a>
+        <a class="nav-link" href="/game/play?deckId=<%= session.deckId %>">Launch Game</a>
+        <a class="nav-link" href="/">Log Out</a>
+      </nav>
+    </header>
+
+    <main class="page-shell">
+      <!-- 
+      	Intro section showing which game you're reviewing.
+      	It explains what the report contains.
+      -->
+      <section class="panel hero-panel">
+        <div>
+          <h1>Report: <%= session.deckTitle %></h1>
+          <p>Review the AI summary and classroom metrics from this session.</p>
+        </div>
+        <a class="btn btn-primary" href="/dashboard">Return to Dashboard</a>
+      </section>
+
+      <!-- 
+      	Left side has the AI feedback text.
+      	Right side has the numbers and stats from the game.
+      -->
+      <section class="grid">
+        <!-- 
+        	The AI feedback paragraphs about the game.
+        	It analyzes how students did and what to focus on.
+        -->
+        <div class="panel">
+          <div class="panel-header">
+            <h2>AI Summary</h2>
+            <span class="panel-meta">Session <%= session.id %></span>
+          </div>
+          <div class="summary-body">
+            <% for (let i = 0; i < session.summaryParagraphs.length; i += 1) { %>
+              <p><%= session.summaryParagraphs[i] %></p>
+            <% } %>
+          </div>
+        </div>
+
+          <!-- 
+          	Game numbers like rounds played, accuracy, and response time.
+          	Below that is a note with suggestions for follow-up practice.
+          -->
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Key Metrics</h2>
+            <span class="panel-meta">Class snapshot</span>
+          </div>
+          <div class="metrics metrics-large">
+            <div>
+              <span class="metric-label">Rounds Played</span>
+              <span class="metric-value"><%= session.metrics.roundsPlayed %></span>
+            </div>
+            <div>
+              <span class="metric-label">Average Accuracy</span>
+              <span class="metric-value"><%= session.metrics.averageAccuracy %></span>
+            </div>
+            <div>
+              <span class="metric-label">Average Response</span>
+              <span class="metric-value"><%= session.metrics.averageResponseTime %></span>
+            </div>
+          </div>
+          <div class="note-card">
+            <h3>Next Steps</h3>
+            <p>
+              Focus follow up practice on the lowest accuracy rounds. Use short
+              review questions before the next live session.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

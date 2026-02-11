@@ -1,0 +1,561 @@
+/*
+Colors and basic setup for the whole site.
+We're defining all our colors here so we can use them everywhere. 
+We also reset the box model so buttons, inputs 
+and containers size themselves predictably without weird surprises.
+*/
+:root {
+  --sand: #f6efe6;
+  --peach: #f1d3b5;
+  --ink: #1f1b16;
+  --teal: #1f6e6a;
+  --teal-dark: #114b49;
+  --coral: #e0684d;
+  --gold: #f2c76e;
+  --panel: rgba(255, 255, 255, 0.86);
+  --shadow: 0 20px 60px rgba(20, 16, 12, 0.18);
+  --radius: 20px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Nunito", "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: #fff;
+  min-height: 100vh;
+}
+
+/*
+Page layouts and styling the background.
+Every page uses .page as a container. We put decorative backgrounds behind everything
+using absolute positioning so buttons and links stay clickable on top. The login version
+centers everything vertically to make the form look centered on the screen.
+*/
+.page {
+  position: relative;
+  padding-bottom: 60px;
+}
+
+.page-login {
+  display: flex;
+  align-items: center;
+}
+
+.background-glow {
+  position: absolute;
+  inset: 0;
+  background: none;
+  z-index: 0;
+}
+
+/*
+The header bar and navigation at the top.
+This sits at the top of every page. The brand title stands out to show what app
+you are in. Navigation links are pill-shaped buttons that light up with .is-active
+to show which page you're currently on.
+*/
+.top-bar {
+  position: relative;
+  z-index: 1;
+  padding: 28px 2vw 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.brand-title {
+  font-family: "Nunito", "Segoe UI", sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.03em;
+  font-weight: 700;
+}
+
+.brand-subtitle {
+  font-size: 0.9rem;
+  color: rgba(31, 27, 22, 0.6);
+  font-weight: 600;
+}
+
+.top-nav {
+  display: flex;
+  gap: 12px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--ink);
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(31, 27, 22, 0.2);
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.7);
+  position: relative;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 3px 0 rgba(31, 27, 22, 0.15);
+  transform: translateY(0);
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 rgba(31, 27, 22, 0.15);
+}
+
+.nav-link:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(31, 27, 22, 0.15);
+}
+
+.nav-link.is-active {
+  background: var(--teal);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 3px 0 var(--teal-dark);
+}
+
+.nav-link.is-active:hover {
+  box-shadow: 0 4px 0 var(--teal-dark);
+}
+
+.nav-link.is-active:active {
+  box-shadow: 0 1px 0 var(--teal-dark);
+}
+
+/*
+Main content areas and organizing layouts.
+.panel is our basic card container with a white background and shadow.
+.grid automatically arranges cards in columns that adjust based on screen width,
+so it looks good on phones and desktops without needing different designs.
+*/
+.page-shell {
+  position: relative;
+  z-index: 1;
+  padding: 24px 2vw 0;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.panel {
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(31, 27, 22, 0.08);
+}
+
+.hero-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.hero-panel h1 {
+  margin: 0 0 10px;
+  font-family: "Nunito", "Segoe UI", sans-serif;
+  font-size: clamp(2rem, 3vw, 2.8rem);
+}
+
+.hero-panel p {
+  margin: 0;
+  max-width: 520px;
+  color: rgba(31, 27, 22, 0.75);
+  font-weight: 600;
+}
+
+.login-panel {
+  margin: 0 auto;
+  max-width: 560px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 28px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-family: "Nunito", "Segoe UI", sans-serif;
+  font-size: 1.5rem;
+}
+
+.panel-meta {
+  font-size: 0.9rem;
+  color: rgba(31, 27, 22, 0.6);
+}
+
+/*
+Individual cards for decks and game sessions.
+Cards display content like deck names, descriptions, and stats. The .card-stack
+stacks them vertically with space between. .card-actions puts buttons at the bottom,
+and .card-kicker shows small details like dates at the bottom.
+*/
+.card-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid rgba(31, 27, 22, 0.08);
+}
+
+.card h3 {
+  margin: 0 0 6px;
+  font-size: 1.2rem;
+}
+
+.card p {
+  margin: 0;
+  color: rgba(31, 27, 22, 0.7);
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.card-kicker {
+  font-size: 0.85rem;
+  color: rgba(31, 27, 22, 0.6);
+}
+
+.summary {
+  margin-top: 6px;
+}
+
+/*
+Showing numbers and stats.
+We use a grid to display metrics side-by-side. The label explains what the number is,
+and the value is the big number. The grid auto-adjusts how many metrics fit per row
+based on screen width so they're always easy to read.
+*/
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 12px;
+}
+
+.metrics-large {
+  margin-bottom: 20px;
+}
+
+.metric-label {
+  display: block;
+  font-size: 0.8rem;
+  color: rgba(31, 27, 22, 0.6);
+}
+
+.metric-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/*
+Buttons and clickable things.
+.btn is the base button style with a pill shape. .btn-primary is the main action
+button in teal. .btn-ghost is a lighter version for secondary actions. .btn-small
+makes buttons smaller when you need them to take up less space.
+*/
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: var(--teal);
+  color: #fff;
+  border-color: var(--teal-dark);
+}
+
+.btn-ghost {
+  background: #fff;
+  color: var(--ink);
+  border-color: rgba(31, 27, 22, 0.2);
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 0.9rem;
+}
+
+/*
+Tactile Button Upgrades
+Adds movement and depth to the existing button classes.
+We use a 3px shadow that compresses to 1px on click.
+*/
+.btn {
+  position: relative;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+/*
+Primary Button: Teal
+Uses the existing --teal-dark variable for the shadow color
+to ensure it matches the border.
+*/
+.btn-primary {
+  box-shadow: 0 3px 0 var(--teal-dark);
+  transform: translateY(0);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 var(--teal-dark);
+}
+
+.btn-primary:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--teal-dark);
+}
+
+/*
+Ghost Button: White
+Uses a semi-transparent ink color for the shadow to keep
+it subtle against the light background.
+*/
+.btn-ghost {
+  box-shadow: 0 3px 0 rgba(31, 27, 22, 0.2);
+  transform: translateY(0);
+}
+
+.btn-ghost:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 rgba(31, 27, 22, 0.2);
+  background: #fff;
+}
+
+.btn-ghost:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(31, 27, 22, 0.2);
+}
+
+/*
+Forms for login and creating decks.
+.form-field groups a label with an input or textarea. The label sits above the
+input so it's clear what each field is for. Rounded borders match the soft,
+friendly feel of the rest of the app.
+*/
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.form-field input,
+.form-field textarea {
+  border-radius: 12px;
+  border: 1px solid rgba(31, 27, 22, 0.2);
+  padding: 10px 12px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/*
+The deck editor for creating flashcard questions.
+Each question is a card that contains a list of answers. .answer-row uses a grid
+to line up the radio button (for marking the correct answer) with the answer text.
+You can add or remove answers dynamically without breaking the layout.
+*/
+.deck-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 8px;
+}
+
+.builder-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.builder-subtitle {
+  margin: 4px 0 0;
+  color: rgba(31, 27, 22, 0.65);
+}
+
+.questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.question-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 18px;
+  border: 1px solid rgba(31, 27, 22, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.question-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.answer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.answer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.answer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.answer-row {
+  display: grid;
+  grid-template-columns: 20px 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.answer-row input[type="text"] {
+  width: 100%;
+}
+
+/*
+The game window where you play Card Clash.
+We embed the Unity game in an iframe. The dark background makes the game stand out.
+The fixed height keeps it consistent across devices and removes the default iframe border.
+*/
+.unity-frame {
+  background: #0f1c1b;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(15, 28, 27, 0.4);
+  min-height: 420px;
+}
+
+.unity-frame iframe {
+  width: 100%;
+  height: 480px;
+  border: 0;
+}
+
+.helper-text {
+  margin-top: 14px;
+  color: rgba(31, 27, 22, 0.6);
+}
+
+/*
+Displaying game results and AI feedback.
+.summary-body is where the AI feedback paragraphs go. .note-card is a warm peach box
+for important takeaways at the bottom. The spacing and colors make it easy to scan
+and find what you need to improve.
+*/
+.summary-body p {
+  margin: 0 0 16px;
+  color: rgba(31, 27, 22, 0.8);
+}
+
+.note-card {
+  background: rgba(241, 211, 181, 0.4);
+  border-radius: 16px;
+  padding: 16px 18px;
+}
+
+.note-card h3 {
+  margin-top: 0;
+}
+
+/*
+Helper classes for special cases.
+.visually-hidden hides something from view but keeps it readable by screen readers.
+We use this for the hidden JSON field in the deck builder so the data syncs without
+cluttering up the screen.
+*/
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/*
+Making the app work on phones.
+On small screens, we stack the navigation vertically instead of horizontally,
+and the hero section content stacks too. This way everything fits without scrolling
+side-to-side and buttons are easy to tap.
+*/
+@media (max-width: 720px) {
+  .top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .top-nav {
+    flex-wrap: wrap;
+  }
+
+  .hero-panel {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

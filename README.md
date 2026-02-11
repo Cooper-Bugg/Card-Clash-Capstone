@@ -6,6 +6,26 @@ This README is a team hub for early development. It defines the MVP scope, share
 
 ---
 
+## Getting Started
+
+### Installation
+
+```bash
+npm install
+```
+
+### Running the Frontend Server
+
+```bash
+npm start
+```
+
+The frontend server will start on `http://localhost:3000`
+
+**Note:** Currently, only the frontend (Web Dashboard) is running on this server.
+
+---
+
 ## Team
 
 - Trevor Mendenhall

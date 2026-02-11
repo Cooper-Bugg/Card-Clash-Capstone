@@ -1,0 +1,13 @@
+{
+	"name": "card-clash-capstone",
+	"version": "0.1.0",
+	"description": "Card Clash Express server for demo",
+	"main": "app.js",
+	"scripts": {
+		"start": "node app.js"
+	},
+	"dependencies": {
+		"ejs": "^3.1.10",
+		"express": "^4.19.2"
+	}
+}

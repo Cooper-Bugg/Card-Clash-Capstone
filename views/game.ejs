@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title><%= pageTitle %> | Card Clash</title>
+		<!-- 
+			We link to the styles here so the page looks polished.
+			This is the main stylesheet.
+		 -->
+		<link rel="stylesheet" href="/styles.css" />
+		<!-- Loading font from Google Fonts -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+	</head>
+	<body class="page">
+		<!-- 
+			This decorative background element sits behind everything.
+			It's positioned so buttons and the game stay clickable on top.
+		 -->
+		<div class="background-glow"></div>
+		<!-- 
+			Nav menu at the top. You can go back to the dashboard
+			or edit this deck from here.
+		 -->
+		<header class="top-bar">
+			<div class="brand">
+				<div class="brand-title">Card Clash</div>
+				<div class="brand-subtitle">Game Launch</div>
+			</div>
+			<nav class="top-nav">
+				<a class="nav-link" href="/dashboard">Dashboard</a>
+				<a class="nav-link" href="/deck/<%= deck.id %>/edit">Edit Deck</a>
+				<a class="nav-link" href="/">Log Out</a>
+			</nav>
+		</header>
+
+		<main class="page-shell">
+			<!-- 
+				Intro section that tells you what's loading.
+				It shows the deck name and explains the game will start when ready.
+			 -->
+			<section class="panel hero-panel">
+				<div>
+					<h1>Launch: <%= deck.title %></h1>
+					<p>
+						This view hosts the Unity WebGL build. When the build is ready the
+						game will load in the frame below.
+					</p>
+				</div>
+				<a class="btn btn-primary" href="/dashboard">Return to Dashboard</a>
+			</section>
+
+			<!-- 
+				The game window. The Unity build runs inside this iframe.
+				If it's blank, check that the game files are in public/Unity.
+			 -->
+			<section class="panel">
+				<div class="panel-header">
+					<h2>Unity Player</h2>
+					<span class="panel-meta">Deck ID <%= deck.id %></span>
+				</div>
+				<div class="unity-frame">
+					<iframe src="<%= unityPath %>" title="Card Clash Unity Game"></iframe>
+				</div>
+				<p class="helper-text">
+					If the frame is empty, confirm that the Unity WebGL build exists in
+					public/Unity and includes an index.html file.
+				</p>
+			</section>
+		</main>
+	</body>
+</html>
