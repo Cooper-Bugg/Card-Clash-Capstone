@@ -10,6 +10,11 @@ This README is a team hub for early development. It defines the MVP scope, share
 
 ### Installation
 
+**Node.js Setup:**
+First, install Node.js LTS (Long Term Support). You can either download directly from the official website at https://nodejs.org/ or use your terminal with your preferred package manager.
+
+Once Node.js is installed, install the project dependencies:
+
 ```bash
 npm install
 ```
