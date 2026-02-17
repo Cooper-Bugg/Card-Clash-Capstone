@@ -1,6 +1,6 @@
 /*
 Fake data for testing the cards and decks right now.
-Eventually this will be replaced with real mssql queries
+Eventually this will be replaced with real MySQL queries
 that talk to the actual database instead of hardcoded data.
 */
 const mockDecks = [
@@ -65,7 +65,7 @@ const mockSessions = [
 /*
 Gets all the decks to show on the dashboard and deck builder.
 Right now it returns the fake data, but when the database is hooked up
-this will query mssql instead. Keeps the route handlers clean.
+this will query MySQL instead. Keeps the route handlers clean.
 */
 function getDecks() {
   return mockDecks;
@@ -73,7 +73,7 @@ function getDecks() {
 
 /*
 Gets all the past game sessions for the dashboard and report pages.
-Right now it returns fake data, but when mssql is connected
+Right now it returns fake data, but when MySQL is connected
 this will query the database. Keeps the route handlers simple.
 */
 function getSessions() {
@@ -83,7 +83,7 @@ function getSessions() {
 /*
 Looks up a specific deck by its id.
 Useful for loading a deck when you click to play or edit.
-When mssql is connected this will do a database query
+When MySQL is connected this will do a database query
 instead of searching through fake data.
 */
 function getDeckById(deckId) {
@@ -141,7 +141,7 @@ function saveDeck({ id, title, contentJson }) {
 /*
 Looks up a specific game session by its id.
 Used on the report page to show details about one game.
-When mssql is connected this will query the database
+When MySQL is connected this will query the database
 instead of searching through fake data.
 */
 function getSessionById(sessionId) {

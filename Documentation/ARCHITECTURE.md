@@ -12,7 +12,7 @@
 
 ### Backend
 * **Server:** Node.js + Express (OSU Server).
-* **Database:** Microsoft SQL Server (utilizing JSON columns for flexibility).
+* **Database:** MySQL (utilizing JSON columns for flexibility).
 * **Networking:** Photon PUN 2 (Photon Cloud) for real-time sync.
 * **AI:** Ollama (Local or Server) for post-game analysis.
 
@@ -34,15 +34,15 @@
 
 ## 3. Domain Model
 
-### Session (Stored in MS SQL)
+### Session (Stored in MySQL)
 * `sessionId` (PK): Internal Database ID.
 * `sessionCode` (String): 6-char code (e.g., "AF492B") used for Photon Room Name.
-* `gameLogJson` (NVARCHAR MAX): The full history of the game (rounds, answers, scores).
-* `aiSummary` (NVARCHAR MAX): The generated text report.
+* `gameLogJson` (JSON): The full history of the game (rounds, answers, scores).
+* `aiSummary` (TEXT): The generated text report.
 
 ### The "Split" State Model
 * **Lobby/Game State:** Live in Photon Cloud (Ephemeral).
-* **Historical Data:** Live in MS SQL (Persistent).
+* **Historical Data:** Live in MySQL (Persistent).
 * **Bridge:** The Teacher's Unity Client acts as the "Recorder," sending the full Game Log JSON to the Node.js API at the end of the match.
 
 ---
@@ -63,7 +63,7 @@ Since the backend renders HTML directly, the API is simplified to Auth and Data 
     * *Output:* Session Cookie.
 * **POST** `/api/upload-log`
     * *Input:* `{ "deckId": 1, "log": { ...huge json object... } }`
-    * *Action:* Saves JSON to MS SQL -> Triggers Async Ollama Process.
+    * *Action:* Saves JSON to MySQL -> Triggers Async Ollama Process.
     * *Output:* `{ "reportId": 101, "status": "PROCESSING" }`
 
 ---
@@ -83,6 +83,6 @@ Since the backend renders HTML directly, the API is simplified to Auth and Data 
 ## 6. AI Report Specification
 
 **Trigger:** The Teacher's Unity Client sends the game log to Node.js.
-**Process:** Node.js calculates stats -> Sends prompt to Ollama -> Saves result to MS SQL.
+**Process:** Node.js calculates stats -> Sends prompt to Ollama -> Saves result to MySQL.
 **Output:** 3 Paragraphs (Class Performance, Knowledge Gaps, Recommendations).
 **Timeout:** 60 Seconds.

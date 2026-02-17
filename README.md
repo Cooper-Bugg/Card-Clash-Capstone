@@ -49,7 +49,7 @@ Card Clash is an educational party game. A teacher hosts a session. Students joi
 
 ### Backend
 - Node.js + Express (OSU servers) handles API logic and UI rendering
-- Database: Microsoft SQL Server (using JSON columns for flexibility)
+- Database: MySQL
 
 ### Realtime Networking
 - Transport: Photon PUN 2 (Photon Cloud)
@@ -91,7 +91,7 @@ NFR-3: server components must fit within OSU student server quotas
 ## Hosting Topology Target
 
 - Web App (Dashboard + API): OSU Server (Node.js)
-- Database: OSU MS SQL Server
+- Database: OSU MySQL Server
 - Unity WebGL: hosted statically within the Node.js public/ folder
 
 Important: Unity WebGL in browser will require HTTPS for many browser features. Photon Cloud uses HTTPS and WSS endpoints, so classroom networks and firewalls must allow outbound 443.
@@ -102,7 +102,7 @@ Important: Unity WebGL in browser will require HTTPS for many browser features. 
 
 ### Trusted
 - Node.js backend
-- MS SQL database
+- MySQL database
 - Teacher Unity Client for game logic authority (MVP assumption)
 
 ### Untrusted
@@ -138,9 +138,9 @@ Use these terms consistently across code and API contracts.
 
 ---
 
-## Database Schema (MS SQL)
+## Database Schema (MySQL)
 
-To reduce overhead, use NVARCHAR(MAX) columns to store structured JSON data, avoiding complex joins.
+To reduce overhead, use JSON columns to store structured data, avoiding complex joins.
 
 ### Users
 - `user_id` PK
@@ -151,14 +151,14 @@ To reduce overhead, use NVARCHAR(MAX) columns to store structured JSON data, avo
 - `deck_id` PK
 - `user_id` FK
 - `title` VARCHAR(100)
-- `content_json` NVARCHAR(MAX)
+- `content_json` JSON
 
 ### Sessions
 - `session_id` PK
 - `user_id` FK
 - `created_at` DATETIME
-- `game_log_json` NVARCHAR(MAX)
-- `ai_summary_text` NVARCHAR(MAX)
+- `game_log_json` JSON
+- `ai_summary_text` TEXT
 
 ---
 

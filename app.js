@@ -1,7 +1,7 @@
 /*
 This is the main server file that runs Card Clash.
 It uses Express to handle routes, render the page templates
-and serve the game files. Later we'll add mssql database, user login sessions,
+and serve the game files. Later we'll add MySQL database, user login sessions,
 and AI report generation.
 */
 const path = require("path");

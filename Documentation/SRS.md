@@ -16,7 +16,7 @@ Application Server: A single Node.js/Express application hosted on OSU Servers. 
 
 Game Logic Authority: The Teacher's Unity Client acts as the "Host" for real-time logic, synchronized via Photon PUN 2.
 
-Data Storage: Microsoft SQL Server using JSON-based storage for flexibility.
+Data Storage: MySQL using JSON-based storage for flexibility.
 
 AI Module: An inference interface (Ollama) processing session logs to produce natural language feedback.
 
@@ -49,7 +49,7 @@ Card Clash is a unified web application. Unlike distributed systems that separat
 - **Session Management**: The Host creates a lobby code; the system synchronizes game states across all connected clients
 - **Assessment & Combat**: Student correctness on multiple-choice questions converts directly into "Action Points" or "Damage" in the game simulation
 - **AI Analysis**: The system aggregates session logs (response times, accuracy per tag) to generate a "Class Summary" via LLM inference
-- **Content Management**: Teachers can create, edit, and save quiz decks to the MS SQL database
+- **Content Management**: Teachers can create, edit, and save quiz decks to the MySQL database
 
 ### 2.3 User Classes and Characteristics
 
@@ -64,7 +64,7 @@ Card Clash is a unified web application. Unlike distributed systems that separat
 
 **Server Constraints:**
 - OSU Student Server (Linux environment)
-- Microsoft SQL Server (Database)
+- MySQL (Database)
 
 **Network:**
 - HTTPS is required for the Unity WebGL build to function correctly
@@ -133,7 +133,7 @@ Card Clash is a unified web application. Unlike distributed systems that separat
 
 #### 3.2.3 Security
 
-- **NFR-5**: Passwords shall be hashed (e.g., bcrypt) before storage in the MS SQL database
+- **NFR-5**: Passwords shall be hashed (e.g., bcrypt) before storage in the MySQL database
 - **NFR-6**: The API shall validate that only the authenticated Session Owner (Teacher) can trigger a game log upload
 
 ---
@@ -148,6 +148,6 @@ Card Clash is a unified web application. Unlike distributed systems that separat
 
 ### 4.2 Software Interfaces
 
-- **Database**: Microsoft SQL Server (utilizing NVARCHAR(MAX) for JSON storage)
+- **Database**: MySQL (utilizing JSON columns for storage)
 - **AI Engine**: Ollama API
 - **Web Server**: Express.js (Node.js) serving both static assets and dynamic views
