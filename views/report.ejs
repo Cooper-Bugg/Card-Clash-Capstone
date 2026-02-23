@@ -9,13 +9,6 @@
     	This is the main stylesheet.
     -->
     <link rel="stylesheet" href="/styles.css" />
-    <!-- Loading font from Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
   </head>
   <body class="page">
     <!-- 
@@ -34,8 +27,11 @@
       </div>
       <nav class="top-nav">
         <a class="nav-link" href="/dashboard">Dashboard</a>
-        <a class="nav-link" href="/game/play?deckId=<%= session.deckId %>">Launch Game</a>
-        <a class="nav-link" href="/">Log Out</a>
+        <a class="nav-link" href="/deck/new">Create Deck</a>
+        <a class="nav-link is-active" href="/sessions">Sessions</a>
+        <form method="post" action="/logout" style="margin: 0;">
+          <button class="nav-link nav-link--danger" type="submit">Log Out</button>
+        </form>
       </nav>
     </header>
 
@@ -49,7 +45,7 @@
           <h1>Report: <%= session.deckTitle %></h1>
           <p>Review the AI summary and classroom metrics from this session.</p>
         </div>
-        <a class="btn btn-primary" href="/dashboard">Return to Dashboard</a>
+        <a class="btn btn-primary" href="/sessions">Return to Sessions</a>
       </section>
 
       <!-- 

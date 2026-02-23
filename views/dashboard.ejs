@@ -9,15 +9,8 @@
 			This is the main stylesheet the whole app shares.
 		-->
 		<link rel="stylesheet" href="/styles.css" />
-		<!-- Loading font from Google Fonts -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap"
-			rel="stylesheet"
-		/>
 	</head>
-	<body class="page">
+	<body class="page page-dashboard">
 		<!-- 
 			This decorative circle/shape sits behind everything.
 			It's positioned so buttons and links stay clickable on top.
@@ -35,7 +28,10 @@
 			<nav class="top-nav">
 				<a class="nav-link is-active" href="/dashboard">Dashboard</a>
 				<a class="nav-link" href="/deck/new">Create Deck</a>
-				<a class="nav-link" href="/">Log Out</a>
+				<a class="nav-link" href="/sessions">Sessions</a>
+				<form method="post" action="/logout" style="margin: 0;">
+					<button class="nav-link nav-link--danger" type="submit">Log Out</button>
+				</form>
 			</nav>
 		</header>
 
@@ -70,7 +66,7 @@
 						<span class="panel-meta"><%= decks.length %> total</span>
 					</div>
 
-					<div class="card-stack">
+					<div class="card-stack card-stack--decks">
 						<% for (let i = 0; i < decks.length; i += 1) { %>
 							<% const deck = decks[i]; %>
 							<!-- 
@@ -84,7 +80,7 @@
 								</div>
 								<div class="card-actions">
 									<a class="btn btn-primary" href="/game/play?deckId=<%= deck.id %>">Launch Game</a>
-									<a class="btn btn-ghost" href="/deck/<%= deck.id %>/edit">Edit Deck</a>
+									<a class="btn btn-primary" href="/deck/<%= deck.id %>/edit">Edit Deck</a>
 								</div>
 							</article>
 						<% } %>
@@ -101,7 +97,7 @@
 						<span class="panel-meta"><%= sessions.length %> total</span>
 					</div>
 
-					<div class="card-stack">
+					<div class="card-stack card-stack--sessions">
 						<% for (let i = 0; i < sessions.length; i += 1) { %>
 							<% const session = sessions[i]; %>
 							<!-- 
@@ -129,7 +125,7 @@
 										<span class="metric-value"><%= session.metrics.averageResponseTime %></span>
 									</div>
 								</div>
-								<a class="btn btn-ghost" href="/report/<%= session.id %>">View Report</a>
+								<a class="btn btn-primary" href="/report/<%= session.id %>">View Report</a>
 							</article>
 						<% } %>
 					</div>

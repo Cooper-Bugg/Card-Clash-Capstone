@@ -4,74 +4,98 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title><%= pageTitle %> | Card Clash</title>
-		<!-- 
-			We link to the styles here so the page looks polished.
-			This is the main stylesheet.
-		 -->
 		<link rel="stylesheet" href="/styles.css" />
-		<!-- Loading font from Google Fonts -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap"
-			rel="stylesheet"
-		/>
+		<style>
+			/* Game page fills viewport but allows scrolling if content overflows */
+			html, body {
+				height: 100%;
+				margin: 0;
+				overflow-y: auto;
+			}
+
+			/* Compact top bar for the game view */
+			.game-top-bar {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 8px 20px;
+				background: var(--sand);
+				border-bottom: 2px solid var(--blue);
+				color: var(--ink);
+				z-index: 10;
+				flex-shrink: 0;
+			}
+
+			.game-brand-title {
+				font-family: "Andika", "Segoe UI", sans-serif;
+				font-size: 1.6rem;
+				font-weight: 800;
+				letter-spacing: 0.04em;
+				color: var(--blue);
+			}
+
+			.game-brand-subtitle {
+				font-size: 1rem;
+				color: var(--gold);
+				font-weight: 700;
+				letter-spacing: 0.02em;
+			}
+
+			.game-nav {
+				display: flex;
+				gap: 10px;
+			}
+
+			/* Outer wrapper that fills everything below the top bar */
+			.game-outer {
+				display: flex;
+				flex-direction: column;
+				height: calc(100vh - 46px); /* subtract top bar height */
+				padding: 20px;
+				box-sizing: border-box;
+				background: var(--sand);
+			}
+
+			/* The bordered frame around the Unity iframe */
+			.game-unity-wrapper {
+				flex: 1;
+				border-radius: 16px;
+				border: 3px solid var(--blue);
+				box-shadow: 0 0 0 4px var(--gold), 0 8px 40px rgba(29, 53, 87, 0.35);
+				overflow: hidden;
+				background: var(--blue);
+			}
+
+			.game-unity-wrapper iframe {
+				width: 100%;
+				height: 100%;
+				border: 0;
+				display: block;
+			}
+		</style>
 	</head>
 	<body class="page">
-		<!-- 
-			This decorative background element sits behind everything.
-			It's positioned so buttons and the game stay clickable on top.
-		 -->
-		<div class="background-glow"></div>
-		<!-- 
-			Nav menu at the top. You can go back to the dashboard
-			or edit this deck from here.
-		 -->
-		<header class="top-bar">
+		<!-- Compact branded top bar with nav links -->
+		<header class="game-top-bar">
 			<div class="brand">
-				<div class="brand-title">Card Clash</div>
-				<div class="brand-subtitle">Game Launch</div>
+				<div class="game-brand-title">Card Clash</div>
+				<div class="game-brand-subtitle">Game Launch &mdash; <%= deck.title %></div>
 			</div>
-			<nav class="top-nav">
+			<nav class="game-nav">
 				<a class="nav-link" href="/dashboard">Dashboard</a>
 				<a class="nav-link" href="/deck/<%= deck.id %>/edit">Edit Deck</a>
-				<a class="nav-link" href="/">Log Out</a>
+				<a class="nav-link" href="/sessions">Sessions</a>
+				<form method="post" action="/logout" style="margin: 0;">
+					<button class="nav-link nav-link--danger" type="submit">Log Out</button>
+				</form>
 			</nav>
 		</header>
 
-		<main class="page-shell">
-			<!-- 
-				Intro section that tells you what's loading.
-				It shows the deck name and explains the game will start when ready.
-			 -->
-			<section class="panel hero-panel">
-				<div>
-					<h1>Launch: <%= deck.title %></h1>
-					<p>
-						This view hosts the Unity WebGL build. When the build is ready the
-						game will load in the frame below.
-					</p>
-				</div>
-				<a class="btn btn-primary" href="/dashboard">Return to Dashboard</a>
-			</section>
-
-			<!-- 
-				The game window. The Unity build runs inside this iframe.
-				If it's blank, check that the game files are in public/Unity.
-			 -->
-			<section class="panel">
-				<div class="panel-header">
-					<h2>Unity Player</h2>
-					<span class="panel-meta">Deck ID <%= deck.id %></span>
-				</div>
-				<div class="unity-frame">
-					<iframe src="<%= unityPath %>" title="Card Clash Unity Game"></iframe>
-				</div>
-				<p class="helper-text">
-					If the frame is empty, confirm that the Unity WebGL build exists in
-					public/Unity and includes an index.html file.
-				</p>
-			</section>
-		</main>
+		<!-- Unity game fills the rest of the screen with padding around it -->
+		<div class="game-outer">
+			<div class="game-unity-wrapper">
+				<iframe src="<%= unityPath %>" title="Card Clash Unity Game" allowfullscreen></iframe>
+			</div>
+		</div>
 	</body>
 </html>
