@@ -1,33 +1,54 @@
-# Card Clash - Senior Capstone Project
+# Card Clash — Senior Capstone Project
 
-Repository for **Card Clash**, an educational party style game where a teacher hosts a session and students join using a short session code. Gameplay runs in real time via Photon Cloud. After the game ends, the Teacher client uploads a game log and the system generates a 3 paragraph summary.
+Card Clash is an educational party game. A teacher hosts a session and students join with a short code. Gameplay runs in real time via Photon Cloud. When the game ends, the Teacher client uploads the game log and the backend generates a 3-paragraph AI summary.
 
-This README is a team hub for early development. It defines the MVP scope, shared terminology, repository layout and the contracts that must stay stable while implementation evolves.
+To run locally: `npm install && npm start` then open `https://localhost:3000`. No database required.
 
 ---
 
-## Getting Started
+## Setup
 
-### Installation
+### Prerequisites
 
-**Node.js Setup:**
-First, install Node.js LTS (Long Term Support). You can either download directly from the official website at https://nodejs.org/ or use your terminal with your preferred package manager.
+- **Node.js** — [nodejs.org](https://nodejs.org/) (LTS recommended)
+- **MySQL** — only needed if working on database integration (see [Database Setup](#database-setup-mysql))
 
-Once Node.js is installed, install the project dependencies:
+### Install and run
+
+Install dependencies:
 
 ```bash
 npm install
-```
-
-### Running the Frontend Server
-
-```bash
 npm start
 ```
 
-The frontend server will start on `http://localhost:3000`
+The server starts at **https://localhost:3000**
 
-**Note:** Currently, only the frontend (Web Dashboard) is running on this server.
+The first run auto-generates a self-signed HTTPS certificate in `certs/`. Your browser will show a security warning — click **Advanced → Proceed to localhost**. HTTPS is required for Unity WebGL Brotli-compressed assets to load.
+
+### Default teacher login
+
+  Username = `admin`
+  Password = `password`
+
+Credentials are set in `.env`. We can change them before deployment.
+
+### Stopping the server
+
+Press `Ctrl + C`. If it doesn't stop:
+
+```bash
+ps aux | grep node
+kill -9 <PID>
+```
+
+### Unity WebGL build
+
+The Unity build is already in `public/Unity/`. If you export a new build, drop the files there — it needs an `index.html` at the root. The server serves it at `/Unity/index.html` and handles Brotli-compressed assets (`.wasm.br`, `.js.br`, `.data.br`) automatically.
+
+### Database Setup (MySQL)
+
+The app uses mock data in `data.js` by default and runs without a database. Only do this if you're working on database integration.
 
 ---
 
@@ -35,200 +56,225 @@ The frontend server will start on `http://localhost:3000`
 
 - Trevor Mendenhall
 - Graham Troast
-- Ahamd Coleman
+- Ahmad Coleman
 - Josh Price
 - Cooper Huntington-Bugg
 
-## Project Summary
+---
 
-Card Clash is an educational party game. A teacher hosts a session. Students join using a short session code. Gameplay runs in real time via Photon Cloud. When the game ends, the Teacher client uploads the game log, which triggers an AI-generated 3-paragraph summary.
+## Architecture
 
-### Architecture
-- Web Dashboard: Server-Side Rendered (SSR) using EJS templates served by Express
-- Game Client: Unity WebGL build running in a browser
+- **Web dashboard** — SSR with EJS templates served by Node.js/Express
+- **Game client** — Unity WebGL running in the browser
+- **Realtime** — Photon PUN 2 (Photon Cloud). The Teacher's Unity client is the authoritative host for game logic, scoring, and timing. The backend handles storage and AI only.
+- **Database** — MySQL (OSU server). JSON columns for game logs and deck content to avoid complex joins.
+- **AI** — LLM generates a 3-paragraph summary from the uploaded game log. Must complete within 60 seconds (NFR-2).
+- **Hosting** — Dashboard + API on OSU Node.js server, DB on OSU MySQL. Unity WebGL served statically from `public/Unity/`.
 
-### Backend
-- Node.js + Express (OSU servers) handles API logic and UI rendering
-- Database: MySQL
+HTTPS is required. Photon uses WSS/443 — classroom networks need outbound 443 open.
 
-### Realtime Networking
-- Transport: Photon PUN 2 (Photon Cloud)
-- Authority: Teacher's Unity Client acts as authoritative host for game logic, scoring and timing
-- Backend is used only for storage and AI processing
+### Trust
 
-### AI
-- Generates a 3 paragraph summary from the final Game Log (FR-1)
-- Must complete within 60 seconds after game upload (NFR-2)
-
-### MVP Scale Target
-- Single active teacher session
-- Small classroom scale for testing
-- One game at a time is acceptable for MVP
+- **Trusted:** Node.js backend, MySQL, Teacher Unity client (MVP assumption)
+- **Untrusted:** Student Unity WebGL client
+- The backend does not validate gameplay in MVP. The Teacher client handles scoring and answer validation.
 
 ---
 
-## Nonnegotiable Requirements (SRS)
+### MVP assumptions
 
-FR-1: LLM generates 3-paragraph summary from end-of-game data
-
-NFR-1: real-time sync within 200 ms (managed by Photon)
-
-NFR-2: LLM inference within 60 seconds after game end
-
-NFR-3: server components must fit within OSU student server quotas
-
----
-
-## Hard Assumptions for MVP
-
-- Teacher trust: the Teacher's Unity instance is trusted to calculate scores and validate answers.
-- Single artifact: the game history is stored as a single JSON blob, not normalized SQL tables.
-- No complex auth: teachers use a simple login; students use ephemeral session codes.
-- Offline logic: the backend does not know game state (Lobby vs. In-Game). It only knows when a game log is uploaded.
-
----
-
-## Hosting Topology Target
-
-- Web App (Dashboard + API): OSU Server (Node.js)
-- Database: OSU MySQL Server
-- Unity WebGL: hosted statically within the Node.js public/ folder
-
-Important: Unity WebGL in browser will require HTTPS for many browser features. Photon Cloud uses HTTPS and WSS endpoints, so classroom networks and firewalls must allow outbound 443.
-
----
-
-## System Boundaries and Trust
-
-### Trusted
-- Node.js backend
-- MySQL database
-- Teacher Unity Client for game logic authority (MVP assumption)
-
-### Untrusted
-- Student Unity WebGL client
-
-### Security baseline
-- Backend stores data and AI summaries; it does not validate gameplay in MVP
-- Teacher authentication uses a simple login (session cookie)
+- The Teacher's Unity client is trusted for scores and answer validation
+- Game history is stored as a single JSON blob, not normalized rows
+- No complex auth — teachers log in with a password, students use session codes
+- The backend doesn't track game state (lobby vs. in-game). It only knows when a log is uploaded.
 
 ---
 
 ## Domain Model
 
-Use these terms consistently across code and API contracts.
+Use these names consistently across code and API contracts.
 
-### Session
-- `sessionId` INT/UUID
-- `teacherId` INT/UUID
+**Session**
+- `sessionID` INT
+- `teacherID` INT (FK → User)
+- `deckID` INT (FK → Deck)
+- `deckTitle` STRING — stored directly so reports don't need a join
 - `datePlayed` DATETIME
-- `gameLog` JSON (full history of rounds, answers, scores)
-- `aiSummary` TEXT (3-paragraph report)
+- `roundsPlayed` INT
+- `averageAccuracy` STRING — e.g. `"86%"`
+- `averageResponseTime` STRING — e.g. `"5.4s"`
+- `gameLog` JSON — full round history uploaded by Unity
+- `aiSummary` TEXT — full 3-paragraph block
+- `aiSummaryParagraph1/2/3` TEXT — split for the report view
 
-### User (Teacher)
-- `userId` INT/UUID
+**User (Teacher)**
+- `userID` INT
 - `username` STRING
 - `passwordHash` STRING
 
-### Deck
-- `deckId` INT/UUID
-- `userId` FK
+**Deck**
+- `deckID` INT
+- `userID` FK
 - `title` STRING
-- `content` JSON (array of questions and answers)
+- `content` JSON — array of questions and answers
 
 ---
 
-## Database Schema (MySQL)
+## Database Schema
 
-To reduce overhead, use JSON columns to store structured data, avoiding complex joins.
+### users
+| Column | Type |
+|--------|------|
+| user_id | INT PK |
+| username | VARCHAR(50) |
+| password_hash | VARCHAR(255) |
 
-### Users
-- `user_id` PK
-- `username` VARCHAR(50)
-- `password_hash` VARCHAR(255)
+### decks
+| Column | Type |
+|--------|------|
+| deck_id | INT PK |
+| user_id | INT FK → users |
+| title | VARCHAR(100) |
+| content_json | JSON |
 
-### Decks
-- `deck_id` PK
-- `user_id` FK
-- `title` VARCHAR(100)
-- `content_json` JSON
-
-### Sessions
-- `session_id` PK
-- `user_id` FK
-- `created_at` DATETIME
-- `game_log_json` JSON
-- `ai_summary_text` TEXT
-
----
-
-## API Contracts 
-
-The backend serves HTML pages directly. API endpoints are limited to auth and data upload.
-
-### Web Routes (Browser Navigation)
-- GET / - Login Page
-- GET /dashboard - Teacher Dashboard (list past sessions, start new game)
-- GET /game/play - Serves the Unity WebGL player
-- GET /report/:id - View a specific game report
-
-### Data Routes (JSON)
-
-#### POST /api/login
-Standard auth.
-
-Request:
-- `{ "username": "...", "password": "..." }`
-
-Response:
-- Sets session cookie
-
-#### GET /api/decks
-Used by Unity to fetch questions.
-
-Response:
-- `[ { "id": 1, "title": "Math 101", "content": { ... } } ]`
-
-#### POST /api/upload-log
-Triggered by Unity when the game ends.
-
-Request:
-- `{ "deckId": 1, "log": { ...huge json object... } }`
-
-Action:
-- Saves JSON to Sessions table
-- Triggers async LLM processing
-
-Response:
-- `{ "reportId": 101, "status": "PROCESSING" }`
+### sessions
+| Column | Type |
+|--------|------|
+| session_id | INT PK |
+| user_id | INT FK → users |
+| deck_id | INT FK → decks |
+| deck_title | VARCHAR(255) |
+| created_at | DATETIME |
+| rounds_played | INT |
+| average_accuracy | VARCHAR(10) |
+| average_response_time | VARCHAR(10) |
+| game_log_json | JSON |
+| ai_summary_text | TEXT |
+| ai_summary_paragraph1 | TEXT |
+| ai_summary_paragraph2 | TEXT |
+| ai_summary_paragraph3 | TEXT |
 
 ---
 
-## Realtime Protocol (Photon PUN 2)
+## API
+
+The backend mostly serves HTML. JSON endpoints are limited to auth and game data.
+
+### Page routes
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/` | Login page |
+| GET | `/dashboard` | Teacher dashboard |
+| GET | `/game/play` | Unity WebGL player |
+| GET | `/report/:id` | Game report |
+
+### Data routes
+
+**POST /api/login**
+```json
+{ "username": "...", "password": "..." }
+```
+Sets a session cookie on success.
+
+**GET /api/decks**
+```json
+[ { "id": 1, "title": "Math 101", "content": { ... } } ]
+```
+Used by Unity to load questions before the game starts.
+
+**POST /api/upload-log**
+```json
+{ "deckId": 1, "log": { ... } }
+```
+Triggered by Unity when the game ends. Saves the log and starts async LLM processing.
+```json
+{ "reportId": 101, "status": "PROCESSING" }
+```
+
+---
+
+## Realtime (Photon PUN 2)
 
 Teacher Client = Master Client. Student Client = Peer.
 
-Since the backend is no longer authoritative, the Teacher's Client handles:
+The Teacher client handles:
 - Loading the deck
-- Broadcasting Round Start
-- Receiving Answer Submitted events from students
-- Calculating correctness
-- Sending Round End scores
+- Broadcasting round start
+- Receiving answer events from students
+- Calculating correctness and scores
+- Sending round end results
 
 ---
 
-## AI Report Specification
+## AI Report
 
-The LLM must output exactly three paragraphs. The backend enforces this format.
+The LLM must output exactly 3 paragraphs. The backend enforces this.
 
-### Inputs to LLM
-The final Game Log uploaded by the Teacher client.
+Input: the game log JSON uploaded by the Teacher client after the game ends.
 
-### Failure behavior
-If inference fails or exceeds 60 seconds, store the failure and show a fallback explanation in the report view.
+If inference fails or takes over 60 seconds, the failure is stored and the report view shows a fallback message.
 
 ---
 
-## Repo Structure (Target)
+## Security Note
 
-Use a monorepo to reduce friction.
+Security on this project is currently minimal. The architecture does not include robust security measures at this stage of development.
+
+The primary focus is gameplay mechanics and real-time sync for the presentation. The system uses hardcoded credentials to bypass authentication during testing. We lack cross-site request forgery protection and strict environment routing.
+
+If we want to be more secure for after the demo, you'll need to:
+- Replace hardcoded logins with secure database authentication
+- Add request validation middleware across the Node backend, React web app, and Unity client
+
+---
+
+## Repo Structure
+
+```
+Card-Clash-Repo/
+├── app.js                  # Express server — routes, auth, API
+├── data.js                 # Mock data layer (swap with MySQL queries later)
+├── schema.sql              # MySQL schema and table definitions
+├── package.json
+├── .env                    # Local environment variables (not committed)
+│
+├── certs/                  # Auto-generated self-signed HTTPS cert
+├── node_modules/           # Installed by npm install — do not edit
+│
+├── public/
+│   ├── styles.css
+│   ├── fonts/              # Andika font files
+│   └── Unity/              # Unity WebGL build
+│       ├── index.html
+│       ├── Build/
+│       └── TemplateData/
+│
+├── views/                  # EJS templates
+│   ├── index.ejs           # Landing page
+│   ├── login.ejs           # Teacher login
+│   ├── dashboard.ejs       # Teacher dashboard
+│   ├── deck.ejs            # Deck editor
+│   ├── game.ejs            # Teacher game view
+│   ├── student.ejs         # Student game view
+│   ├── sessions.ejs        # Past sessions list
+│   └── report.ejs          # Session report + AI summary
+│
+└── Documentation/
+    ├── ARCHITECTURE.md
+    ├── SRS.md
+    └── Tasks1-3.docx
+```
+
+---
+
+## Environment Variables (.env)
+
+Create a `.env` file in the project root. It's already in `.gitignore` — never commit it.
+
+```
+SESSION_SECRET=your_super_secret_key   # signs the session cookie — change this to anything long and random
+ADMIN_USERNAME=admin                   # teacher login username
+ADMIN_PASSWORD=password                # teacher login password — change before any real deployment
+NODE_ENV=development                   # set to "production" on the server (enables secure cookies)
+```

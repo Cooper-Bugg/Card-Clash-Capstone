@@ -5,12 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title><%= pageTitle %> | Card Clash</title>
     <link rel="stylesheet" href="/styles.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
   </head>
   <body class="page">
     <div class="background-glow"></div>
@@ -22,7 +16,10 @@
       <nav class="top-nav">
         <a class="nav-link" href="/dashboard">Dashboard</a>
         <a class="nav-link is-active" href="/deck/new">Create Deck</a>
-        <a class="nav-link" href="/">Log Out</a>
+        <a class="nav-link" href="/sessions">Sessions</a>
+        <form method="post" action="/logout" style="margin: 0;">
+          <button class="nav-link nav-link--danger" type="submit">Log Out</button>
+        </form>
       </nav>
     </header>
 
@@ -36,131 +33,22 @@
               Create a New Deck
             <% } %>
           </h1>
-          <p>
-            Provide a title and build questions with answers. The editor will handle the rest automatically.
-          </p>
+          <p>Select a question from the sidebar to edit its properties.</p>
         </div>
-        <a class="btn btn-primary" href="/dashboard">Return to Dashboard</a>
+        <a class="btn btn-primary btn-compact" href="/dashboard">Return to Dashboard</a>
       </section>
 
-      <section class="panel">
-        <div class="panel-header">
-          <h2>Deck Details</h2>
-          <span class="panel-meta">
-            <% if (mode === "edit") { %>
-              Deck <%= deck.id %>
-            <% } else { %>
-              New deck
-            <% } %>
-          </span>
-        </div>
-
-        <%
-          let parsedDeck = null;
-          let questions = [];
-
-          try {
-            parsedDeck = JSON.parse(deck.contentJson || "");
-          } catch (error) {
-            parsedDeck = null;
-          }
-
-          if (parsedDeck && Array.isArray(parsedDeck.questions)) {
-            questions = parsedDeck.questions;
-          }
-
-          if (questions.length === 0) {
-            questions = [
-              {
-                prompt: "",
-                answers: ["", "", "", ""],
-                correctIndex: 0
-              }
-            ];
-          }
-        %>
-
-        <form class="form" method="post" action="/deck">
+      <section class="deck-editor-panel">
+        <form id="deckForm" class="form" method="post" action="/deck">
           <input type="hidden" name="id" value="<%= deck.id || "" %>" />
-          <label class="form-field">
-            <span>Title</span>
-            <input type="text" name="title" value="<%= deck.title %>" />
-          </label>
 
-          <div class="deck-builder" data-deck-builder>
-            <div class="builder-header">
-              <div>
-                <h3>Questions</h3>
-                <p class="builder-subtitle">
-                  Add prompts, answers and the correct option.
-                </p>
-              </div>
-              <button class="btn btn-primary" type="button" data-action="add-question">
-                Add Question
-              </button>
-            </div>
-
-            <div class="questions-list" data-question-list>
-              <% for (let i = 0; i < questions.length; i += 1) { %>
-                <%
-                  const question = questions[i] || {};
-                  const answers = Array.isArray(question.answers) && question.answers.length > 0
-                    ? question.answers
-                    : ["", "", "", ""]; 
-                  const correctIndex = Number.isInteger(question.correctIndex)
-                    ? question.correctIndex
-                    : 0;
-                %>
-                <div class="question-card" data-question-id="<%= i + 1 %>">
-                  <div class="question-header">
-                    <h3 data-question-title="true">Question <%= i + 1 %></h3>
-                    <button class="btn btn-ghost btn-small" type="button" data-action="remove-question">
-                      Remove Question
-                    </button>
-                  </div>
-
-                  <label class="form-field">
-                    <span>Prompt</span>
-                    <input
-                      type="text"
-                      class="question-prompt"
-                      value="<%= question.prompt || "" %>"
-                      placeholder="Enter the question"
-                    />
-                  </label>
-
-                  <div class="answer-section">
-                    <div class="answer-header">
-                      <span>Answers</span>
-                      <button class="btn btn-ghost btn-small" type="button" data-action="add-answer">
-                        Add Answer
-                      </button>
-                    </div>
-                    <div class="answer-list">
-                      <% for (let j = 0; j < answers.length; j += 1) { %>
-                        <div class="answer-row">
-                          <input
-                            class="answer-correct"
-                            type="radio"
-                            name="correct-<%= i + 1 %>"
-                            value="<%= j %>"
-                            <%= j === correctIndex ? "checked" : "" %>
-                          />
-                          <input
-                            class="answer-text"
-                            type="text"
-                            value="<%= answers[j] %>"
-                            placeholder="Answer option"
-                          />
-                          <button class="btn btn-ghost btn-small" type="button" data-action="remove-answer">
-                            Remove
-                          </button>
-                        </div>
-                      <% } %>
-                    </div>
-                  </div>
-                </div>
-              <% } %>
+          <div class="panel-header">
+            <label class="form-field" style="width: 100%; max-width: 400px; margin: 0;">
+              <span>Deck Title</span>
+              <input type="text" name="title" value="<%= deck.title %>" required />
+            </label>
+            <div class="form-actions" style="margin-top: 0;">
+              <button class="btn btn-primary" type="submit">Save Deck</button>
             </div>
           </div>
 
@@ -170,369 +58,229 @@
             class="visually-hidden"
           ><%= deck.contentJson %></textarea>
 
-          <div class="form-actions">
-            <button class="btn btn-primary" type="submit">Save Deck</button>
-            <a class="btn btn-ghost" href="/dashboard">Cancel</a>
+          <div class="deck-editor-layout">
+            <aside class="editor-sidebar">
+              <div class="sidebar-header">
+                <h3>Questions</h3>
+                <button type="button" id="addQuestionBtn" class="btn btn-primary btn-compact">Add</button>
+              </div>
+              <div id="questionList" class="question-nav-list"></div>
+            </aside>
+
+            <section id="questionDetail" class="editor-detail"></section>
           </div>
         </form>
       </section>
     </main>
 
     <script>
-        
-      /*
-      Building answer rows for each question.
-      We need this to create those radio button + text input combos you see for each answer.
-      The radio button lets you mark which answer is correct, and the text input is where
-      you type the actual answer. We also add a remove button so you can delete answers later.
-      */
-      function createAnswerRow(questionId, answerText, answerIndex, correctIndex) {
-        const row = document.createElement("div");
-        row.className = "answer-row";
+      const jsonField = document.getElementById("contentJson");
+      const questionListContainer = document.getElementById("questionList");
+      const questionDetailContainer = document.getElementById("questionDetail");
+      const addQuestionBtn = document.getElementById("addQuestionBtn");
 
-        const radio = document.createElement("input");
-        radio.type = "radio";
-        radio.name = `correct-${questionId}`;
-        radio.value = String(answerIndex);
-        radio.className = "answer-correct";
-        radio.checked = answerIndex === correctIndex;
-
-        const input = document.createElement("input");
-        input.type = "text";
-        input.className = "answer-text";
-        input.value = answerText || "";
-        input.placeholder = "Answer option";
-
-        const removeButton = document.createElement("button");
-        removeButton.type = "button";
-        removeButton.className = "btn btn-ghost btn-small";
-        removeButton.textContent = "Remove";
-        removeButton.dataset.action = "remove-answer";
-
-        row.append(radio, input, removeButton);
-        return row;
-      }
+      let deckData = { questions: [] };
+      let activeIndex = 0;
 
       /*
-      Fixing answer numbers after you add or remove answers.
-      When you delete an answer, the remaining ones need to get renumbered so the radio buttons
-      still work properly. Otherwise you might end up with answer 0, 2, 4 instead of 0, 1, 2
-      which would break the correct answer tracking.
+      Initializes the application state from the hidden JSON payload provided by the server.
+      Sets a default empty question if the parsed array is empty to prevent a blank interface.
       */
-      function renumberAnswers(questionCard) {
-        const rows = questionCard.querySelectorAll(".answer-row");
-        for (let i = 0; i < rows.length; i += 1) {
-          const radio = rows[i].querySelector(".answer-correct");
-          radio.value = String(i);
+      function loadInitialData() {
+        try {
+          const parsed = JSON.parse(jsonField.value);
+          if (parsed && Array.isArray(parsed.questions)) {
+            deckData.questions = parsed.questions;
+          }
+        } catch (error) {
+          console.warn("Failed to parse initial deck JSON. Defaulting to empty array.");
+        }
+
+        if (deckData.questions.length === 0) {
+          appendEmptyQuestion();
         }
       }
 
       /*
-      Keeping question titles numbered correctly.
-      If you delete Question 2 out of 5 questions, we need to update the titles so they go
-      1, 2, 3, 4 instead of showing 1, 3, 4, 5. This just makes the UI less confusing when
-      you're building your deck.
+      Serializes the current state back to the hidden textarea.
+      This ensures the server receives the most up-to-date data upon form submission.
       */
-      function renumberQuestions(questionList) {
-        const cards = questionList.querySelectorAll(".question-card");
-        for (let i = 0; i < cards.length; i += 1) {
-          const title = cards[i].querySelector("[data-question-title]");
-          title.textContent = `Question ${i + 1}`;
+      function syncDataToField() {
+        jsonField.value = JSON.stringify(deckData, null, 2);
+      }
+
+      /*
+      Pushes a structured empty question object to the state array.
+      */
+      function appendEmptyQuestion() {
+        deckData.questions.push({
+          questionText: "",
+          optionA: "",
+          optionB: "",
+          optionC: "",
+          optionD: "",
+          correctAnswer: "A"
+        });
+      }
+
+      /*
+      Handles the logic for modifying data properties of the currently active question.
+      Triggers a data sync immediately after mutation.
+      */
+      function updateActiveQuestionProperty(key, value) {
+        if (deckData.questions[activeIndex]) {
+          deckData.questions[activeIndex][key] = value;
+          syncDataToField();
         }
       }
 
       /*
-      Building a complete question card with all its parts.
-      Each question needs a prompt input, a list of answer rows and buttons to add/remove stuff.
-      This function creates the whole card structure from scratch so we can add new questions
-      dynamically when you click the "Add Question" button.
+      Deletes a question from the array based on its index.
+      Adjusts the active index to prevent out-of-bounds rendering errors.
       */
-      function createQuestionCard(questionId, data) {
-        const card = document.createElement("div");
-        card.className = "question-card";
-        card.dataset.questionId = String(questionId);
+      function removeQuestion(indexToRemove) {
+        deckData.questions.splice(indexToRemove, 1);
 
-        const header = document.createElement("div");
-        header.className = "question-header";
+        if (deckData.questions.length === 0) {
+          appendEmptyQuestion();
+          activeIndex = 0;
+        } else if (activeIndex >= deckData.questions.length) {
+          activeIndex = deckData.questions.length - 1;
+        } else if (activeIndex === indexToRemove) {
+          activeIndex = Math.max(0, indexToRemove - 1);
+        }
 
-        const title = document.createElement("h3");
-        title.dataset.questionTitle = "true";
-        title.textContent = "Question";
+        syncDataToField();
+        renderInterface();
+      }
 
-        const removeButton = document.createElement("button");
-        removeButton.type = "button";
-        removeButton.className = "btn btn-ghost btn-small";
-        removeButton.textContent = "Remove Question";
-        removeButton.dataset.action = "remove-question";
+      /*
+      Generates the navigation buttons within the left sidebar.
+      Attaches click listeners to update the active index and refresh the detail view.
+      */
+      function renderSidebar() {
+        questionListContainer.innerHTML = "";
 
-        header.append(title, removeButton);
+        for (let i = 0; i < deckData.questions.length; i += 1) {
+          const navItem = document.createElement("button");
+          navItem.type = "button";
+          navItem.className = "question-nav-item";
+          if (i === activeIndex) {
+            navItem.classList.add("is-active");
+          }
+          navItem.textContent = `Question ${i + 1}`;
+          navItem.addEventListener("click", () => {
+            activeIndex = i;
+            renderInterface();
+          });
+          questionListContainer.appendChild(navItem);
+        }
+      }
+
+      /*
+      Generates the input form for the currently selected question in the right pane.
+      Binds input events directly to the state management functions.
+      */
+      function renderDetailPane() {
+        questionDetailContainer.innerHTML = "";
+
+        const currentQuestion = deckData.questions[activeIndex];
+        if (!currentQuestion) {
+          questionDetailContainer.innerHTML = `<div class="editor-empty-state">No question selected.</div>`;
+          return;
+        }
+
+        const headerDiv = document.createElement("div");
+        headerDiv.className = "question-header";
+
+        const title = document.createElement("h2");
+        title.textContent = `Editing Question ${activeIndex + 1}`;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "btn btn-primary btn-compact";
+        removeBtn.textContent = "Delete Question";
+        removeBtn.addEventListener("click", () => removeQuestion(activeIndex));
+
+        headerDiv.appendChild(title);
+        headerDiv.appendChild(removeBtn);
 
         const promptLabel = document.createElement("label");
         promptLabel.className = "form-field";
-
-        const promptLabelText = document.createElement("span");
-        promptLabelText.textContent = "Prompt";
-
+        const promptSpan = document.createElement("span");
+        promptSpan.textContent = "Question Prompt";
         const promptInput = document.createElement("input");
         promptInput.type = "text";
-        promptInput.className = "question-prompt";
-        promptInput.value = data.prompt || "";
-        promptInput.placeholder = "Enter the question";
+        promptInput.value = currentQuestion.questionText;
+        promptInput.addEventListener("input", (e) => updateActiveQuestionProperty("questionText", e.target.value));
+        promptLabel.appendChild(promptSpan);
+        promptLabel.appendChild(promptInput);
 
-        promptLabel.append(promptLabelText, promptInput);
+        questionDetailContainer.appendChild(headerDiv);
+        questionDetailContainer.appendChild(promptLabel);
+
+        const options = ["A", "B", "C", "D"];
+        const optionKeys = ["optionA", "optionB", "optionC", "optionD"];
 
         const answerSection = document.createElement("div");
         answerSection.className = "answer-section";
 
         const answerHeader = document.createElement("div");
         answerHeader.className = "answer-header";
-
-        const answerTitle = document.createElement("span");
-        answerTitle.textContent = "Answers";
-
-        const addAnswerButton = document.createElement("button");
-        addAnswerButton.type = "button";
-        addAnswerButton.className = "btn btn-ghost btn-small";
-        addAnswerButton.textContent = "Add Answer";
-        addAnswerButton.dataset.action = "add-answer";
-
-        answerHeader.append(answerTitle, addAnswerButton);
+        answerHeader.textContent = "Answer Options";
+        answerSection.appendChild(answerHeader);
 
         const answerList = document.createElement("div");
         answerList.className = "answer-list";
 
-        const answers = Array.isArray(data.answers) && data.answers.length > 0
-          ? data.answers
-          : ["", "", "", ""];
+        for (let j = 0; j < options.length; j += 1) {
+          const rowDiv = document.createElement("div");
+          rowDiv.className = "answer-row";
 
-        for (let i = 0; i < answers.length; i += 1) {
-          const row = createAnswerRow(questionId, answers[i], i, data.correctIndex || 0);
-          answerList.append(row);
+          const radioInput = document.createElement("input");
+          radioInput.type = "radio";
+          radioInput.name = "correctAnswerSelect";
+          radioInput.value = options[j];
+          radioInput.checked = currentQuestion.correctAnswer === options[j];
+          radioInput.addEventListener("change", (e) => updateActiveQuestionProperty("correctAnswer", e.target.value));
+
+          const letterSpan = document.createElement("span");
+          letterSpan.className = "answer-label";
+          letterSpan.textContent = options[j];
+
+          const textInput = document.createElement("input");
+          textInput.type = "text";
+          textInput.value = currentQuestion[optionKeys[j]];
+          textInput.addEventListener("input", (e) => updateActiveQuestionProperty(optionKeys[j], e.target.value));
+
+          rowDiv.appendChild(radioInput);
+          rowDiv.appendChild(letterSpan);
+          rowDiv.appendChild(textInput);
+          answerList.appendChild(rowDiv);
         }
 
-        answerSection.append(answerHeader, answerList);
-        card.append(header, promptLabel, answerSection);
-        return card;
+        answerSection.appendChild(answerList);
+        questionDetailContainer.appendChild(answerSection);
       }
 
       /*
-      Grabbing all the question data from the form.
-      We loop through every question card and pull out the prompt, all the answers,
-      and which answer is marked correct. We package it all up into a nice object
-      that we can convert to JSON for the backend.
+      Coordinates the complete UI refresh sequence.
       */
-      function collectQuestions(questionList) {
-        const cards = questionList.querySelectorAll(".question-card");
-        const questions = [];
-
-        for (let i = 0; i < cards.length; i += 1) {
-          const card = cards[i];
-          const prompt = card.querySelector(".question-prompt").value.trim();
-          const answerInputs = card.querySelectorAll(".answer-text");
-          const answers = [];
-
-          for (let j = 0; j < answerInputs.length; j += 1) {
-            answers.push(answerInputs[j].value.trim());
-          }
-
-          const checked = card.querySelector(".answer-correct:checked");
-          const correctIndex = checked ? Number.parseInt(checked.value, 10) : 0;
-
-          questions.push({
-            prompt,
-            answers,
-            correctIndex
-          });
-        }
-
-        return { questions };
+      function renderInterface() {
+        renderSidebar();
+        renderDetailPane();
       }
 
-      /*
-      Keeping the hidden JSON field updated.
-      Every time you change something in the builder, we need to grab all the current data
-      and update the hidden textarea. That way when you submit the form, the server gets
-      the latest version of your deck.
-      */
-      function syncJsonOutput(questionList, jsonField) {
-        const payload = collectQuestions(questionList);
-        const prettyJson = JSON.stringify(payload, null, 2);
-        jsonField.value = prettyJson;
-      }
+      addQuestionBtn.addEventListener("click", () => {
+        appendEmptyQuestion();
+        activeIndex = deckData.questions.length - 1;
+        syncDataToField();
+        renderInterface();
+      });
 
-      /*
-      Adding a new question to the deck builder.
-      This creates a new question card using the data you provide or blank if you're starting
-      fresh, adds it to the list, and renumbers everything so the titles stay accurate.
-      */
-      function addQuestionCard(questionList, questionId, data) {
-        const card = createQuestionCard(questionId, data);
-        questionList.append(card);
-        renumberQuestions(questionList);
-        return card;
-      }
-
-      /*
-      Handling all the button clicks in the builder.
-      We use event delegation here, so one click handler manages all the buttons. We check
-      the data-action attribute to figure out what you clicked (add question, remove answer, etc.)
-      and then do the right thing. Way cleaner than attaching separate listeners to every button.
-      */
-      function handleBuilderClick(event, state) {
-        const action = event.target.dataset.action;
-        if (!action) {
-          return;
-        }
-
-        if (action === "add-question") {
-          state.nextQuestionId += 1;
-          addQuestionCard(state.questionList, state.nextQuestionId, {
-            prompt: "",
-            answers: ["", "", "", ""],
-            correctIndex: 0
-          });
-          syncJsonOutput(state.questionList, state.jsonField);
-        }
-
-        if (action === "remove-question") {
-          const card = event.target.closest(".question-card");
-          if (card) {
-            card.remove();
-            renumberQuestions(state.questionList);
-            syncJsonOutput(state.questionList, state.jsonField);
-          }
-        }
-
-        if (action === "add-answer") {
-          const card = event.target.closest(".question-card");
-          if (!card) {
-            return;
-          }
-
-          const questionId = Number.parseInt(card.dataset.questionId, 10);
-          const answerList = card.querySelector(".answer-list");
-          const answerIndex = answerList.querySelectorAll(".answer-row").length;
-          const row = createAnswerRow(questionId, "", answerIndex, 0);
-          answerList.append(row);
-          renumberAnswers(card);
-          syncJsonOutput(state.questionList, state.jsonField);
-        }
-
-        if (action === "remove-answer") {
-          const card = event.target.closest(".question-card");
-          const row = event.target.closest(".answer-row");
-          if (!card || !row) {
-            return;
-          }
-
-          row.remove();
-          renumberAnswers(card);
-          syncJsonOutput(state.questionList, state.jsonField);
-        }
-      }
-
-      /*
-      Listening for any typing in the builder.
-      Whenever you type in a prompt or answer field, we update the JSON immediately so it stays
-      in sync. That way if you submit the form, you don't lose any changes.
-      */
-      function handleBuilderInput(event, state) {
-        if (event.target.matches("input, textarea")) {
-          syncJsonOutput(state.questionList, state.jsonField);
-        }
-      }
-
-      /*
-      Setting up the deck builder when the page loads.
-      We grab all the important DOM elements, check if there are existing questions (like if
-      you're editing a deck), or create a blank one if you're starting fresh. Then we attach
-      all the event listeners so the buttons actually work.
-      */
-      function initializeDeckBuilder() {
-        const builder = document.querySelector("[data-deck-builder]");
-        const questionList = document.querySelector("[data-question-list]");
-        const jsonField = document.getElementById("contentJson");
-
-        if (!builder || !questionList || !jsonField) {
-          return;
-        }
-
-        const existingCards = questionList.querySelectorAll(".question-card");
-        let nextQuestionId = existingCards.length;
-
-        if (nextQuestionId === 0) {
-          nextQuestionId = 1;
-          addQuestionCard(questionList, nextQuestionId, {
-            prompt: "",
-            answers: ["", "", "", ""],
-            correctIndex: 0
-          });
-        }
-
-        deckBuilderState = createBuilderState({
-          builder,
-          questionList,
-          jsonField,
-          nextQuestionId
-        });
-
-        builder.addEventListener("click", handleBuilderClickEvent);
-        builder.addEventListener("input", handleBuilderInputEvent);
-        builder.addEventListener("change", handleBuilderInputEvent);
-
-        renumberQuestions(questionList);
-        syncJsonOutput(questionList, jsonField);
-      }
-
-      let deckBuilderState = null;
-
-      /*
-      Creating a state object to share across all the handlers.
-      Instead of making every function grab the DOM elements itself, we bundle them up once
-      and pass them around. Keeps things organized and means we only query the DOM once
-      instead of every time we need something.
-      */
-      function createBuilderState({
-        builder,
-        questionList,
-        jsonField,
-        nextQuestionId
-      }) {
-        return {
-          builder,
-          questionList,
-          jsonField,
-          nextQuestionId
-        };
-      }
-
-      /*
-      Wrapper for click events to pass along the state.
-      We need this because addEventListener doesn't let us pass extra arguments to the handler.
-      So this grabs the event and the state, then calls the real handler with both.
-      */
-      function handleBuilderClickEvent(event) {
-        if (!deckBuilderState) {
-          return;
-        }
-
-        handleBuilderClick(event, deckBuilderState);
-      }
-
-      /*
-      Wrapper for input events to pass along the state.
-      Same deal as the click wrapper - we need to pass the state object to the handler,
-      so this function acts as a middleman between the DOM event and our actual logic.
-      */
-      function handleBuilderInputEvent(event) {
-        if (!deckBuilderState) {
-          return;
-        }
-
-        handleBuilderInput(event, deckBuilderState);
-      }
-
-      initializeDeckBuilder();
+      loadInitialData();
+      renderInterface();
+      syncDataToField();
     </script>
   </body>
 </html>

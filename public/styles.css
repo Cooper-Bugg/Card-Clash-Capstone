@@ -1,19 +1,55 @@
 /*
+Local font: Andika by SIL International.
+Loaded from public/fonts/Andika so we don't need the Google Fonts API.
+All four weights are declared so bold and italic render correctly.
+*/
+@font-face {
+  font-family: "Andika";
+  src: url("/fonts/Andika/Andika-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Andika";
+  src: url("/fonts/Andika/Andika-Italic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Andika";
+  src: url("/fonts/Andika/Andika-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Andika";
+  src: url("/fonts/Andika/Andika-BoldItalic.ttf") format("truetype");
+  font-weight: 700;
+  font-style: italic;
+}
+
+/*
 Colors and basic setup for the whole site.
 We're defining all our colors here so we can use them everywhere. 
 We also reset the box model so buttons, inputs 
 and containers size themselves predictably without weird surprises.
 */
 :root {
-  --sand: #f6efe6;
-  --peach: #f1d3b5;
-  --ink: #1f1b16;
-  --teal: #1f6e6a;
-  --teal-dark: #114b49;
-  --coral: #e0684d;
-  --gold: #f2c76e;
-  --panel: rgba(255, 255, 255, 0.86);
-  --shadow: 0 20px 60px rgba(20, 16, 12, 0.18);
+  --sand: #F1FAEE;
+  --peach: #F1FAEE;
+  --ink: #111111;
+  --blue: #1D3557;
+  --blue-dark: #14253d;
+  --teal: #1D3557;
+  --teal-dark: #14253d;
+  --coral: #E63946;
+  --gold: #FFC300;
+  --gold-dark: #b38a00;
+  --panel: rgba(241, 250, 238, 0.92);
+  --shadow: 0 20px 60px rgba(29, 53, 87, 0.18);
   --radius: 20px;
 }
 
@@ -23,9 +59,9 @@ and containers size themselves predictably without weird surprises.
 
 body {
   margin: 0;
-  font-family: "Nunito", "Segoe UI", sans-serif;
+  font-family: "Andika", "Segoe UI", sans-serif;
   color: var(--ink);
-  background: #fff;
+  background: var(--sand);
   min-height: 100vh;
 }
 
@@ -40,9 +76,121 @@ centers everything vertically to make the form look centered on the screen.
   padding-bottom: 60px;
 }
 
+/* Dashboard fills the full viewport height; panels extend to the bottom and scroll */
+.page-dashboard {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+}
+
+.page-dashboard .page-shell {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding-bottom: 24px;
+}
+
+.page-dashboard .grid {
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
+}
+
+.page-dashboard .grid > .panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  margin-top: 10px;
+  padding-bottom: 10px;
+}
+
+.page-dashboard .card-stack--decks,
+.page-dashboard .card-stack--sessions {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+}
+
 .page-login {
+  min-height: 100vh;
+  position: relative;
+  display: block;
+  padding-bottom: 0;
+}
+
+.page-home {
+  min-height: 100vh;
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  padding-right: 50%;
+}
+
+.page-home .page-shell {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.home-panel {
+  max-width: 480px;
+  width: 100%;
+}
+
+.login-midline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: var(--blue);
+  z-index: 0;
+}
+
+.login-layout {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  display: flex;
+  align-items: flex-start;
+  z-index: 1;
+}
+
+.login-brand {
+  flex: 0 0 25%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  transform: translateY(-100%);
+  padding-bottom: 14px;
+}
+
+.login-brand .brand-title {
+  font-size: 4rem;
+}
+
+.page-login .page-shell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 40px;
+}
+
+.login-panel .form-field span {
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.login-panel > div > p {
+  color: var(--gold);
+  font-weight: 600;
 }
 
 .background-glow {
@@ -61,69 +209,122 @@ to show which page you're currently on.
 .top-bar {
   position: relative;
   z-index: 1;
-  padding: 28px 2vw 12px;
+  padding: 20px 2vw 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
+  border-bottom: 2px solid var(--blue);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
 }
 
 .brand-title {
-  font-family: "Nunito", "Segoe UI", sans-serif;
-  font-size: 1.6rem;
-  letter-spacing: 0.03em;
-  font-weight: 700;
+  font-family: "Andika", "Segoe UI", sans-serif;
+  font-size: 3.5rem;
+  letter-spacing: 0.04em;
+  font-weight: 800;
+  color: var(--blue);
+  line-height: 1;
 }
 
 .brand-subtitle {
-  font-size: 0.9rem;
-  color: rgba(31, 27, 22, 0.6);
-  font-weight: 600;
+  font-size: 1.25rem;
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .top-nav {
   display: flex;
   gap: 12px;
+  align-items: center;
 }
 
 .nav-link {
   text-decoration: none;
   color: var(--ink);
-  padding: 8px 14px;
+  padding: 9px 18px;
   border-radius: 999px;
-  border: 1px solid rgba(31, 27, 22, 0.2);
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(29, 53, 87, 0.2);
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: rgba(241, 250, 238, 0.9);
   position: relative;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 3px 0 rgba(31, 27, 22, 0.15);
+  box-shadow: 0 3px 0 rgba(29, 53, 87, 0.2);
   transform: translateY(0);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  font-family: inherit;
 }
 
-.nav-link:hover {
+.nav-link:hover,
+.nav-link:focus-visible {
+  background: var(--blue);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 0 var(--gold-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 0 rgba(31, 27, 22, 0.15);
 }
 
 .nav-link:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 rgba(31, 27, 22, 0.15);
+  box-shadow: 0 1px 0 var(--gold-dark);
+  background: var(--blue-dark);
+  color: #fff;
+  border-color: transparent;
 }
 
 .nav-link.is-active {
-  background: var(--teal);
+  background: var(--blue);
   color: #fff;
   border-color: transparent;
-  box-shadow: 0 3px 0 var(--teal-dark);
+  box-shadow: 0 3px 0 var(--gold-dark);
 }
 
-.nav-link.is-active:hover {
-  box-shadow: 0 4px 0 var(--teal-dark);
+.nav-link.is-active:hover,
+.nav-link.is-active:focus-visible {
+  box-shadow: 0 4px 0 var(--gold-dark);
+  transform: translateY(-1px);
 }
 
 .nav-link.is-active:active {
-  box-shadow: 0 1px 0 var(--teal-dark);
+  box-shadow: 0 1px 0 var(--gold-dark);
+  transform: translateY(2px);
+}
+
+/* Red hover for Log Out and Back buttons */
+.nav-link--danger:hover,
+.nav-link--danger:focus-visible {
+  background: var(--coral);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 0 #a0252b;
+  transform: translateY(-1px);
+}
+
+.nav-link--danger:active {
+  background: #c0313a;
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 1px 0 #a0252b;
+  transform: translateY(2px);
+}
+
+/* Make sure button elements using .nav-link look identical to anchor elements */
+button.nav-link {
+  background: rgba(241, 250, 238, 0.9);
+  border: 1px solid rgba(29, 53, 87, 0.2);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: inherit;
 }
 
 /*
@@ -145,8 +346,16 @@ so it looks good on phones and desktops without needing different designs.
   background: var(--panel);
   border-radius: var(--radius);
   padding: 24px 28px;
-  box-shadow: var(--shadow);
-  border: 1px solid rgba(31, 27, 22, 0.08);
+  border: 2px solid rgba(29, 53, 87, 0.35);
+  box-shadow: 0 4px 16px rgba(29, 53, 87, 0.10);
+}
+
+.deck-editor-panel {
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 12px 28px 24px;
+  border: 2px solid rgba(29, 53, 87, 0.35);
+  box-shadow: 0 4px 16px rgba(29, 53, 87, 0.10);
 }
 
 .hero-panel {
@@ -154,25 +363,38 @@ so it looks good on phones and desktops without needing different designs.
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 12px;
+  padding: 16px 24px;
 }
 
 .hero-panel h1 {
-  margin: 0 0 10px;
-  font-family: "Nunito", "Segoe UI", sans-serif;
-  font-size: clamp(2rem, 3vw, 2.8rem);
+  margin: 0 0 4px;
+  font-family: "Andika", "Segoe UI", sans-serif;
+  font-size: clamp(1.5rem, 3vw, 1.8rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--blue);
 }
 
 .hero-panel p {
   margin: 0;
   max-width: 520px;
-  color: rgba(31, 27, 22, 0.75);
+  color: rgba(17, 17, 17, 0.75);
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .login-panel {
-  margin: 0 auto;
   max-width: 560px;
+  background: #F1FAEE;
+  transform: translateY(calc(-50% + 50px));
+}
+
+.login-panel h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--blue);
+  margin-bottom: 8px;
 }
 
 .grid {
@@ -190,13 +412,13 @@ so it looks good on phones and desktops without needing different designs.
 
 .panel-header h2 {
   margin: 0;
-  font-family: "Nunito", "Segoe UI", sans-serif;
+  font-family: "Andika", "Segoe UI", sans-serif;
   font-size: 1.5rem;
 }
 
 .panel-meta {
   font-size: 0.9rem;
-  color: rgba(31, 27, 22, 0.6);
+  color: rgba(17, 17, 17, 0.6);
 }
 
 /*
@@ -211,14 +433,47 @@ and .card-kicker shows small details like dates at the bottom.
   gap: 18px;
 }
 
+/* Quiz Decks: show 3 cards then scroll */
+.card-stack--decks {
+  max-height: calc(3 * 148px + 2 * 18px);
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* Recent Sessions: show 2 cards then scroll */
+.card-stack--sessions {
+  max-height: calc(2 * 230px + 1 * 18px);
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* Subtle custom scrollbar for both stacks */
+.card-stack--decks::-webkit-scrollbar,
+.card-stack--sessions::-webkit-scrollbar {
+  width: 6px;
+}
+.card-stack--decks::-webkit-scrollbar-track,
+.card-stack--sessions::-webkit-scrollbar-track {
+  background: transparent;
+}
+.card-stack--decks::-webkit-scrollbar-thumb,
+.card-stack--sessions::-webkit-scrollbar-thumb {
+  background: rgba(29, 53, 87, 0.3);
+  border-radius: 3px;
+}
+.card-stack--decks::-webkit-scrollbar-thumb:hover,
+.card-stack--sessions::-webkit-scrollbar-thumb:hover {
+  background: rgba(29, 53, 87, 0.6);
+}
+
 .card {
-  background: #fff;
+  background: #F1FAEE;
   border-radius: 16px;
   padding: 18px 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  border: 1px solid rgba(31, 27, 22, 0.08);
+  border: 1px solid rgba(29, 53, 87, 0.35);
 }
 
 .card h3 {
@@ -228,7 +483,7 @@ and .card-kicker shows small details like dates at the bottom.
 
 .card p {
   margin: 0;
-  color: rgba(31, 27, 22, 0.7);
+  color: rgba(17, 17, 17, 0.7);
 }
 
 .card-actions {
@@ -239,7 +494,7 @@ and .card-kicker shows small details like dates at the bottom.
 
 .card-kicker {
   font-size: 0.85rem;
-  color: rgba(31, 27, 22, 0.6);
+  color: rgba(17, 17, 17, 0.6);
 }
 
 .summary {
@@ -265,7 +520,7 @@ based on screen width so they're always easy to read.
 .metric-label {
   display: block;
   font-size: 0.8rem;
-  color: rgba(31, 27, 22, 0.6);
+  color: rgba(17, 17, 17, 0.6);
 }
 
 .metric-value {
@@ -275,9 +530,8 @@ based on screen width so they're always easy to read.
 
 /*
 Buttons and clickable things.
-.btn is the base button style with a pill shape. .btn-primary is the main action
-button in teal. .btn-ghost is a lighter version for secondary actions. .btn-small
-makes buttons smaller when you need them to take up less space.
+.btn is the base button style with a pill shape. All buttons start white and
+turn blue on hover. .btn-small makes buttons smaller when needed.
 */
 .btn {
   display: inline-flex;
@@ -287,79 +541,59 @@ makes buttons smaller when you need them to take up less space.
   padding: 10px 18px;
   border-radius: 999px;
   font-weight: 600;
+  font-size: 1rem;
   border: 1px solid transparent;
   text-decoration: none;
   cursor: pointer;
   font-family: inherit;
-}
-
-.btn-primary {
-  background: var(--teal);
-  color: #fff;
-  border-color: var(--teal-dark);
-}
-
-.btn-ghost {
-  background: #fff;
-  color: var(--ink);
-  border-color: rgba(31, 27, 22, 0.2);
-}
-
-.btn-small {
-  padding: 6px 12px;
-  font-size: 0.9rem;
-}
-
-/*
-Tactile Button Upgrades
-Adds movement and depth to the existing button classes.
-We use a 3px shadow that compresses to 1px on click.
-*/
-.btn {
   position: relative;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
 }
 
-/*
-Primary Button: Teal
-Uses the existing --teal-dark variable for the shadow color
-to ensure it matches the border.
-*/
 .btn-primary {
-  box-shadow: 0 3px 0 var(--teal-dark);
+  background: #F1FAEE;
+  color: var(--blue);
+  border-color: rgba(29, 53, 87, 0.35);
+  box-shadow: 0 3px 0 rgba(29, 53, 87, 0.2);
   transform: translateY(0);
 }
 
-.btn-primary:hover {
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 0 var(--teal-dark);
+  box-shadow: 0 4px 0 var(--gold-dark);
 }
 
 .btn-primary:active {
+  background: var(--blue-dark);
+  color: #fff;
+  border-color: var(--blue-dark);
   transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--teal-dark);
+  box-shadow: 0 1px 0 var(--gold-dark);
 }
 
-/*
-Ghost Button: White
-Uses a semi-transparent ink color for the shadow to keep
-it subtle against the light background.
-*/
-.btn-ghost {
-  box-shadow: 0 3px 0 rgba(31, 27, 22, 0.2);
-  transform: translateY(0);
+/* Danger override: Back to Home turns red on hover */
+.btn-primary.nav-link--danger:hover,
+.btn-primary.nav-link--danger:focus-visible {
+  background: var(--coral);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 0 #a0252b;
 }
 
-.btn-ghost:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 0 rgba(31, 27, 22, 0.2);
-  background: #fff;
+.btn-primary.nav-link--danger:active {
+  background: #c0313a;
+  color: #fff;
+  box-shadow: 0 1px 0 #a0252b;
 }
 
-.btn-ghost:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 rgba(31, 27, 22, 0.2);
+.btn-small {
+  padding: 6px 12px;
+  font-size: 0.9rem;
 }
 
 /*
@@ -385,16 +619,51 @@ friendly feel of the rest of the app.
 .form-field input,
 .form-field textarea {
   border-radius: 12px;
-  border: 1px solid rgba(31, 27, 22, 0.2);
+  border: 1px solid rgba(29, 53, 87, 0.2);
   padding: 10px 12px;
   font-size: 1rem;
   font-family: inherit;
+  background: #F1FAEE;
+  color: var(--ink);
 }
 
 .form-actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+/*
+Password reveal wrapper.
+Wraps the password input and the eye toggle button together so the button
+sits inside the right edge of the input without shifting the layout.
+*/
+.input-reveal {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-reveal input {
+  width: 100%;
+  padding-right: 44px;
+}
+
+.input-reveal-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(17, 17, 17, 0.45);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+
+.input-reveal-btn:hover {
+  color: var(--blue);
 }
 
 /*
@@ -419,7 +688,7 @@ You can add or remove answers dynamically without breaking the layout.
 
 .builder-subtitle {
   margin: 4px 0 0;
-  color: rgba(31, 27, 22, 0.65);
+  color: rgba(17, 17, 17, 0.65);
 }
 
 .questions-list {
@@ -429,10 +698,10 @@ You can add or remove answers dynamically without breaking the layout.
 }
 
 .question-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(241, 250, 238, 0.97);
   border-radius: 16px;
   padding: 18px;
-  border: 1px solid rgba(31, 27, 22, 0.1);
+  border: 1px solid rgba(29, 53, 87, 0.35);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -467,13 +736,135 @@ You can add or remove answers dynamically without breaking the layout.
 
 .answer-row {
   display: grid;
-  grid-template-columns: 20px 1fr auto;
+  grid-template-columns: 20px 24px 1fr;
   gap: 10px;
   align-items: center;
 }
 
+.answer-label {
+  font-weight: bold;
+  color: var(--blue);
+  font-size: 0.95rem;
+  text-align: center;
+}
+
 .answer-row input[type="text"] {
   width: 100%;
+}
+
+/*
+Two-panel master-detail layout for the deck editor.
+The sidebar lists all questions; the detail pane shows the selected one.
+*/
+.deck-editor-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  align-items: start;
+  margin-top: 16px;
+}
+
+.editor-sidebar {
+  background: var(--panel);
+  border: 1px solid rgba(29, 53, 87, 0.35);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  height: 520px;
+  overflow: hidden;
+}
+
+.sidebar-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(29, 53, 87, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+.question-nav-list {
+  list-style: none;
+  padding: 10px;
+  margin: 0;
+  overflow-y: auto;
+  flex-grow: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.question-nav-item {
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  background: #F1FAEE;
+  border: 1px solid rgba(29, 53, 87, 0.25);
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--ink);
+  transition: all 0.15s ease;
+}
+
+.question-nav-item:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.question-nav-item.is-active {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue-dark);
+  box-shadow: 0 3px 0 var(--gold-dark);
+}
+
+.editor-detail {
+  background: var(--panel);
+  border: 1px solid rgba(29, 53, 87, 0.35);
+  border-radius: var(--radius);
+  padding: 24px;
+  height: 520px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.editor-empty-state {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  color: rgba(17, 17, 17, 0.5);
+  font-style: italic;
+}
+
+.editor-detail .question-header {
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(29, 53, 87, 0.15);
+  margin-bottom: 4px;
+}
+
+.editor-detail .question-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--blue);
+}
+
+.btn-compact {
+  padding: 6px 14px;
+  font-size: 0.9rem;
 }
 
 /*
@@ -482,10 +873,10 @@ We embed the Unity game in an iframe. The dark background makes the game stand o
 The fixed height keeps it consistent across devices and removes the default iframe border.
 */
 .unity-frame {
-  background: #0f1c1b;
+  background: #1D3557;
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(15, 28, 27, 0.4);
+  border: 1px solid rgba(29, 53, 87, 0.5);
   min-height: 420px;
 }
 
@@ -497,7 +888,7 @@ The fixed height keeps it consistent across devices and removes the default ifra
 
 .helper-text {
   margin-top: 14px;
-  color: rgba(31, 27, 22, 0.6);
+  color: rgba(17, 17, 17, 0.6);
 }
 
 /*
@@ -508,17 +899,114 @@ and find what you need to improve.
 */
 .summary-body p {
   margin: 0 0 16px;
-  color: rgba(31, 27, 22, 0.8);
+  color: rgba(17, 17, 17, 0.8);
 }
 
 .note-card {
-  background: rgba(241, 211, 181, 0.4);
+  background: rgba(255, 195, 0, 0.15);
   border-radius: 16px;
   padding: 16px 18px;
+  border-left: 4px solid var(--gold);
 }
 
 .note-card h3 {
   margin-top: 0;
+}
+
+/*
+Sessions page: fill the viewport, panel scrolls internally.
+*/
+.page-sessions {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+}
+
+.page-sessions .page-shell {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding-bottom: 24px;
+}
+
+.page-sessions .page-shell > .panel:last-child {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 10px;
+}
+
+.page-sessions .deck-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.page-sessions .deck-list::-webkit-scrollbar {
+  width: 6px;
+}
+.page-sessions .deck-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.page-sessions .deck-list::-webkit-scrollbar-thumb {
+  background: rgba(29, 53, 87, 0.3);
+  border-radius: 3px;
+}
+.page-sessions .deck-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(29, 53, 87, 0.6);
+}
+
+/*
+Session list and individual session cards.
+Each session sits in its own card panel with proper spacing and shadow.
+The deck-list stacks them vertically with consistent gaps.
+*/
+.deck-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.deck-card {
+  background: #F1FAEE;
+  border-radius: 16px;
+  padding: 20px 24px;
+  border: 1px solid rgba(29, 53, 87, 0.35);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.2s ease;
+}
+
+.deck-card:hover {
+  border-color: rgba(29, 53, 87, 0.6);
+}
+
+.deck-card-info {
+  flex: 1;
+}
+
+.deck-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--blue);
+  margin-bottom: 6px;
+}
+
+.deck-card-meta {
+  font-size: 0.9rem;
+  color: rgba(17, 17, 17, 0.6);
+  font-weight: 500;
+}
+
+.deck-card-actions {
+  flex-shrink: 0;
 }
 
 /*

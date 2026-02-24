@@ -1,1 +1,0 @@
-Use this folder to host fonts that we like locally so we dont have to pull font api's which may cause slowdowns I'm not sure.

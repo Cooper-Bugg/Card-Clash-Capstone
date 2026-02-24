@@ -1,13 +1,18 @@
 {
 	"name": "card-clash-capstone",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Card Clash Express server for demo",
 	"main": "app.js",
 	"scripts": {
 		"start": "node app.js"
 	},
 	"dependencies": {
-		"ejs": "^3.1.10",
-		"express": "^4.19.2"
+		"ejs": "^3.0.2",
+		"express": "^4.22.1",
+		"express-session": "^1.19.0",
+		"selfsigned": "^2.4.1"
+	},
+	"overrides": {
+		"minimatch": "^10.2.1"
 	}
 }

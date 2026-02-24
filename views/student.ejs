@@ -5,32 +5,92 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>Join Game | Card Clash</title>
 		<link rel="stylesheet" href="/styles.css" />
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap"
-			rel="stylesheet"
-		/>
+		<style>
+			/* Student game page fills viewport but allows scrolling if content overflows */
+			html, body {
+				height: 100%;
+				margin: 0;
+				overflow-y: auto;
+			}
+
+			/* Compact top bar for the student game view */
+			.game-top-bar {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 8px 20px;
+				background: var(--sand);
+				border-bottom: 2px solid var(--blue);
+				color: var(--ink);
+				z-index: 10;
+				flex-shrink: 0;
+			}
+
+			.game-brand-title {
+				font-family: "Andika", "Segoe UI", sans-serif;
+				font-size: 1.6rem;
+				font-weight: 800;
+				letter-spacing: 0.04em;
+				color: var(--blue);
+			}
+
+			.game-brand-subtitle {
+				font-size: 1rem;
+				color: var(--gold);
+				font-weight: 700;
+				letter-spacing: 0.02em;
+			}
+
+			.game-nav {
+				display: flex;
+				gap: 10px;
+			}
+
+			/* Outer wrapper that fills everything below the top bar */
+			.game-outer {
+				display: flex;
+				flex-direction: column;
+				height: calc(100vh - 46px);
+				padding: 20px;
+				box-sizing: border-box;
+				background: var(--sand);
+			}
+
+			/* The bordered frame around the Unity iframe */
+			.game-unity-wrapper {
+				flex: 1;
+				border-radius: 16px;
+				border: 3px solid var(--blue);
+				box-shadow: 0 0 0 4px var(--gold), 0 8px 40px rgba(29, 53, 87, 0.35);
+				overflow: hidden;
+				background: var(--blue);
+			}
+
+			.game-unity-wrapper iframe {
+				width: 100%;
+				height: 100%;
+				border: 0;
+				display: block;
+			}
+		</style>
 	</head>
 	<body class="page">
-		<div class="background-glow"></div>
-        
-        <header class="top-bar">
+		<!-- Compact branded top bar with back button -->
+		<header class="game-top-bar">
 			<div class="brand">
-				<div class="brand-title">Card Clash</div>
-				<div class="brand-subtitle">Student Client</div>
+				<div class="game-brand-title">Card Clash</div>
+				<div class="game-brand-subtitle">Student View</div>
 			</div>
-            </header>
+			<nav class="game-nav">
+				<a class="nav-link nav-link--danger" href="/">&#8592; Back to Home</a>
+			</nav>
+		</header>
 
-		<main class="page-shell">
-			<section class="panel">
-				<div class="unity-frame">
-                    <iframe src="<%= unityPath %>" title="Card Clash Game"></iframe>
-				</div>
-                <div style="margin-top: 1rem; text-align: center;">
-                    <a href="/" class="btn btn-ghost btn-small">Exit to Home</a>
-                </div>
-			</section>
-		</main>
+		<!-- Unity game fills the rest of the screen with padding around it -->
+		<div class="game-outer">
+			<div class="game-unity-wrapper">
+				<iframe src="<%= unityPath %>" title="Card Clash Game" allowfullscreen></iframe>
+			</div>
+		</div>
 	</body>
 </html>

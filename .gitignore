@@ -20,3 +20,29 @@ npm-error.log
 # Build and dist
 dist/
 build/
+
+# This is needed to NOT ignore the Unity/Build folder
+!public/Unity/Build/
+!public/Unity/Build/**
+
+# HTTPS self-signed certificates (generated automatically on startup)
+certs/
+
+# Unity: Only keep the exported WebGL build in the repo.
+# Don't commit Unity Editor project files, Library, Temp,
+# or anything from the Editor folder.
+# We just want the WebGL build output in:
+#   public/Unity/
+#     Build/
+#     TemplateData/
+#     index.html
+
+Unity_Folders/Editor/
+Unity_Folders/*/Library/
+Unity_Folders/*/Temp/
+Unity_Folders/*/Logs/
+Unity_Folders/*/obj/
+Unity_Folders/*/*.csproj
+Unity_Folders/*/*.sln
+Unity_Folders/*/UserSettings/
+*.meta
