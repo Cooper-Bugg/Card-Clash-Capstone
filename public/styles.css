@@ -169,6 +169,8 @@ centers everything vertically to make the form look centered on the screen.
   align-items: flex-end;
   transform: translateY(-100%);
   padding-bottom: 14px;
+  padding-left: 4%;
+  padding-right: 4%;
 }
 
 .login-brand .brand-title {
@@ -181,6 +183,49 @@ centers everything vertically to make the form look centered on the screen.
   align-items: center;
   justify-content: center;
   padding-top: 40px;
+}
+
+/* Responsive login: on small screens stack vertically and center everything */
+@media (max-width: 860px) {
+  .login-midline {
+    display: none;
+  }
+
+  .login-layout {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px 16px;
+    gap: 16px;
+  }
+
+  .login-brand {
+    flex: none;
+    transform: none;
+    padding-bottom: 0;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .login-brand .brand-title {
+    font-size: 2.8rem;
+    text-align: center;
+  }
+
+  .page-login .page-shell {
+    display: none;
+  }
+
+  .login-panel {
+    width: 100%;
+    max-width: 480px;
+    transform: none;
+  }
 }
 
 .login-panel .form-field span {
