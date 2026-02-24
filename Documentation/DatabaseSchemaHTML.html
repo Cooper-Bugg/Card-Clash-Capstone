@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Game Database Schema</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 8px;
+    color: #58a6ff;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #8b949e;
+    font-size: 0.8rem;
+    margin-bottom: 48px;
+  }
+
+  .canvas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .table-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .table-card.highlight {
+    border-color: #58a6ff;
+    box-shadow: 0 0 20px rgba(88,166,255,0.15);
+  }
+
+  .table-header {
+    background: #21262d;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #30363d;
+  }
+
+  .table-header.blue { background: #0d2a4a; border-bottom-color: #1f6feb; }
+  .table-header.green { background: #0d2e1e; border-bottom-color: #238636; }
+  .table-header.purple { background: #2d1f4e; border-bottom-color: #6e40c9; }
+  .table-header.orange { background: #3d2200; border-bottom-color: #9e6a03; }
+  .table-header.teal { background: #0d2e2e; border-bottom-color: #1b7c83; }
+
+  .table-icon {
+    font-size: 1.1rem;
+  }
+
+  .table-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #fff;
+  }
+
+  .table-desc {
+    font-size: 0.65rem;
+    color: #8b949e;
+    margin-top: 2px;
+  }
+
+  .fields {
+    padding: 8px 0;
+  }
+
+  .field {
+    display: flex;
+    align-items: center;
+    padding: 5px 16px;
+    gap: 8px;
+    font-size: 0.75rem;
+    border-bottom: 1px solid #21262d;
+    transition: background 0.15s;
+  }
+
+  .field:last-child { border-bottom: none; }
+  .field:hover { background: #21262d; }
+
+  .field-key {
+    font-size: 0.6rem;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .pk { background: #9e6a03; color: #fff; }
+  .fk { background: #1f6feb; color: #fff; }
+  .uk { background: #238636; color: #fff; }
+
+  .field-name {
+    color: #e6edf3;
+    flex: 1;
+  }
+
+  .field-type {
+    color: #8b949e;
+    font-size: 0.65rem;
+  }
+
+  .field-note {
+    color: #6e7681;
+    font-size: 0.6rem;
+    font-style: italic;
+  }
+
+  /* Relationship lines section */
+  .relationships {
+    max-width: 1100px;
+    margin: 36px auto 0;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 24px;
+  }
+
+  .relationships h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #58a6ff;
+    margin-bottom: 16px;
+  }
+
+  .rel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .rel-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.75rem;
+    padding: 8px 12px;
+    background: #0d1117;
+    border-radius: 6px;
+    border: 1px solid #21262d;
+  }
+
+  .rel-arrow { color: #58a6ff; flex-shrink: 0; font-size: 1rem; }
+  .rel-text { color: #c9d1d9; line-height: 1.4; }
+  .rel-text strong { color: #e6edf3; }
+
+  .notes {
+    max-width: 1100px;
+    margin: 20px auto 0;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 24px;
+  }
+
+  .notes h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #58a6ff;
+    margin-bottom: 16px;
+  }
+
+  .notes p {
+    font-size: 0.78rem;
+    color: #8b949e;
+    line-height: 1.7;
+    margin-bottom: 10px;
+  }
+
+  .notes p:last-child { margin-bottom: 0; }
+
+  .tag {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    margin-right: 4px;
+  }
+
+  .tag-blue { background: #1f6feb33; color: #58a6ff; border: 1px solid #1f6feb; }
+  .tag-green { background: #23863633; color: #3fb950; border: 1px solid #238636; }
+  .tag-orange { background: #9e6a0333; color: #f0883e; border: 1px solid #9e6a03; }
+
+  .table-header.red { background: #3d1200; border-bottom-color: #cf222e; }
+  .table-header.amber { background: #3d2200; border-bottom-color: #f0883e; }
+
+  .table-card.new-table {
+    border-color: #f0883e;
+    box-shadow: 0 0 18px rgba(240,136,62,0.15);
+  }
+
+  .new-badge {
+    display: inline-block;
+    font-size: 0.55rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    background: #f0883e;
+    color: #000;
+    border-radius: 3px;
+    margin-left: 6px;
+    vertical-align: middle;
+    letter-spacing: 0.5px;
+  }
+
+  .section-label {
+    max-width: 1100px;
+    margin: 36px auto 14px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #f0883e;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #f0883e44;
+  }
+</style>
+</head>
+<body>
+
+<h1>📦 Game App — Database Schema</h1>
+<div class="subtitle">Proposed MySQL Schema · 8 Tables · Teacher-centric Design</div>
+<div style="display:flex;justify-content:center;gap:16px;margin-bottom:32px;font-size:0.72rem;font-family:'JetBrains Mono',monospace;">
+  <span style="display:flex;align-items:center;gap:6px;color:#8b949e;"><span style="width:12px;height:12px;border-radius:3px;background:#161b22;border:1px solid #30363d;display:inline-block;"></span>Original tables</span>
+  <span style="display:flex;align-items:center;gap:6px;color:#f0883e;"><span style="width:12px;height:12px;border-radius:3px;background:#3d1f00;border:1px solid #f0883e;display:inline-block;"></span>New tables (v2)</span>
+</div>
+
+<div class="canvas">
+
+  <!-- Teachers -->
+  <div class="table-card highlight">
+    <div class="table-header blue">
+      <span class="table-icon">👨‍🏫</span>
+      <div>
+        <div class="table-name">teachers</div>
+        <div class="table-desc">Core account table</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><span class="field-key pk">PK</span><span class="field-name">teacher_id</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-key uk">UK</span><span class="field-name">username</span><span class="field-type">VARCHAR(64)</span></div>
+      <div class="field"><span class="field-key uk">UK</span><span class="field-name">email</span><span class="field-type">VARCHAR(255)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">password_hash</span><span class="field-type">VARCHAR(255)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">display_name</span><span class="field-type">VARCHAR(128)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">created_at</span><span class="field-type">TIMESTAMP</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">last_login</span><span class="field-type">TIMESTAMP</span></div>
+    </div>
+  </div>
+
+  <!-- Question Banks -->
+  <div class="table-card">
+    <div class="table-header green">
+      <span class="table-icon">📚</span>
+      <div>
+        <div class="table-name">question_banks</div>
+        <div class="table-desc">Bank metadata &amp; visibility</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><span class="field-key pk">PK</span><span class="field-name">bank_id</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">owner_id</span><span class="field-type">→ teachers</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">bank_name</span><span class="field-type">VARCHAR(128)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">description</span><span class="field-type">TEXT</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">is_public</span><span class="field-type">TINYINT(1)</span><span class="field-note">0=private</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">subject_tag</span><span class="field-type">VARCHAR(64)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">created_at</span><span class="field-type">TIMESTAMP</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">updated_at</span><span class="field-type">TIMESTAMP</span></div>
+    </div>
+  </div>
+
+  <!-- Questions -->
+  <div class="table-card">
+    <div class="table-header purple">
+      <span class="table-icon">❓</span>
+      <div>
+        <div class="table-name">questions</div>
+        <div class="table-desc">Individual questions per bank</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><span class="field-key pk">PK</span><span class="field-name">question_id</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">bank_id</span><span class="field-type">→ question_banks</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">question_text</span><span class="field-type">TEXT</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">question_type</span><span class="field-type">ENUM</span><span class="field-note">mc/tf/short</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">correct_answer</span><span class="field-type">TEXT</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">answer_options</span><span class="field-type">JSON</span><span class="field-note">for MC</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">points_value</span><span class="field-type">SMALLINT</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">time_limit_sec</span><span class="field-type">SMALLINT</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">display_order</span><span class="field-type">INT</span></div>
+    </div>
+  </div>
+
+  <!-- Game Sessions -->
+  <div class="table-card">
+    <div class="table-header orange">
+      <span class="table-icon">🎮</span>
+      <div>
+        <div class="table-name">game_sessions</div>
+        <div class="table-desc">Each hosted game instance</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><span class="field-key pk">PK</span><span class="field-name">session_id</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">host_teacher_id</span><span class="field-type">→ teachers</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">bank_id</span><span class="field-type">→ question_banks</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">session_code</span><span class="field-type">VARCHAR(16)</span><span class="field-note">join PIN</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">status</span><span class="field-type">ENUM</span><span class="field-note">lobby/active/done</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">started_at</span><span class="field-type">TIMESTAMP</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">ended_at</span><span class="field-type">TIMESTAMP</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">player_count</span><span class="field-type">SMALLINT</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">session_config</span><span class="field-type">JSON</span><span class="field-note">settings</span></div>
+    </div>
+  </div>
+
+  <!-- Session Results -->
+  <div class="table-card">
+    <div class="table-header teal">
+      <span class="table-icon">📊</span>
+      <div>
+        <div class="table-name">session_results</div>
+        <div class="table-desc">Per-player, per-question data</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><span class="field-key pk">PK</span><span class="field-name">result_id</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">session_id</span><span class="field-type">→ game_sessions</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">question_id</span><span class="field-type">→ questions</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">player_name</span><span class="field-type">VARCHAR(64)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">player_token</span><span class="field-type">VARCHAR(64)</span><span class="field-note">anon ID</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">answer_given</span><span class="field-type">TEXT</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">is_correct</span><span class="field-type">TINYINT(1)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">points_earned</span><span class="field-type">SMALLINT</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">response_time_ms</span><span class="field-type">INT</span></div>
+    </div>
+  </div>
+
+  <!-- Bank Shares / Public Access -->
+  <div class="table-card">
+    <div class="table-header blue">
+      <span class="table-icon">🔗</span>
+      <div>
+        <div class="table-name">bank_saves</div>
+        <div class="table-desc">Teachers saving public banks</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><span class="field-key pk">PK</span><span class="field-name">save_id</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">teacher_id</span><span class="field-type">→ teachers</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">bank_id</span><span class="field-type">→ question_banks</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">saved_at</span><span class="field-type">TIMESTAMP</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">is_cloned</span><span class="field-type">TINYINT(1)</span><span class="field-note">own copy?</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Section label for new tables -->
+<div class="section-label">✦ New in v2 — Analytics & Metrics</div>
+
+<div class="canvas">
+
+  <!-- Session Summaries -->
+  <div class="table-card new-table">
+    <div class="table-header amber">
+      <span class="table-icon">🏆</span>
+      <div>
+        <div class="table-name">session_summaries <span class="new-badge">NEW</span></div>
+        <div class="table-desc">Cached per-player stats, computed at session end</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><span class="field-key pk">PK</span><span class="field-name">summary_id</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">session_id</span><span class="field-type">→ game_sessions</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">player_name</span><span class="field-type">VARCHAR(64)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">player_token</span><span class="field-type">VARCHAR(64)</span><span class="field-note">anon ID</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">final_score</span><span class="field-type">INT</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">rank</span><span class="field-type">SMALLINT</span><span class="field-note">leaderboard pos</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">accuracy_pct</span><span class="field-type">DECIMAL(5,2)</span><span class="field-note">correct / total</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">avg_response_ms</span><span class="field-type">INT</span><span class="field-note">mean resp time</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">fastest_response_ms</span><span class="field-type">INT</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">longest_streak</span><span class="field-type">SMALLINT</span><span class="field-note">consec. correct</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">questions_answered</span><span class="field-type">SMALLINT</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">questions_correct</span><span class="field-type">SMALLINT</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">computed_at</span><span class="field-type">TIMESTAMP</span></div>
+    </div>
+  </div>
+
+  <!-- Question Metrics -->
+  <div class="table-card new-table">
+    <div class="table-header red">
+      <span class="table-icon">📈</span>
+      <div>
+        <div class="table-name">question_metrics <span class="new-badge">NEW</span></div>
+        <div class="table-desc">Rolling stats per question across all sessions</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><span class="field-key pk">PK</span><span class="field-name">metric_id</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">question_id</span><span class="field-type">→ questions</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">times_seen</span><span class="field-type">INT UNSIGNED</span><span class="field-note">total attempts</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">times_correct</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">difficulty_index</span><span class="field-type">DECIMAL(5,2)</span><span class="field-note">% wrong (0–100)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">avg_response_ms</span><span class="field-type">INT</span><span class="field-note">avg time to answer</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">answer_dist</span><span class="field-type">JSON</span><span class="field-note">MC choice tallies</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">sessions_used_in</span><span class="field-type">INT UNSIGNED</span><span class="field-note">session count</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">last_updated</span><span class="field-type">TIMESTAMP</span></div>
+    </div>
+  </div>
+
+  <!-- Bank Metrics -->
+  <div class="table-card new-table">
+    <div class="table-header amber">
+      <span class="table-icon">🗂️</span>
+      <div>
+        <div class="table-name">bank_metrics <span class="new-badge">NEW</span></div>
+        <div class="table-desc">Aggregate stats for a whole question bank</div>
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><span class="field-key pk">PK</span><span class="field-name">bmetric_id</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">bank_id</span><span class="field-type">→ question_banks</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">total_sessions</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">total_players</span><span class="field-type">INT UNSIGNED</span><span class="field-note">all-time</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">avg_accuracy_pct</span><span class="field-type">DECIMAL(5,2)</span><span class="field-note">across all sessions</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">avg_session_score</span><span class="field-type">DECIMAL(8,2)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">hardest_question_id</span><span class="field-type">INT UNSIGNED</span><span class="field-note">lowest acc. Q</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">easiest_question_id</span><span class="field-type">INT UNSIGNED</span><span class="field-note">highest acc. Q</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">save_count</span><span class="field-type">INT UNSIGNED</span><span class="field-note">bookmarks by others</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">last_updated</span><span class="field-type">TIMESTAMP</span></div>
+    </div>
+  </div>
+
+</div>
+<div class="relationships">
+  <h2>🔗 Relationships</h2>
+  <div class="rel-grid">
+    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>teachers</strong> (1) → (many) <strong>question_banks</strong> — a teacher owns multiple banks</span></div>
+    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>question_banks</strong> (1) → (many) <strong>questions</strong> — each bank holds many questions</span></div>
+    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>teachers</strong> (1) → (many) <strong>game_sessions</strong> — a teacher hosts many sessions</span></div>
+    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>question_banks</strong> (1) → (many) <strong>game_sessions</strong> — a bank can be used in many sessions</span></div>
+    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>game_sessions</strong> (1) → (many) <strong>session_results</strong> — raw per-question, per-player data</span></div>
+    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>teachers ↔ question_banks</strong> via <strong>bank_saves</strong> — many-to-many for public bank access</span></div>
+    <div class="rel-item" style="border-color:#f0883e55"><span class="rel-arrow" style="color:#f0883e">→</span><span class="rel-text"><strong>game_sessions</strong> (1) → (many) <strong>session_summaries</strong> <span class="new-badge">NEW</span> — one summary row per player, written when session ends</span></div>
+    <div class="rel-item" style="border-color:#f0883e55"><span class="rel-arrow" style="color:#f0883e">→</span><span class="rel-text"><strong>questions</strong> (1) → (1) <strong>question_metrics</strong> <span class="new-badge">NEW</span> — one rolling-stats row per question, updated after every session</span></div>
+    <div class="rel-item" style="border-color:#f0883e55"><span class="rel-arrow" style="color:#f0883e">→</span><span class="rel-text"><strong>question_banks</strong> (1) → (1) <strong>bank_metrics</strong> <span class="new-badge">NEW</span> — aggregate health stats per bank, updated after every session</span></div>
+  </div>
+</div>
+
+<!-- Design Notes -->
+<div class="notes">
+  <h2>💡 Design Notes</h2>
+  <p><span class="tag tag-green">Public Banks</span> The <code>is_public</code> flag on <code>question_banks</code> is the core toggle. Your server queries <code>WHERE is_public = 1</code> to show the shared library. The <code>bank_saves</code> table then lets teachers bookmark public banks for quick access — or if <code>is_cloned = 1</code>, it signals the teacher made their own editable copy (a new row in <code>question_banks</code> owned by them, pointing to the same source questions or duplicated ones).</p>
+  <p><span class="tag tag-blue">Passwords</span> Store only the <em>hash</em> of the password (bcrypt recommended). Never the plaintext.</p>
+  <p><span class="tag tag-blue">Session Results</span> Players in this game are likely students who don't have accounts, so <code>session_results</code> identifies them by a display name and an anonymous session token rather than a foreign key to an accounts table. If you later add student accounts, you can add an optional FK column.</p>
+  <p><span class="tag tag-blue">JSON Columns</span> <code>answer_options</code> (for multiple-choice arrays) and <code>session_config</code> (for per-session settings like time limits or randomization) are stored as JSON. MySQL 5.7+ handles this natively. This keeps the schema flexible without extra tables for every possible game setting.</p>
+  <p><span class="tag tag-green">Cloning Banks</span> When a teacher wants to edit a public bank they've saved, you'd duplicate the <code>question_banks</code> row and its child <code>questions</code> rows with the new teacher as <code>owner_id</code>. This keeps the original intact for other users.</p>
+  <p><span class="tag tag-orange">session_summaries</span> These rows are written once — when the host ends the session — by a server-side process that aggregates <code>session_results</code>. Since the raw data is still in <code>session_results</code>, you can always recompute them if your formulas change. The <code>computed_at</code> timestamp lets you detect stale summaries.</p>
+  <p><span class="tag tag-orange">question_metrics</span> Rather than inserting a new row after every session, these should be upserted (INSERT … ON DUPLICATE KEY UPDATE in MySQL) so each question always has exactly one metrics row. The <code>difficulty_index</code> can be derived as <code>(times_seen - times_correct) / times_seen * 100</code>, but storing it directly makes filtering fast — e.g. "show me all questions harder than 70%". The <code>answer_dist</code> JSON column tallies how many players chose each MC option, which is what lets teachers spot misconception patterns.</p>
+  <p><span class="tag tag-orange">bank_metrics</span> Stores the <code>hardest_question_id</code> and <code>easiest_question_id</code> as FKs back to <code>questions</code> so you can surface these in the teacher's bank overview without a costly subquery. The <code>save_count</code> mirrors the count of rows in <code>bank_saves</code> for that bank — useful as social proof in the public bank browser without a JOIN.</p>
+</div>
+
+</body>
+</html>
