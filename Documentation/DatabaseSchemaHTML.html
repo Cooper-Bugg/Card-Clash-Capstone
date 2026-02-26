@@ -2,16 +2,30 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Game Database Schema</title>
+<title>Card Clash Database Schema</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+  @font-face {
+    font-family: "Andika";
+    src: url("../public/fonts/Andika/Andika-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: "Andika";
+    src: url("../public/fonts/Andika/Andika-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+  }
+
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&display=swap');
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    background: #0d1117;
-    color: #e6edf3;
-    font-family: 'JetBrains Mono', monospace;
+    background: #1D3557;
+    color: #F1FAEE;
+    font-family: 'Andika', -apple-system, BlinkMacSystemFont, sans-serif;
     padding: 40px 20px;
     min-height: 100vh;
   }
@@ -22,13 +36,14 @@
     font-weight: 800;
     text-align: center;
     margin-bottom: 8px;
-    color: #58a6ff;
+    color: #FFC300;
     letter-spacing: -0.5px;
   }
 
   .subtitle {
     text-align: center;
-    color: #8b949e;
+    color: #F1FAEE;
+    opacity: 0.7;
     font-size: 0.8rem;
     margin-bottom: 48px;
   }
@@ -43,32 +58,34 @@
   }
 
   .table-card {
-    background: #161b22;
-    border: 1px solid #30363d;
+    background: #F1FAEE;
+    border: 1px solid #FFC300;
     border-radius: 10px;
     overflow: hidden;
     position: relative;
   }
 
   .table-card.highlight {
-    border-color: #58a6ff;
-    box-shadow: 0 0 20px rgba(88,166,255,0.15);
+    border-color: #FFC300;
+    box-shadow: 0 0 20px rgba(255, 195, 0, 0.3);
   }
 
   .table-header {
-    background: #21262d;
+    background: #14253d;
     padding: 12px 16px;
     display: flex;
     align-items: center;
     gap: 10px;
-    border-bottom: 1px solid #30363d;
+    border-bottom: 2px solid #FFC300;
   }
 
-  .table-header.blue { background: #0d2a4a; border-bottom-color: #1f6feb; }
-  .table-header.green { background: #0d2e1e; border-bottom-color: #238636; }
-  .table-header.purple { background: #2d1f4e; border-bottom-color: #6e40c9; }
-  .table-header.orange { background: #3d2200; border-bottom-color: #9e6a03; }
-  .table-header.teal { background: #0d2e2e; border-bottom-color: #1b7c83; }
+  .table-header.blue { background: #1D3557; border-bottom-color: #FFC300; }
+  .table-header.green { background: #1D3557; border-bottom-color: #FFC300; }
+  .table-header.purple { background: #1D3557; border-bottom-color: #FFC300; }
+  .table-header.orange { background: #1D3557; border-bottom-color: #FFC300; }
+  .table-header.teal { background: #1D3557; border-bottom-color: #FFC300; }
+  .table-header.red { background: #E63946; border-bottom-color: #FFC300; }
+  .table-header.amber { background: #FFC300; border-bottom-color: #1D3557; }
 
   .table-icon {
     font-size: 1.1rem;
@@ -78,12 +95,23 @@
     font-family: 'Syne', sans-serif;
     font-weight: 700;
     font-size: 0.95rem;
-    color: #fff;
+    color: #FFC300;
+  }
+  
+  /* Better contrast for amber header */
+  .table-header.amber .table-name {
+    color: #1D3557;
+  }
+  
+  .table-header.amber .table-desc {
+    color: #1D3557;
+    opacity: 0.9;
   }
 
   .table-desc {
     font-size: 0.65rem;
-    color: #8b949e;
+    color: #F1FAEE;
+    opacity: 0.9;
     margin-top: 2px;
   }
 
@@ -97,12 +125,12 @@
     padding: 5px 16px;
     gap: 8px;
     font-size: 0.75rem;
-    border-bottom: 1px solid #21262d;
+    border-bottom: 1px solid rgba(29, 53, 87, 0.1);
     transition: background 0.15s;
   }
 
   .field:last-child { border-bottom: none; }
-  .field:hover { background: #21262d; }
+  .field:hover { background: rgba(29, 53, 87, 0.05); }
 
   .field-key {
     font-size: 0.6rem;
@@ -112,22 +140,24 @@
     flex-shrink: 0;
   }
 
-  .pk { background: #9e6a03; color: #fff; }
-  .fk { background: #1f6feb; color: #fff; }
-  .uk { background: #238636; color: #fff; }
+  .pk { background: #FFC300; color: #1D3557; }
+  .fk { background: #1D3557; color: #F1FAEE; }
+  .uk { background: #E63946; color: #F1FAEE; }
 
   .field-name {
-    color: #e6edf3;
+    color: #1D3557;
     flex: 1;
   }
 
   .field-type {
-    color: #8b949e;
+    color: #1D3557;
+    opacity: 0.7;
     font-size: 0.65rem;
   }
 
   .field-note {
-    color: #6e7681;
+    color: #1D3557;
+    opacity: 0.6;
     font-size: 0.6rem;
     font-style: italic;
   }
@@ -136,8 +166,8 @@
   .relationships {
     max-width: 1100px;
     margin: 36px auto 0;
-    background: #161b22;
-    border: 1px solid #30363d;
+    background: #F1FAEE;
+    border: 2px solid #FFC300;
     border-radius: 10px;
     padding: 24px;
   }
@@ -146,7 +176,7 @@
     font-family: 'Syne', sans-serif;
     font-size: 1rem;
     font-weight: 700;
-    color: #58a6ff;
+    color: #1D3557;
     margin-bottom: 16px;
   }
 
@@ -162,20 +192,20 @@
     gap: 10px;
     font-size: 0.75rem;
     padding: 8px 12px;
-    background: #0d1117;
+    background: #1D3557;
     border-radius: 6px;
-    border: 1px solid #21262d;
+    border: 1px solid #FFC300;
   }
 
-  .rel-arrow { color: #58a6ff; flex-shrink: 0; font-size: 1rem; }
-  .rel-text { color: #c9d1d9; line-height: 1.4; }
-  .rel-text strong { color: #e6edf3; }
+  .rel-arrow { color: #FFC300; flex-shrink: 0; font-size: 1rem; }
+  .rel-text { color: #F1FAEE; line-height: 1.4; }
+  .rel-text strong { color: #FFC300; }
 
   .notes {
     max-width: 1100px;
     margin: 20px auto 0;
-    background: #161b22;
-    border: 1px solid #30363d;
+    background: #F1FAEE;
+    border: 2px solid #FFC300;
     border-radius: 10px;
     padding: 24px;
   }
@@ -184,13 +214,13 @@
     font-family: 'Syne', sans-serif;
     font-size: 1rem;
     font-weight: 700;
-    color: #58a6ff;
+    color: #1D3557;
     margin-bottom: 16px;
   }
 
   .notes p {
     font-size: 0.78rem;
-    color: #8b949e;
+    color: #1D3557;
     line-height: 1.7;
     margin-bottom: 10px;
   }
@@ -206,16 +236,13 @@
     margin-right: 4px;
   }
 
-  .tag-blue { background: #1f6feb33; color: #58a6ff; border: 1px solid #1f6feb; }
-  .tag-green { background: #23863633; color: #3fb950; border: 1px solid #238636; }
-  .tag-orange { background: #9e6a0333; color: #f0883e; border: 1px solid #9e6a03; }
-
-  .table-header.red { background: #3d1200; border-bottom-color: #cf222e; }
-  .table-header.amber { background: #3d2200; border-bottom-color: #f0883e; }
+  .tag-blue { background: #1D3557; color: #F1FAEE; border: 1px solid #1D3557; }
+  .tag-green { background: #1D3557; color: #F1FAEE; border: 1px solid #1D3557; }
+  .tag-orange { background: #FFC300; color: #1D3557; border: 1px solid #FFC300; }
 
   .table-card.new-table {
-    border-color: #f0883e;
-    box-shadow: 0 0 18px rgba(240,136,62,0.15);
+    border-color: #FFC300;
+    box-shadow: 0 0 18px rgba(255, 195, 0, 0.3);
   }
 
   .new-badge {
@@ -223,8 +250,8 @@
     font-size: 0.55rem;
     font-weight: 700;
     padding: 1px 6px;
-    background: #f0883e;
-    color: #000;
+    background: #FFC300;
+    color: #1D3557;
     border-radius: 3px;
     margin-left: 6px;
     vertical-align: middle;
@@ -237,7 +264,7 @@
     font-family: 'Syne', sans-serif;
     font-size: 0.8rem;
     font-weight: 700;
-    color: #f0883e;
+    color: #FFC300;
     letter-spacing: 1px;
     text-transform: uppercase;
     display: flex;
@@ -249,25 +276,36 @@
     content: '';
     flex: 1;
     height: 1px;
-    background: #f0883e44;
+    background: rgba(255, 195, 0, 0.3);
+  }
+
+  /* Add extra vertical spacing when two .canvas groups stack (creates gap between row-2 and row-3) */
+  .canvas + .canvas {
+    margin-top: 48px;
+  }
+
+  code {
+    background: #1D3557;
+    color: #FFC300;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Andika', monospace;
+    font-size: 0.9em;
+    border: 1px solid rgba(255, 195, 0, 0.3);
   }
 </style>
 </head>
 <body>
 
-<h1>📦 Game App — Database Schema</h1>
-<div class="subtitle">Proposed MySQL Schema · 8 Tables · Teacher-centric Design</div>
-<div style="display:flex;justify-content:center;gap:16px;margin-bottom:32px;font-size:0.72rem;font-family:'JetBrains Mono',monospace;">
-  <span style="display:flex;align-items:center;gap:6px;color:#8b949e;"><span style="width:12px;height:12px;border-radius:3px;background:#161b22;border:1px solid #30363d;display:inline-block;"></span>Original tables</span>
-  <span style="display:flex;align-items:center;gap:6px;color:#f0883e;"><span style="width:12px;height:12px;border-radius:3px;background:#3d1f00;border:1px solid #f0883e;display:inline-block;"></span>New tables (v2)</span>
-</div>
+<h1>Card Clash — Database Schema</h1>
+<div class="subtitle">MySQL Schema · 8 Tables · Teacher-centric Design</div>
 
 <div class="canvas">
 
   <!-- Teachers -->
-  <div class="table-card highlight">
+  <div class="table-card">
     <div class="table-header blue">
-      <span class="table-icon">👨‍🏫</span>
+      <span class="table-icon"></span>
       <div>
         <div class="table-name">teachers</div>
         <div class="table-desc">Core account table</div>
@@ -284,19 +322,19 @@
     </div>
   </div>
 
-  <!-- Question Banks -->
+  <!-- Question Decks -->
   <div class="table-card">
-    <div class="table-header green">
-      <span class="table-icon">📚</span>
+    <div class="table-header blue">
+      <span class="table-icon"></span>
       <div>
-        <div class="table-name">question_banks</div>
-        <div class="table-desc">Bank metadata &amp; visibility</div>
+        <div class="table-name">decks</div>
+        <div class="table-desc">Deck metadata &amp; visibility</div>
       </div>
     </div>
     <div class="fields">
-      <div class="field"><span class="field-key pk">PK</span><span class="field-name">bank_id</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-key pk">PK</span><span class="field-name">deck_id</span><span class="field-type">INT UNSIGNED</span></div>
       <div class="field"><span class="field-key fk">FK</span><span class="field-name">owner_id</span><span class="field-type">→ teachers</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">bank_name</span><span class="field-type">VARCHAR(128)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">deck_name</span><span class="field-type">VARCHAR(128)</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">description</span><span class="field-type">TEXT</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">is_public</span><span class="field-type">TINYINT(1)</span><span class="field-note">0=private</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">subject_tag</span><span class="field-type">VARCHAR(64)</span></div>
@@ -307,16 +345,16 @@
 
   <!-- Questions -->
   <div class="table-card">
-    <div class="table-header purple">
-      <span class="table-icon">❓</span>
+    <div class="table-header blue">
+      <span class="table-icon"></span>
       <div>
         <div class="table-name">questions</div>
-        <div class="table-desc">Individual questions per bank</div>
+        <div class="table-desc">Individual questions per deck</div>
       </div>
     </div>
     <div class="fields">
       <div class="field"><span class="field-key pk">PK</span><span class="field-name">question_id</span><span class="field-type">INT UNSIGNED</span></div>
-      <div class="field"><span class="field-key fk">FK</span><span class="field-name">bank_id</span><span class="field-type">→ question_banks</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">deck_id</span><span class="field-type">→ decks</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">question_text</span><span class="field-type">TEXT</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">question_type</span><span class="field-type">ENUM</span><span class="field-note">mc/tf/short</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">correct_answer</span><span class="field-type">TEXT</span></div>
@@ -329,8 +367,8 @@
 
   <!-- Game Sessions -->
   <div class="table-card">
-    <div class="table-header orange">
-      <span class="table-icon">🎮</span>
+    <div class="table-header blue">
+      <span class="table-icon"></span>
       <div>
         <div class="table-name">game_sessions</div>
         <div class="table-desc">Each hosted game instance</div>
@@ -339,20 +377,25 @@
     <div class="fields">
       <div class="field"><span class="field-key pk">PK</span><span class="field-name">session_id</span><span class="field-type">INT UNSIGNED</span></div>
       <div class="field"><span class="field-key fk">FK</span><span class="field-name">host_teacher_id</span><span class="field-type">→ teachers</span></div>
-      <div class="field"><span class="field-key fk">FK</span><span class="field-name">bank_id</span><span class="field-type">→ question_banks</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">deck_id</span><span class="field-type">→ decks</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">session_code</span><span class="field-type">VARCHAR(16)</span><span class="field-note">join PIN</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">status</span><span class="field-type">ENUM</span><span class="field-note">lobby/active/done</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">started_at</span><span class="field-type">TIMESTAMP</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">ended_at</span><span class="field-type">TIMESTAMP</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">player_count</span><span class="field-type">SMALLINT</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">session_config</span><span class="field-type">JSON</span><span class="field-note">settings</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">rounds_played</span><span class="field-type">SMALLINT</span><span class="field-note">total rounds completed</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">average_accuracy</span><span class="field-type">DECIMAL(5,2)</span><span class="field-note">class average %</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">average_response_time</span><span class="field-type">DECIMAL(6,2)</span><span class="field-note">class avg seconds</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">game_log_json</span><span class="field-type">JSON</span><span class="field-note">complete Photon log</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">ai_summary_text</span><span class="field-type">TEXT</span><span class="field-note">AI-generated insights (3 paragraphs)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">session_config</span><span class="field-type">JSON</span><span class="field-note">game settings</span></div>
     </div>
   </div>
 
   <!-- Session Results -->
   <div class="table-card">
-    <div class="table-header teal">
-      <span class="table-icon">📊</span>
+    <div class="table-header blue">
+      <span class="table-icon"></span>
       <div>
         <div class="table-name">session_results</div>
         <div class="table-desc">Per-player, per-question data</div>
@@ -371,19 +414,19 @@
     </div>
   </div>
 
-  <!-- Bank Shares / Public Access -->
+  <!-- Deck Shares / Public Access -->
   <div class="table-card">
     <div class="table-header blue">
-      <span class="table-icon">🔗</span>
+      <span class="table-icon"></span>
       <div>
-        <div class="table-name">bank_saves</div>
-        <div class="table-desc">Teachers saving public banks</div>
+        <div class="table-name">deck_saves</div>
+        <div class="table-desc">Teachers saving public decks</div>
       </div>
     </div>
     <div class="fields">
       <div class="field"><span class="field-key pk">PK</span><span class="field-name">save_id</span><span class="field-type">INT UNSIGNED</span></div>
       <div class="field"><span class="field-key fk">FK</span><span class="field-name">teacher_id</span><span class="field-type">→ teachers</span></div>
-      <div class="field"><span class="field-key fk">FK</span><span class="field-name">bank_id</span><span class="field-type">→ question_banks</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">deck_id</span><span class="field-type">→ decks</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">saved_at</span><span class="field-type">TIMESTAMP</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">is_cloned</span><span class="field-type">TINYINT(1)</span><span class="field-note">own copy?</span></div>
     </div>
@@ -391,17 +434,14 @@
 
 </div>
 
-<!-- Section label for new tables -->
-<div class="section-label">✦ New in v2 — Analytics & Metrics</div>
-
 <div class="canvas">
 
   <!-- Session Summaries -->
-  <div class="table-card new-table">
-    <div class="table-header amber">
-      <span class="table-icon">🏆</span>
+  <div class="table-card">
+    <div class="table-header blue">
+      <span class="table-icon"></span>
       <div>
-        <div class="table-name">session_summaries <span class="new-badge">NEW</span></div>
+        <div class="table-name">session_summaries</div>
         <div class="table-desc">Cached per-player stats, computed at session end</div>
       </div>
     </div>
@@ -423,11 +463,11 @@
   </div>
 
   <!-- Question Metrics -->
-  <div class="table-card new-table">
+  <div class="table-card">
     <div class="table-header red">
-      <span class="table-icon">📈</span>
+      <span class="table-icon"></span>
       <div>
-        <div class="table-name">question_metrics <span class="new-badge">NEW</span></div>
+        <div class="table-name">question_metrics</div>
         <div class="table-desc">Rolling stats per question across all sessions</div>
       </div>
     </div>
@@ -444,18 +484,18 @@
     </div>
   </div>
 
-  <!-- Bank Metrics -->
-  <div class="table-card new-table">
-    <div class="table-header amber">
-      <span class="table-icon">🗂️</span>
+  <!-- Deck Metrics -->
+  <div class="table-card">
+    <div class="table-header red">
+      <span class="table-icon"></span>
       <div>
-        <div class="table-name">bank_metrics <span class="new-badge">NEW</span></div>
-        <div class="table-desc">Aggregate stats for a whole question bank</div>
+        <div class="table-name">deck_metrics</div>
+        <div class="table-desc">Aggregate stats for a whole deck</div>
       </div>
     </div>
     <div class="fields">
       <div class="field"><span class="field-key pk">PK</span><span class="field-name">bmetric_id</span><span class="field-type">INT UNSIGNED</span></div>
-      <div class="field"><span class="field-key fk">FK</span><span class="field-name">bank_id</span><span class="field-type">→ question_banks</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">deck_id</span><span class="field-type">→ decks</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">total_sessions</span><span class="field-type">INT UNSIGNED</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">total_players</span><span class="field-type">INT UNSIGNED</span><span class="field-note">all-time</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">avg_accuracy_pct</span><span class="field-type">DECIMAL(5,2)</span><span class="field-note">across all sessions</span></div>
@@ -469,31 +509,33 @@
 
 </div>
 <div class="relationships">
-  <h2>🔗 Relationships</h2>
+  <h2>Relationships</h2>
   <div class="rel-grid">
-    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>teachers</strong> (1) → (many) <strong>question_banks</strong> — a teacher owns multiple banks</span></div>
-    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>question_banks</strong> (1) → (many) <strong>questions</strong> — each bank holds many questions</span></div>
+    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>teachers</strong> (1) → (many) <strong>decks</strong> — a teacher owns multiple decks</span></div>
+    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>decks</strong> (1) → (many) <strong>questions</strong> — each deck holds many questions</span></div>
     <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>teachers</strong> (1) → (many) <strong>game_sessions</strong> — a teacher hosts many sessions</span></div>
-    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>question_banks</strong> (1) → (many) <strong>game_sessions</strong> — a bank can be used in many sessions</span></div>
+    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>decks</strong> (1) → (many) <strong>game_sessions</strong> — a deck can be used in many sessions</span></div>
     <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>game_sessions</strong> (1) → (many) <strong>session_results</strong> — raw per-question, per-player data</span></div>
-    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>teachers ↔ question_banks</strong> via <strong>bank_saves</strong> — many-to-many for public bank access</span></div>
-    <div class="rel-item" style="border-color:#f0883e55"><span class="rel-arrow" style="color:#f0883e">→</span><span class="rel-text"><strong>game_sessions</strong> (1) → (many) <strong>session_summaries</strong> <span class="new-badge">NEW</span> — one summary row per player, written when session ends</span></div>
-    <div class="rel-item" style="border-color:#f0883e55"><span class="rel-arrow" style="color:#f0883e">→</span><span class="rel-text"><strong>questions</strong> (1) → (1) <strong>question_metrics</strong> <span class="new-badge">NEW</span> — one rolling-stats row per question, updated after every session</span></div>
-    <div class="rel-item" style="border-color:#f0883e55"><span class="rel-arrow" style="color:#f0883e">→</span><span class="rel-text"><strong>question_banks</strong> (1) → (1) <strong>bank_metrics</strong> <span class="new-badge">NEW</span> — aggregate health stats per bank, updated after every session</span></div>
+    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>teachers ↔ decks</strong> via <strong>deck_saves</strong> — many-to-many for public deck access</span></div>
+    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>game_sessions</strong> (1) → (many) <strong>session_summaries</strong> — one summary row per player, written when session ends</span></div>
+    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>questions</strong> (1) → (1) <strong>question_metrics</strong> — one rolling-stats row per question, updated after every session</span></div>
+    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>decks</strong> (1) → (1) <strong>deck_metrics</strong> — aggregate health stats per deck, updated after every session</span></div>
   </div>
 </div>
 
 <!-- Design Notes -->
 <div class="notes">
-  <h2>💡 Design Notes</h2>
-  <p><span class="tag tag-green">Public Banks</span> The <code>is_public</code> flag on <code>question_banks</code> is the core toggle. Your server queries <code>WHERE is_public = 1</code> to show the shared library. The <code>bank_saves</code> table then lets teachers bookmark public banks for quick access — or if <code>is_cloned = 1</code>, it signals the teacher made their own editable copy (a new row in <code>question_banks</code> owned by them, pointing to the same source questions or duplicated ones).</p>
+  <h2>Design Notes</h2>
+  <p><span class="tag tag-green">Public Decks</span> The <code>is_public</code> flag on <code>decks</code> is the core toggle. Your server queries <code>WHERE is_public = 1</code> to show the shared library. The <code>deck_saves</code> table then lets teachers bookmark public decks for quick access — or if <code>is_cloned = 1</code>, it signals the teacher made their own editable copy (a new row in <code>decks</code> owned by them, pointing to the same source questions or duplicated ones).</p>
   <p><span class="tag tag-blue">Passwords</span> Store only the <em>hash</em> of the password (bcrypt recommended). Never the plaintext.</p>
   <p><span class="tag tag-blue">Session Results</span> Players in this game are likely students who don't have accounts, so <code>session_results</code> identifies them by a display name and an anonymous session token rather than a foreign key to an accounts table. If you later add student accounts, you can add an optional FK column.</p>
   <p><span class="tag tag-blue">JSON Columns</span> <code>answer_options</code> (for multiple-choice arrays) and <code>session_config</code> (for per-session settings like time limits or randomization) are stored as JSON. MySQL 5.7+ handles this natively. This keeps the schema flexible without extra tables for every possible game setting.</p>
-  <p><span class="tag tag-green">Cloning Banks</span> When a teacher wants to edit a public bank they've saved, you'd duplicate the <code>question_banks</code> row and its child <code>questions</code> rows with the new teacher as <code>owner_id</code>. This keeps the original intact for other users.</p>
+  <p><span class="tag tag-green">Cloning Decks</span> When a teacher wants to edit a public deck they've saved, you'd duplicate the <code>decks</code> row and its child <code>questions</code> rows with the new teacher as <code>owner_id</code>. This keeps the original intact for other users.</p>
   <p><span class="tag tag-orange">session_summaries</span> These rows are written once — when the host ends the session — by a server-side process that aggregates <code>session_results</code>. Since the raw data is still in <code>session_results</code>, you can always recompute them if your formulas change. The <code>computed_at</code> timestamp lets you detect stale summaries.</p>
   <p><span class="tag tag-orange">question_metrics</span> Rather than inserting a new row after every session, these should be upserted (INSERT … ON DUPLICATE KEY UPDATE in MySQL) so each question always has exactly one metrics row. The <code>difficulty_index</code> can be derived as <code>(times_seen - times_correct) / times_seen * 100</code>, but storing it directly makes filtering fast — e.g. "show me all questions harder than 70%". The <code>answer_dist</code> JSON column tallies how many players chose each MC option, which is what lets teachers spot misconception patterns.</p>
-  <p><span class="tag tag-orange">bank_metrics</span> Stores the <code>hardest_question_id</code> and <code>easiest_question_id</code> as FKs back to <code>questions</code> so you can surface these in the teacher's bank overview without a costly subquery. The <code>save_count</code> mirrors the count of rows in <code>bank_saves</code> for that bank — useful as social proof in the public bank browser without a JOIN.</p>
+  <p><span class="tag tag-orange">deck_metrics</span> Stores the <code>hardest_question_id</code> and <code>easiest_question_id</code> as FKs back to <code>questions</code> so you can surface these in the teacher's deck overview without a costly subquery. The <code>save_count</code> mirrors the count of rows in <code>deck_saves</code> for that deck — useful as social proof in the public deck browser without a JOIN.</p>
+  <p><span class="tag tag-blue">Naming Conventions</span> <strong>Database uses snake_case</strong> (session_id, teacher_id, deck_id) while <strong>code/README uses camelCase</strong> (sessionID, teacherID, deckID). <strong>Standardized terminology: "deck"</strong> — both UI/code AND database now use "deck" (not "bank"). The database table is <code>decks</code> and primary key is <code>deck_id</code>. When converting between layers, map: <code>deckID → deck_id</code>, <code>sessionID → session_id</code>, <code>teacherID → teacher_id/host_teacher_id</code>.</p>
+  <p><span class="tag tag-green">Game Log & AI Summary</span> The <code>game_log_json</code> field stores the complete Photon event log from Unity (all player actions, timestamps, answer submissions). The <code>ai_summary_text</code> field contains 3 AI-generated paragraphs (can be split on newlines) that analyze class performance — this is what displays in the session report view. Both fields are populated when the session ends.</p>
 </div>
 
 </body>
