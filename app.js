@@ -14,7 +14,7 @@ const selfsigned = require("selfsigned");
 const dataStore = require("./data");
 
 const app = express();
-// Use PORT env var if set (e.g. on a real server), otherwise default to 3000 for local dev
+// Use PORT env var if set (e.g. for deployment), otherwise default to 3000 for local dev
 const port = process.env.PORT || 3000;
 
 app.set("view engine", "ejs");
@@ -232,8 +232,8 @@ Looks up which deck you want to play and displays the game iframe.
 */
 async function renderGame(req, res) {
     try {
-        const deckId = Number.parseInt(req.query.deckId, 10);
-        const deck = Number.isNaN(deckId) ? null : await dataStore.getDeckById(deckId);
+        const deckID = Number.parseInt(req.query.deckID, 10);
+        const deck = Number.isNaN(deckID) ? null : await dataStore.getDeckById(deckID);
 
         let fallbackDeck = deck;
         if (!fallbackDeck) {
@@ -263,10 +263,10 @@ Looks up which session you want to review and displays the report.
 */
 async function renderReport(req, res) {
     try {
-        const sessionId = Number.parseInt(req.params.id, 10);
-        const session = Number.isNaN(sessionId)
+        const sessionID = Number.parseInt(req.params.id, 10);
+        const session = Number.isNaN(sessionID)
             ? null
-            : await dataStore.getSessionById(sessionId);
+            : await dataStore.getSessionById(sessionID);
 
         if (!session) {
             res.status(404).send("Report not found.");
@@ -298,7 +298,7 @@ async function renderSessions(req, res) {
         const storedSessions = await dataStore.getSessions();
         const sessions = (Array.isArray(storedSessions) ? storedSessions : []).map((s) => ({
             id: s.id,
-            deckId: s.deckId,
+            deckID: s.deckID,
             deckTitle: s.deckTitle || "Untitled Deck",
             createdAt: s.createdAt || "Unknown date",
             summaryPreview: Array.isArray(s.summaryParagraphs) ? s.summaryParagraphs[0] : null,
@@ -342,8 +342,8 @@ Lets you edit questions and answers for a deck you already created.
 */
 async function renderEditDeck(req, res) {
     try {
-        const deckId = Number.parseInt(req.params.id, 10);
-        const deck = Number.isNaN(deckId) ? null : await dataStore.getDeckById(deckId);
+        const deckID = Number.parseInt(req.params.id, 10);
+        const deck = Number.isNaN(deckID) ? null : await dataStore.getDeckById(deckID);
 
         if (!deck) {
             res.status(404).send("Deck not found.");
@@ -516,11 +516,11 @@ app.post("/api/ai/summarize", requireTeacherAuthentication, async (req, res) => 
     }
 });
 
-app.get("/api/ai/report/:sessionId", requireTeacherAuthentication, async (req, res) => {
+app.get("/api/ai/report/:sessionID", requireTeacherAuthentication, async (req, res) => {
     try {
         // Implement MySQL SELECT query here to retrieve the session summary.
-        const sessionId = Number.parseInt(req.params.sessionId, 10);
-        const session = await dataStore.getSessionById(sessionId);
+        const sessionID = Number.parseInt(req.params.sessionID, 10);
+        const session = await dataStore.getSessionById(sessionID);
 
         if (!session) {
             res.status(404).json({ error: "Session not found." });
@@ -528,7 +528,7 @@ app.get("/api/ai/report/:sessionId", requireTeacherAuthentication, async (req, r
         }
 
         res.json({
-            sessionId,
+            sessionID,
             summary: Array.isArray(session.summaryParagraphs) ? session.summaryParagraphs.join("\n\n") : ""
         });
     } catch (error) {
@@ -537,7 +537,7 @@ app.get("/api/ai/report/:sessionId", requireTeacherAuthentication, async (req, r
     }
 });
 
-app.post("/api/ai/report/:sessionId", requireTeacherAuthentication, async (req, res) => {
+app.post("/api/ai/report/:sessionID", requireTeacherAuthentication, async (req, res) => {
     try {
         // Implement MySQL UPDATE query here to save the completed AI summary.
         res.json({ ok: true, note: "Save stub — MySQL not connected yet." });

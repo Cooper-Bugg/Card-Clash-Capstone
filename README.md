@@ -185,7 +185,7 @@ Used by Unity to load questions before the game starts.
 
 **POST /api/upload-log**
 ```json
-{ "deckId": 1, "log": { ... } }
+{ "deckID": 1, "log": { ... } }
 ```
 Triggered by Unity when the game ends. Saves the log and starts async LLM processing.
 ```json

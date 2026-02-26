@@ -32,43 +32,79 @@
 
 ---
 
-## 3. Domain Model
+## 3. Database Schema
 
-### Session (Stored in MySQL)
-* `sessionId` (PK): Internal Database ID.
-* `sessionCode` (String): 6-char code (e.g., "AF492B") used for Photon Room Name.
-* `gameLogJson` (JSON): The full history of the game (rounds, answers, scores).
-* `aiSummary` (TEXT): The generated text report.
+**Card Clash** uses a MySQL database with 8 core tables following a teacher-centric design. The schema supports both simplified JSON storage (current mock implementation) and normalized relational structure (production target).
+
+### Core Tables
+* **`teachers`** - Teacher accounts (username, email, password_hash)
+* **`decks`** - Question deck metadata (deck_name, description, is_public, owner_id)
+* **`questions`** - Individual questions per deck (question_text, correct_answer, answer_options as JSON)
+* **`game_sessions`** - Game instances (session_code, host_teacher_id, deck_id, game_log_json, ai_summary_text)
+* **`session_results`** - Raw per-player, per-question data (player_name, answer_given, is_correct, response_time_ms)
+* **`deck_saves`** - Many-to-many for public deck bookmarking (teacher_id, deck_id, is_cloned)
+
+### Analytics Tables
+* **`session_summaries`** - Cached per-player stats (final_score, rank, accuracy_pct, avg_response_ms)
+* **`question_metrics`** - Rolling question stats (times_seen, times_correct, difficulty_index)
+* **`deck_metrics`** - Aggregate deck health (total_sessions, avg_accuracy_pct, save_count)
+
+### Naming Conventions
+* **Database:** snake_case (session_id, teacher_id, deck_id)
+* **Code/API:** camelCase (sessionID, teacherID, deckID)
+* **Mapping:** `deckID → deck_id`, `sessionID → session_id`, `teacherID → teacher_id`
+
+### Current Implementation Note
+The live codebase currently uses a simplified mock model with `mockDecks[].contentJson` containing embedded questions and `mockSessions` with summary data. This will migrate to the normalized schema above for production MySQL deployment.
+
+---
+
+## 4. Domain Model
+
+### Session (Current Implementation)
+* `sessionID` (Number): Internal Database ID
+* `deckID` (Number): Reference to question deck
+* `deckTitle` (String): Display name for UI
+* `summaryParagraphs` (Array): AI-generated analysis paragraphs
+* `metrics` (Object): `{ roundsPlayed, averageAccuracy, averageResponseTime }`
+
+### Deck (Current Implementation)  
+* `id` (Number): Primary key
+* `title` (String): Display name
+* `contentJson` (String): Serialized questions array with optionA/B/C/D format
 
 ### The "Split" State Model
-* **Lobby/Game State:** Live in Photon Cloud (Ephemeral).
-* **Historical Data:** Live in MySQL (Persistent).
-* **Bridge:** The Teacher's Unity Client acts as the "Recorder," sending the full Game Log JSON to the Node.js API at the end of the match.
+* **Lobby/Game State:** Live in Photon Cloud (Ephemeral)
+* **Historical Data:** Live in MySQL (Persistent)
+* **Bridge:** The Teacher's Unity Client acts as the "Recorder," sending the full Game Log JSON to the Node.js API at the end of the match
 
 ---
 
-## 4. API Contracts (Node.js)
+## 5. API Contracts (Node.js)
 
-Since the backend renders HTML directly, the API is simplified to Auth and Data Upload.
+The backend renders HTML directly with simplified JSON APIs for AI processing.
 
 ### Web Routes (Browser)
-* **GET** `/` - Login Page.
-* **GET** `/dashboard` - Teacher Home (View History, Start Game).
-* **GET** `/game/play?deckId=1` - Serves the Unity WebGL Client.
-* **GET** `/report/:id` - View the AI Summary and metrics.
+* **GET** `/` - Home/Login redirect
+* **GET** `/login` - Teacher login page
+* **POST** `/login` - Process authentication (form-based)
+* **GET** `/dashboard` - Teacher home (view history, start game)
+* **GET** `/game/play?deckID=1` - Serves the Unity WebGL client
+* **GET** `/report/:id` - View AI summary and metrics
 
-### Data Routes (JSON)
-* **POST** `/api/login`
-    * *Input:* `{ "username": "...", "password": "..." }`
-    * *Output:* Session Cookie.
-* **POST** `/api/upload-log`
-    * *Input:* `{ "deckId": 1, "log": { ...huge json object... } }`
-    * *Action:* Saves JSON to MySQL -> Triggers Async Ollama Process.
-    * *Output:* `{ "reportId": 101, "status": "PROCESSING" }`
+### Data Routes (JSON) - Current Implementation
+* **POST** `/api/ai/summarize`
+    * *Input:* Game log JSON data
+    * *Action:* Triggers Ollama AI analysis
+    * *Output:* Summary paragraphs
+* **GET** `/api/ai/report/:sessionID`
+    * *Output:* Cached AI report for session
+* **POST** `/api/ai/report/:sessionID`
+    * *Input:* Manual report regeneration request
 
 ---
 
-## 5. Realtime Protocol (Photon PUN 2)
+## 6. Realtime Protocol (Photon PUN 2)
 
 **Room Name:** Equal to `sessionCode`.
 **Authority:** The Teacher's Client is the Master Client and handles scoring logic.
@@ -80,9 +116,34 @@ Since the backend renders HTML directly, the API is simplified to Auth and Data 
 
 ---
 
-## 6. AI Report Specification
+## 7. AI Report Specification
 
 **Trigger:** The Teacher's Unity Client sends the game log to Node.js.
 **Process:** Node.js calculates stats -> Sends prompt to Ollama -> Saves result to MySQL.
 **Output:** 3 Paragraphs (Class Performance, Knowledge Gaps, Recommendations).
 **Timeout:** 60 Seconds.
+
+### AI Analysis Structure
+* **Paragraph 1:** Class performance overview and engagement patterns
+* **Paragraph 2:** Knowledge gaps and misconception analysis  
+* **Paragraph 3:** Recommendations for future sessions
+
+---
+
+## 8. Development Notes
+
+### File Structure
+* **`app.js`** - Main Express server with routes and middleware
+* **`data.js`** - Mock data layer (to be replaced with MySQL queries)
+* **`views/*.ejs`** - Server-side rendered HTML templates
+* **`public/`** - Static assets (CSS, fonts, Unity builds)
+* **`Documentation/`** - Architecture docs and database schema visual
+
+### Migration Path
+Current mock implementation → Production MySQL schema:
+1. Replace `mockDecks` with normalized `decks` + `questions` tables
+2. Replace `mockSessions` with `game_sessions` + analytics tables
+3. Implement camelCase ↔ snake_case property mapping
+4. Add proper foreign key relationships and constraints
+
+For detailed database schema visualization, see `Documentation/DatabaseSchemaHTML.html`.

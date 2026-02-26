@@ -125,7 +125,7 @@ More fake data for testing the sessions and reports
 const mockSessions = [
   {
     id: 101,
-    deckId: 1,
+    deckID: 1,
     deckTitle: "Math Warmup",
     createdAt: "2026-02-03 09:12",
     summaryParagraphs: [
@@ -137,7 +137,7 @@ const mockSessions = [
   },
   {
     id: 102,
-    deckId: 2,
+    deckID: 2,
     deckTitle: "US History 101",
     createdAt: "2026-02-04 13:40",
     summaryParagraphs: [
@@ -149,7 +149,7 @@ const mockSessions = [
   },
   {
     id: 103,
-    deckId: 3,
+    deckID: 3,
     deckTitle: "Science: Solar System",
     createdAt: "2026-02-05 10:00",
     summaryParagraphs: [
@@ -161,7 +161,7 @@ const mockSessions = [
   },
   {
     id: 104,
-    deckId: 4,
+    deckID: 4,
     deckTitle: "English Vocabulary",
     createdAt: "2026-02-06 11:30",
     summaryParagraphs: [
@@ -173,7 +173,7 @@ const mockSessions = [
   },
   {
     id: 105,
-    deckId: 5,
+    deckID: 5,
     deckTitle: "World Geography",
     createdAt: "2026-02-10 09:45",
     summaryParagraphs: [
@@ -185,7 +185,7 @@ const mockSessions = [
   },
   {
     id: 106,
-    deckId: 1,
+    deckID: 1,
     deckTitle: "Basic Math",
     createdAt: "2026-02-12 14:15",
     summaryParagraphs: [
@@ -197,7 +197,7 @@ const mockSessions = [
   },
   {
     id: 107,
-    deckId: 6,
+    deckID: 6,
     deckTitle: "Biology Basics",
     createdAt: "2026-02-14 08:50",
     summaryParagraphs: [
@@ -209,7 +209,7 @@ const mockSessions = [
   },
   {
     id: 108,
-    deckId: 7,
+    deckID: 7,
     deckTitle: "Pop Culture Trivia",
     createdAt: "2026-02-17 13:00",
     summaryParagraphs: [
@@ -221,7 +221,7 @@ const mockSessions = [
   },
   {
     id: 109,
-    deckId: 2,
+    deckID: 2,
     deckTitle: "US History 101",
     createdAt: "2026-02-19 10:20",
     summaryParagraphs: [
@@ -233,7 +233,7 @@ const mockSessions = [
   },
   {
     id: 110,
-    deckId: 3,
+    deckID: 3,
     deckTitle: "Science: Solar System",
     createdAt: "2026-02-21 09:00",
     summaryParagraphs: [
@@ -268,7 +268,7 @@ If we add this, the AI summary can give more specific feedback for each student 
 /*
 Retrieve all available question decks.
 Returns a Promise to simulate asynchronous database latency.
-This function must be refactored to execute: SELECT * FROM Decks
+This function must be refactored to execute: SELECT * FROM decks
 */
 async function getDecks() {
   return mockDecks;
@@ -277,7 +277,7 @@ async function getDecks() {
 /*
 Retrieve all historical session data.
 Returns a Promise to simulate asynchronous database latency.
-This function must be refactored to execute: SELECT * FROM Sessions
+This function must be refactored to execute: SELECT * FROM game_sessions
 */
 async function getSessions() {
   return mockSessions;
@@ -285,13 +285,13 @@ async function getSessions() {
 
 /*
 Retrieve a specific deck object by its primary key.
-This function must be refactored to execute: SELECT * FROM Decks WHERE deckId = ?
+This function must be refactored to execute: SELECT * FROM decks WHERE deck_id = ?
 */
-function getDeckById(deckId) {
+function getDeckById(deckID) {
   return Promise.resolve((() => {
     for (let i = 0; i < mockDecks.length; i += 1) {
       const deck = mockDecks[i];
-      if (deck.id === deckId) {
+      if (deck.id === deckID) {
         return deck;
       }
     }
@@ -303,7 +303,7 @@ function getDeckById(deckId) {
 Calculate the next sequential primary key.
 This function will be deprecated when the database schema implements AUTO_INCREMENT.
 */
-function getNextDeckId() {
+function getNextDeckID() {
   let maxId = 0;
   for (let i = 0; i < mockDecks.length; i += 1) {
     maxId = Math.max(maxId, mockDecks[i].id);
@@ -332,7 +332,7 @@ function saveDeck({ id, title, contentJson }) {
     }
 
     const newDeck = {
-      id: getNextDeckId(),
+      id: getNextDeckID(),
       title,
       contentJson
     };
@@ -344,13 +344,13 @@ function saveDeck({ id, title, contentJson }) {
 
 /*
 Retrieve a specific session object by its primary key.
-This function must be refactored to execute: SELECT * FROM Sessions WHERE sessionId = ?
+This function must be refactored to execute: SELECT * FROM game_sessions WHERE session_id = ?
 */
-function getSessionById(sessionId) {
+function getSessionById(sessionID) {
   return Promise.resolve((() => {
     for (let i = 0; i < mockSessions.length; i += 1) {
       const session = mockSessions[i];
-      if (session.id === sessionId) {
+      if (session.id === sessionID) {
         return session;
       }
     }

@@ -12,7 +12,7 @@ Game Client (Unity WebGL): A browser-based 2D game client hosted statically by t
 
 Backend Infrastructure:
 
-Application Server: A single Node.js/Express application hosted on OSU Servers. It handles HTTP requests, serves the HTML dashboard, and manages the database.
+Application Server: A single Node.js/Express application hosted on a local development server. It handles HTTP requests, serves the HTML dashboard, and manages the database.
 
 Game Logic Authority: The Teacher's Unity Client acts as the "Host" for real-time logic, synchronized via Photon PUN 2.
 
@@ -31,7 +31,7 @@ PUN 2: Photon Unity Networking 2 (Middleware for multiplayer synchronization).
 
 Ollama: Framework for running local Large Language Models (LLMs).
 
-OSU Server: The university-provided Linux hosting environment (HTTP only).
+Local Development Server: The Node.js application serves on localhost with team access via local network IP.
 
 ---
 
@@ -63,7 +63,7 @@ Card Clash is a unified web application. Unlike distributed systems that separat
 - **Student**: Chromebooks (4GB RAM) or standard mobile devices
 
 **Server Constraints:**
-- OSU Student Server (Linux environment)
+- Local Development Environment (Node.js runtime)
 - MySQL (Database)
 
 **Network:**
