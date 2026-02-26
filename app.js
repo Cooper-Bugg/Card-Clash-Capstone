@@ -13,6 +13,9 @@ const expressSession = require("express-session");
 const selfsigned = require("selfsigned");
 const dataStore = require("./data");
 
+// Loads environment variables from a .env file into process.env
+require("dotenv").config();
+
 const app = express();
 // Use PORT env var if set (e.g. for deployment), otherwise default to 3000 for local dev
 const port = process.env.PORT || 3000;
