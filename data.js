@@ -269,6 +269,7 @@ If we add this, the AI summary can give more specific feedback for each student 
 Retrieve all available question decks.
 Returns a Promise to simulate asynchronous database latency.
 This function must be refactored to execute: SELECT * FROM decks
+// TODO after demo: switch data routes from data.js to database.js — replace with database.getDecks()
 */
 async function getDecks() {
   return mockDecks;
@@ -278,6 +279,7 @@ async function getDecks() {
 Retrieve all historical session data.
 Returns a Promise to simulate asynchronous database latency.
 This function must be refactored to execute: SELECT * FROM game_sessions
+// TODO after demo: switch data routes from data.js to database.js — replace with database.getSessions()
 */
 async function getSessions() {
   return mockSessions;
@@ -286,6 +288,7 @@ async function getSessions() {
 /*
 Retrieve a specific deck object by its primary key.
 This function must be refactored to execute: SELECT * FROM decks WHERE deck_id = ?
+// TODO after demo: switch data routes from data.js to database.js — replace with database.getDeckById(deckID)
 */
 function getDeckById(deckID) {
   return Promise.resolve((() => {
@@ -316,6 +319,7 @@ function getNextDeckID() {
 Insert or update a deck record.
 Data is currently stored in volatile memory and drops on server termination.
 This function must be refactored to execute INSERT or UPDATE statements.
+// TODO after demo: switch data routes from data.js to database.js — replace with database.saveDeck({ id, title, contentJson })
 */
 function saveDeck({ id, title, contentJson }) {
   return Promise.resolve((() => {
@@ -345,6 +349,7 @@ function saveDeck({ id, title, contentJson }) {
 /*
 Retrieve a specific session object by its primary key.
 This function must be refactored to execute: SELECT * FROM game_sessions WHERE session_id = ?
+// TODO after demo: switch data routes from data.js to database.js — replace with database.getSessionById(sessionID)
 */
 function getSessionById(sessionID) {
   return Promise.resolve((() => {

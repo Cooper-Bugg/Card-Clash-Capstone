@@ -11,6 +11,8 @@ const https = require("https");
 const express = require("express");
 const expressSession = require("express-session");
 const selfsigned = require("selfsigned");
+// TODO after demo: switch data routes from data.js to database.js
+// Replace the line below with: const dataStore = require("./Backend/database");
 const dataStore = require("./data");
 
 // Loads environment variables from a .env file into process.env
@@ -116,7 +118,9 @@ async function buildDashboardViewModel() {
     const decks = [];
     const sessions = [];
     const storedDecks = await dataStore.getDecks();
+    // TODO after demo: switch data routes from data.js to database.js — replace above with database.getDecks()
     const storedSessions = await dataStore.getSessions();
+    // TODO after demo: switch data routes from data.js to database.js — replace above with database.getSessions()
 
     for (let i = 0; i < storedDecks.length; i += 1) {
         const deck = storedDecks[i];
@@ -236,10 +240,12 @@ Looks up which deck you want to play and displays the game iframe.
 async function renderGame(req, res) {
     try {
         const deckID = Number.parseInt(req.query.deckID, 10);
+        // TODO after demo: switch data routes from data.js to database.js — replace below with database.getDeckById(deckID)
         const deck = Number.isNaN(deckID) ? null : await dataStore.getDeckById(deckID);
 
         let fallbackDeck = deck;
         if (!fallbackDeck) {
+            // TODO after demo: switch data routes from data.js to database.js — replace below with database.getDecks()
             const allDecks = await dataStore.getDecks();
             fallbackDeck = allDecks[0] || null;
         }
@@ -267,6 +273,7 @@ Looks up which session you want to review and displays the report.
 async function renderReport(req, res) {
     try {
         const sessionID = Number.parseInt(req.params.id, 10);
+        // TODO after demo: switch data routes from data.js to database.js — replace below with database.getSessionById(sessionID)
         const session = Number.isNaN(sessionID)
             ? null
             : await dataStore.getSessionById(sessionID);
@@ -298,6 +305,7 @@ Pulls from the data store — ready for MySQL implementation.
 */
 async function renderSessions(req, res) {
     try {
+        // TODO after demo: switch data routes from data.js to database.js — replace below with database.getSessions()
         const storedSessions = await dataStore.getSessions();
         const sessions = (Array.isArray(storedSessions) ? storedSessions : []).map((s) => ({
             id: s.id,
@@ -346,6 +354,7 @@ Lets you edit questions and answers for a deck you already created.
 async function renderEditDeck(req, res) {
     try {
         const deckID = Number.parseInt(req.params.id, 10);
+        // TODO after demo: switch data routes from data.js to database.js — replace below with database.getDeckById(deckID)
         const deck = Number.isNaN(deckID) ? null : await dataStore.getDeckById(deckID);
 
         if (!deck) {
@@ -398,6 +407,7 @@ async function saveDeck(req, res) {
             }
         }
 
+        // TODO after demo: switch data routes from data.js to database.js — replace below with database.saveDeck(...)
         const savedDeck = await dataStore.saveDeck({
             id: req.body.id,
             title,
@@ -523,6 +533,7 @@ app.get("/api/ai/report/:sessionID", requireTeacherAuthentication, async (req, r
     try {
         // Implement MySQL SELECT query here to retrieve the session summary.
         const sessionID = Number.parseInt(req.params.sessionID, 10);
+        // TODO after demo: switch data routes from data.js to database.js — replace below with database.getSessionById(sessionID)
         const session = await dataStore.getSessionById(sessionID);
 
         if (!session) {
