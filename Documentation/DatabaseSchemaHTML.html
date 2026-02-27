@@ -336,8 +336,8 @@
       <div class="field"><span class="field-key fk">FK</span><span class="field-name">owner_id</span><span class="field-type">→ teachers</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">deck_name</span><span class="field-type">VARCHAR(128)</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">description</span><span class="field-type">TEXT</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">subject_tag</span><span class="field-type">VARCHAR(64)</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">is_public</span><span class="field-type">TINYINT(1)</span><span class="field-note">0=private</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">subject_tag</span><span class="field-type">VARCHAR(64)</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">created_at</span><span class="field-type">TIMESTAMP</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">updated_at</span><span class="field-type">TIMESTAMP</span></div>
     </div>
@@ -360,26 +360,8 @@
       <div class="field"><span class="field-name" style="padding-left:38px">correct_answer</span><span class="field-type">TEXT</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">answer_options</span><span class="field-type">JSON</span><span class="field-note">for MC</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">points_value</span><span class="field-type">SMALLINT</span></div>
-    </div>
-  </div>
-
-  <!-- Math Question Decks -->
-  <div class="table-card">
-    <div class="table-header blue">
-      <span class="table-icon">🔢</span>
-      <div>
-        <div class="table-name">math_decks</div>
-        <div class="table-desc">Special table for math question decks</div>
-      </div>
-    </div>
-    <div class="fields">
-      <div class="field"><span class="field-key pk">PK</span><span class="field-key fk">FK</span><span class="field-name">deck_id</span><span class="field-type">INT UNSIGNED</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">operations</span><span class="field-type">JSON</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">lowest_number</span><span class="field-type">INT</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">highest_number</span><span class="field-type">INT</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">number_of_operands</span><span class="field-type">INT UNSIGNED</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">number_of_questions</span><span class="field-type">INT UNSIGNED</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">subject_tag</span><span class="field-type">VARCHAR(64)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">time_limit_sec</span><span class="field-type">SMALLINT</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">display_order</span><span class="field-type">INT</span></div>
     </div>
   </div>
 
@@ -396,14 +378,17 @@
       <div class="field"><span class="field-key pk">PK</span><span class="field-name">session_id</span><span class="field-type">INT UNSIGNED</span></div>
       <div class="field"><span class="field-key fk">FK</span><span class="field-name">host_teacher_id</span><span class="field-type">→ teachers</span></div>
       <div class="field"><span class="field-key fk">FK</span><span class="field-name">deck_id</span><span class="field-type">→ decks</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">session_code</span><span class="field-type">VARCHAR(16)</span><span class="field-note">join PIN</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">status</span><span class="field-type">ENUM</span><span class="field-note">lobby/active/done</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">started_at</span><span class="field-type">TIMESTAMP</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">ended_at</span><span class="field-type">TIMESTAMP</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">player_count</span><span class="field-type">SMALLINT</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">rounds_played</span><span class="field-type">SMALLINT</span><span class="field-note">total rounds completed</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">average_accuracy</span><span class="field-type">DECIMAL(5,2)</span><span class="field-note">class average %</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">average_response_time_ms</span><span class="field-type">INT UNSIGNED</span><span class="field-note">class avg milliseconds</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">average_response_time</span><span class="field-type">DECIMAL(6,2)</span><span class="field-note">class avg seconds</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">game_log_json</span><span class="field-type">JSON</span><span class="field-note">complete Photon log</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">ai_summary_text</span><span class="field-type">TEXT</span><span class="field-note">AI-generated insights (3 paragraphs)</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">game_log_json</span><span class="field-type">JSON</span><span class="field-note">complete Photon event log</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">session_config</span><span class="field-type">JSON</span><span class="field-note">game settings</span></div>
     </div>
   </div>
 
@@ -421,9 +406,11 @@
       <div class="field"><span class="field-key fk">FK</span><span class="field-name">session_id</span><span class="field-type">→ game_sessions</span></div>
       <div class="field"><span class="field-key fk">FK</span><span class="field-name">question_id</span><span class="field-type">→ questions</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">player_name</span><span class="field-type">VARCHAR(64)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">player_token</span><span class="field-type">VARCHAR(64)</span><span class="field-note">anon ID</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">answer_given</span><span class="field-type">TEXT</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">is_correct</span><span class="field-type">TINYINT(1)</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">response_time_ms</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">points_earned</span><span class="field-type">SMALLINT</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">response_time_ms</span><span class="field-type">INT</span></div>
     </div>
   </div>
 
@@ -441,6 +428,7 @@
       <div class="field"><span class="field-key fk">FK</span><span class="field-name">teacher_id</span><span class="field-type">→ teachers</span></div>
       <div class="field"><span class="field-key fk">FK</span><span class="field-name">deck_id</span><span class="field-type">→ decks</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">saved_at</span><span class="field-type">TIMESTAMP</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">is_cloned</span><span class="field-type">TINYINT(1)</span><span class="field-note">own copy?</span></div>
     </div>
   </div>
 
@@ -461,11 +449,12 @@
       <div class="field"><span class="field-key pk">PK</span><span class="field-name">summary_id</span><span class="field-type">INT UNSIGNED</span></div>
       <div class="field"><span class="field-key fk">FK</span><span class="field-name">session_id</span><span class="field-type">→ game_sessions</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">player_name</span><span class="field-type">VARCHAR(64)</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">player_token</span><span class="field-type">VARCHAR(64)</span><span class="field-note">anon ID</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">final_score</span><span class="field-type">INT</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">rank</span><span class="field-type">SMALLINT</span><span class="field-note">leaderboard pos</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">accuracy_pct</span><span class="field-type">DECIMAL(5,2)</span><span class="field-note">correct / total</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">avg_response_ms</span><span class="field-type">INT UNSIGNED</span><span class="field-note">mean resp time</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">fastest_response_ms</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">avg_response_ms</span><span class="field-type">INT</span><span class="field-note">mean resp time</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">fastest_response_ms</span><span class="field-type">INT</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">longest_streak</span><span class="field-type">SMALLINT</span><span class="field-note">consec. correct</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">questions_answered</span><span class="field-type">SMALLINT</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">questions_correct</span><span class="field-type">SMALLINT</span></div>
@@ -483,12 +472,13 @@
       </div>
     </div>
     <div class="fields">
-      <div class="field"><span class="field-key pk">PK</span><span class="field-key fk">FK</span><span class="field-name">question_id</span><span class="field-type">→ questions</span></div>
+      <div class="field"><span class="field-key pk">PK</span><span class="field-name">metric_id</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">question_id</span><span class="field-type">→ questions</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">times_seen</span><span class="field-type">INT UNSIGNED</span><span class="field-note">total attempts</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">times_correct</span><span class="field-type">INT UNSIGNED</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">difficulty_index</span><span class="field-type">DECIMAL(5,2)</span><span class="field-note">% wrong (0–100)</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">avg_response_ms</span><span class="field-type">INT UNSIGNED</span><span class="field-note">avg time to answer</span></div>
-      <div class="field"><span class="field-name" style="padding-left:38px">answer_distribution</span><span class="field-type">JSON</span><span class="field-note">MC choice tallies</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">avg_response_ms</span><span class="field-type">INT</span><span class="field-note">avg time to answer</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">answer_dist</span><span class="field-type">JSON</span><span class="field-note">MC choice tallies</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">sessions_used_in</span><span class="field-type">INT UNSIGNED</span><span class="field-note">session count</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">last_updated</span><span class="field-type">TIMESTAMP</span></div>
     </div>
@@ -504,8 +494,10 @@
       </div>
     </div>
     <div class="fields">
-      <div class="field"><span class="field-key pk">PK</span><span class="field-key fk">FK</span><span class="field-name">deck_id</span><span class="field-type">→ decks</span></div>
+      <div class="field"><span class="field-key pk">PK</span><span class="field-name">bmetric_id</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-key fk">FK</span><span class="field-name">deck_id</span><span class="field-type">→ decks</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">total_sessions</span><span class="field-type">INT UNSIGNED</span></div>
+      <div class="field"><span class="field-name" style="padding-left:38px">total_players</span><span class="field-type">INT UNSIGNED</span><span class="field-note">all-time</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">avg_accuracy_pct</span><span class="field-type">DECIMAL(5,2)</span><span class="field-note">across all sessions</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">avg_session_score</span><span class="field-type">DECIMAL(8,2)</span></div>
       <div class="field"><span class="field-name" style="padding-left:38px">hardest_question_id</span><span class="field-type">INT UNSIGNED</span><span class="field-note">lowest acc. Q</span></div>
@@ -521,7 +513,6 @@
   <div class="rel-grid">
     <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>teachers</strong> (1) → (many) <strong>decks</strong> — a teacher owns multiple decks</span></div>
     <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>decks</strong> (1) → (many) <strong>questions</strong> — each deck holds many questions</span></div>
-    <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>math_decks</strong> (1) → (1) <strong>decks</strong> — math decks have only one entry in this table</span></div>
     <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>teachers</strong> (1) → (many) <strong>game_sessions</strong> — a teacher hosts many sessions</span></div>
     <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>decks</strong> (1) → (many) <strong>game_sessions</strong> — a deck can be used in many sessions</span></div>
     <div class="rel-item"><span class="rel-arrow">→</span><span class="rel-text"><strong>game_sessions</strong> (1) → (many) <strong>session_results</strong> — raw per-question, per-player data</span></div>
@@ -535,13 +526,12 @@
 <!-- Design Notes -->
 <div class="notes">
   <h2>Design Notes</h2>
-  <p><span class="tag tag-green">Public Decks</span> The <code>is_public</code> flag on <code>decks</code> is the core toggle. The server queries <code>WHERE is_public = 1</code> to show the shared library. The <code>deck_saves</code> table then lets teachers bookmark public decks for quick access. <!-- — or if <code>is_cloned = 1</code>, it signals the teacher made their own editable copy (a new row in <code>decks</code> owned by them, pointing to the same source questions or duplicated ones).--></p>
-  <p><span class="tag tag-blue">Passwords</span> Store only the <em>hash</em> of the password. Never the plaintext.</p>
-  <p><span class="tag tag-blue">Session Results</span> Players in this game are students who don't have accounts, so <code>session_results</code> identifies them by a display name and an anonymous session token rather than a foreign key to an accounts table. If we later add student accounts, we can add an optional FK column.</p>
+  <p><span class="tag tag-green">Public Decks</span> The <code>is_public</code> flag on <code>decks</code> is the core toggle. Your server queries <code>WHERE is_public = 1</code> to show the shared library. The <code>deck_saves</code> table then lets teachers bookmark public decks for quick access — or if <code>is_cloned = 1</code>, it signals the teacher made their own editable copy (a new row in <code>decks</code> owned by them, pointing to the same source questions or duplicated ones).</p>
+  <p><span class="tag tag-blue">Passwords</span> Store only the <em>hash</em> of the password (bcrypt recommended). Never the plaintext.</p>
+  <p><span class="tag tag-blue">Session Results</span> Players in this game are likely students who don't have accounts, so <code>session_results</code> identifies them by a display name and an anonymous session token rather than a foreign key to an accounts table. If you later add student accounts, you can add an optional FK column.</p>
   <p><span class="tag tag-blue">JSON Columns</span> <code>answer_options</code> (for multiple-choice arrays) and <code>session_config</code> (for per-session settings like time limits or randomization) are stored as JSON. MySQL 5.7+ handles this natively. This keeps the schema flexible without extra tables for every possible game setting.</p>
-  <p><span class="tag tag-green">Cloning Decks</span> When a teacher wants to edit a public deck they've saved, we'd duplicate the <code>decks</code> row and its child <code>questions</code> rows with the new teacher as <code>owner_id</code>. This keeps the original intact for other users.</p>
-  <p><span class="tag tag-orange">math_decks</span> Math decks are not stored as a series of questions; instead, details about the types of problems in the deck are stored, and the server generates new questions from these details each time the deck is used for a game. There is thus only one entry in the <code>math_decks</code> table for each math deck.</p>
-  <p><span class="tag tag-orange">session_summaries</span> These rows are written once — when the host ends the session — by a server-side process that aggregates <code>session_results</code>. Since the raw data is still in <code>session_results</code>, we can always recompute them if our formulas change. The <code>computed_at</code> timestamp lets us detect stale summaries.</p>
+  <p><span class="tag tag-green">Cloning Decks</span> When a teacher wants to edit a public deck they've saved, you'd duplicate the <code>decks</code> row and its child <code>questions</code> rows with the new teacher as <code>owner_id</code>. This keeps the original intact for other users.</p>
+  <p><span class="tag tag-orange">session_summaries</span> These rows are written once — when the host ends the session — by a server-side process that aggregates <code>session_results</code>. Since the raw data is still in <code>session_results</code>, you can always recompute them if your formulas change. The <code>computed_at</code> timestamp lets you detect stale summaries.</p>
   <p><span class="tag tag-orange">question_metrics</span> Rather than inserting a new row after every session, these should be upserted (INSERT … ON DUPLICATE KEY UPDATE in MySQL) so each question always has exactly one metrics row. The <code>difficulty_index</code> can be derived as <code>(times_seen - times_correct) / times_seen * 100</code>, but storing it directly makes filtering fast — e.g. "show me all questions harder than 70%". The <code>answer_dist</code> JSON column tallies how many players chose each MC option, which is what lets teachers spot misconception patterns.</p>
   <p><span class="tag tag-orange">deck_metrics</span> Stores the <code>hardest_question_id</code> and <code>easiest_question_id</code> as FKs back to <code>questions</code> so you can surface these in the teacher's deck overview without a costly subquery. The <code>save_count</code> mirrors the count of rows in <code>deck_saves</code> for that deck — useful as social proof in the public deck browser without a JOIN.</p>
   <p><span class="tag tag-blue">Naming Conventions</span> <strong>Database uses snake_case</strong> (session_id, teacher_id, deck_id) while <strong>code/README uses camelCase</strong> (sessionID, teacherID, deckID). <strong>Standardized terminology: "deck"</strong> — both UI/code AND database now use "deck" (not "bank"). The database table is <code>decks</code> and primary key is <code>deck_id</code>. When converting between layers, map: <code>deckID → deck_id</code>, <code>sessionID → session_id</code>, <code>teacherID → teacher_id/host_teacher_id</code>.</p>
