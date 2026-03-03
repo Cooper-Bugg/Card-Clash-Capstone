@@ -85,12 +85,20 @@ The live codebase currently uses a simplified mock model with `mockDecks[].conte
 The backend renders HTML directly with simplified JSON APIs for AI processing.
 
 ### Web Routes (Browser)
-* **GET** `/` - Home/Login redirect
-* **GET** `/login` - Teacher login page
+* **GET** `/` - Landing page — role selector (Student or Teacher)
+* **GET** `/teacher` - Teacher portal (Sign In / Create Account)
+* **GET** `/login` - Teacher login form
 * **POST** `/login` - Process authentication (form-based)
-* **GET** `/dashboard` - Teacher home (view history, start game)
-* **GET** `/game/play?deckID=1` - Serves the Unity WebGL client
+* **GET** `/register` - New account registration form
+* **POST** `/register` - Submit new account (ready for DB hookup)
+* **GET** `/dashboard` - Teacher home (deck list, session history)
+* **GET** `/deck/new` - Create a new deck
+* **GET** `/deck/:id/edit` - Edit an existing deck
+* **POST** `/deck` - Save deck to data store
+* **GET** `/sessions` - All past game sessions
 * **GET** `/report/:id` - View AI summary and metrics
+* **GET** `/game/play?deckID=1` - Serves the Unity WebGL client (Teacher)
+* **GET** `/join` - Student game view
 
 ### Data Routes (JSON) - Current Implementation
 * **POST** `/api/ai/summarize`
@@ -133,11 +141,26 @@ The backend renders HTML directly with simplified JSON APIs for AI processing.
 ## 8. Development Notes
 
 ### File Structure
-* **`app.js`** - Main Express server with routes and middleware
-* **`data.js`** - Mock data layer (to be replaced with MySQL queries)
-* **`views/*.ejs`** - Server-side rendered HTML templates
-* **`public/`** - Static assets (CSS, fonts, Unity builds)
-* **`Documentation/`** - Architecture docs and database schema visual
+* **`Backend/app.js`** - Main Express server with routes, auth, and middleware
+* **`Backend/mockdata.js`** - Mock data layer (currently active — replace with DB queries)
+* **`Backend/database.js`** - MySQL connection pool (ready, not yet active)
+* **`Backend/database.sql`** - MySQL schema and table definitions
+* **`Frontend/public/styles.css`** - Main stylesheet with full dark mode support
+* **`Frontend/public/darkmode.js`** - Dark mode toggle with localStorage persistence
+* **`Frontend/public/fonts/`** - Andika font files (TTF, all weights)
+* **`Frontend/public/Unity/`** - Unity WebGL build (index.html + Build/ assets)
+* **`Frontend/views/*.ejs`** - Server-side rendered HTML templates
+  * `index.ejs` — Landing (role selector)
+  * `teacher.ejs` — Teacher portal (Sign In / Create Account)
+  * `login.ejs` — Teacher sign in
+  * `register.ejs` — Teacher registration
+  * `dashboard.ejs` — Teacher dashboard
+  * `deck.ejs` — Deck editor with math generator
+  * `game.ejs` — Teacher Unity game view
+  * `student.ejs` — Student Unity game view
+  * `sessions.ejs` — Past sessions list
+  * `report.ejs` — Session report + AI summary
+* **`Documentation/`** - Architecture docs, SRS, presentation notes, and DB schema visual
 
 ### Migration Path
 Current mock implementation → Production MySQL schema:

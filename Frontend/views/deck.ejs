@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= pageTitle %> | Card Clash</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/darkmode.js"></script>
+  </head>
+  <body class="page">
+    <div class="background-glow"></div>
+    <header class="top-bar">
+      <div class="brand">
+        <div class="brand-title">Card Clash</div>
+        <div class="brand-subtitle">Deck Builder</div>
+      </div>
+      <nav class="top-nav">
+        <a class="nav-link" href="/dashboard">Dashboard</a>
+        <a class="nav-link is-active" href="/deck/new">Create Deck</a>
+        <a class="nav-link" href="/sessions">Sessions</a>
+        <button id="darkModeBtn" type="button" class="btn-darkmode">Dark Mode</button>
+        <form method="post" action="/logout" style="margin: 0;">
+          <button class="nav-link nav-link--danger" type="submit">Log Out</button>
+        </form>
+      </nav>
+    </header>
+
+    <main class="page-shell">
+      <section class="panel hero-panel">
+        <div>
+          <h1>
+            <% if (mode === "edit") { %>
+              Edit Deck
+            <% } else { %>
+              Create a New Deck
+            <% } %>
+          </h1>
+          <p>Select a question from the sidebar to edit its properties.</p>
+        </div>
+        <a class="btn btn-primary btn-compact" href="/dashboard">Return to Dashboard</a>
+      </section>
+
+      <section class="deck-editor-panel">
+        <form id="deckForm" class="form" method="post" action="/deck">
+          <input type="hidden" name="id" value="<%= deck.id || "" %>" />
+
+          <div class="panel-header">
+            <label class="form-field" style="width: 100%; max-width: 400px; margin: 0;">
+              <span>Deck Title</span>
+              <input type="text" name="title" value="<%= deck.title %>" required />
+            </label>
+            <div class="form-actions" style="margin-top: 0;">
+              <button class="btn btn-primary" type="submit">Save Deck</button>
+            </div>
+          </div>
+
+          <textarea
+            id="contentJson"
+            name="contentJson"
+            class="visually-hidden"
+          ><%= deck.contentJson %></textarea>
+
+          <section class="math-generator-panel">
+            <div class="math-generator-header">
+              <h2>Basic Math Generator</h2>
+              <button type="button" id="toggleMathGeneratorBtn" class="btn btn-primary btn-compact">Show</button>
+            </div>
+            <div id="mathGeneratorBody" class="math-generator-body is-collapsed">
+            <div class="math-generator-grid">
+              <label class="form-field">
+                <span>Question Type</span>
+                <select id="generatorQuestionType">
+                  <option value="multiple_choice">Multiple Choice</option>
+                  <option value="true_false">True / False</option>
+                  <option value="fill_blank">Fill in the Blank</option>
+                </select>
+              </label>
+
+              <div class="form-field">
+                <span>Select Operators</span>
+                <div class="operator-toggle-group">
+                  <label class="operator-toggle"><input type="checkbox" name="operations" value="+" /><span>+</span></label>
+                  <label class="operator-toggle"><input type="checkbox" name="operations" value="-" /><span>−</span></label>
+                  <label class="operator-toggle"><input type="checkbox" name="operations" value="x" /><span>×</span></label>
+                  <label class="operator-toggle"><input type="checkbox" name="operations" value="÷" /><span>÷</span></label>
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer;">
+                  <input type="checkbox" id="allowNegatives" />
+                  <span>Allow Negative Answers</span>
+                </label>
+              </div>
+
+              <div class="range-row">
+                <label class="form-field">
+                  <span>Lowest Number</span>
+                  <input id="minRange" type="number" value="0" />
+                </label>
+                <label class="form-field">
+                  <span>Highest Number</span>
+                  <input id="maxRange" type="number" value="12" />
+                </label>
+                <label class="form-field">
+                  <span># of Questions</span>
+                  <input id="questionCount" type="number" value="8" min="1" max="50" />
+                </label>
+              </div>
+            </div>
+
+            <div class="math-generator-actions">
+              <button type="button" id="generateMathDeckBtn" class="btn btn-primary">Generate Math Deck</button>
+            </div>
+            <div id="generatorPreview" class="generator-preview"></div>
+            </div><!-- /#mathGeneratorBody -->
+          </section>
+
+          <div class="deck-editor-layout">
+            <aside class="editor-sidebar">
+              <div class="sidebar-header">
+                <h3>Questions</h3>
+                <button type="button" id="addQuestionBtn" class="btn btn-primary btn-compact">Add</button>
+              </div>
+              <div id="questionList" class="question-nav-list"></div>
+            </aside>
+
+            <section id="questionDetail" class="editor-detail"></section>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      const jsonField = document.getElementById("contentJson");
+      const questionListContainer = document.getElementById("questionList");
+      const questionDetailContainer = document.getElementById("questionDetail");
+      const addQuestionBtn = document.getElementById("addQuestionBtn");
+
+      const QUESTION_TYPES = {
+        MULTIPLE_CHOICE: "multiple_choice",
+        TRUE_FALSE: "true_false",
+        FILL_BLANK: "fill_blank"
+      };
+
+      let deckData = { questions: [] };
+      let activeIndex = 0;
+
+      function buildEmptyQuestion() {
+        return {
+          questionType: QUESTION_TYPES.MULTIPLE_CHOICE,
+          questionText: "",
+          optionA: "",
+          optionB: "",
+          optionC: "",
+          optionD: "",
+          correctAnswer: "A",
+          correctAnswerText: ""
+        };
+      }
+
+      function normalizeQuestion(question) {
+        const merged = { ...buildEmptyQuestion(), ...question };
+
+        if (!Object.values(QUESTION_TYPES).includes(merged.questionType)) {
+          merged.questionType = QUESTION_TYPES.MULTIPLE_CHOICE;
+        }
+
+        if (merged.questionType === QUESTION_TYPES.TRUE_FALSE) {
+          const normalized = String(merged.correctAnswer || "true").toLowerCase();
+          merged.correctAnswer = normalized === "false" ? "false" : "true";
+          merged.optionA = "True";
+          merged.optionB = "False";
+          merged.optionC = "";
+          merged.optionD = "";
+        }
+
+        if (merged.questionType === QUESTION_TYPES.FILL_BLANK) {
+          if (!merged.correctAnswerText && merged.correctAnswer) {
+            merged.correctAnswerText = String(merged.correctAnswer);
+          }
+          merged.correctAnswer = "";
+          merged.optionA = "";
+          merged.optionB = "";
+          merged.optionC = "";
+          merged.optionD = "";
+        }
+
+        return merged;
+      }
+
+      function loadInitialData() {
+        try {
+          const parsed = JSON.parse(jsonField.value);
+          if (parsed && Array.isArray(parsed.questions)) {
+            deckData.questions = parsed.questions.map((q) => normalizeQuestion(q));
+          }
+        } catch (error) {
+          console.warn("Failed to parse initial deck JSON. Defaulting to empty array.");
+        }
+
+        if (deckData.questions.length === 0) {
+          appendEmptyQuestion();
+        }
+      }
+
+      function syncDataToField() {
+        jsonField.value = JSON.stringify(deckData, null, 2);
+      }
+
+      function appendEmptyQuestion() {
+        deckData.questions.push(buildEmptyQuestion());
+      }
+
+      function updateActiveQuestionProperty(key, value) {
+        if (deckData.questions[activeIndex]) {
+          deckData.questions[activeIndex][key] = value;
+          syncDataToField();
+        }
+      }
+
+      function removeQuestion(indexToRemove) {
+        deckData.questions.splice(indexToRemove, 1);
+
+        if (deckData.questions.length === 0) {
+          appendEmptyQuestion();
+          activeIndex = 0;
+        } else if (activeIndex >= deckData.questions.length) {
+          activeIndex = deckData.questions.length - 1;
+        } else if (activeIndex === indexToRemove) {
+          activeIndex = Math.max(0, indexToRemove - 1);
+        }
+
+        syncDataToField();
+        renderInterface();
+      }
+
+      function setQuestionType(newType) {
+        const question = deckData.questions[activeIndex];
+        if (!question || !Object.values(QUESTION_TYPES).includes(newType)) {
+          return;
+        }
+
+        question.questionType = newType;
+
+        if (newType === QUESTION_TYPES.MULTIPLE_CHOICE) {
+          question.correctAnswer = ["A", "B", "C", "D"].includes(question.correctAnswer) ? question.correctAnswer : "A";
+        }
+
+        if (newType === QUESTION_TYPES.TRUE_FALSE) {
+          question.optionA = "True";
+          question.optionB = "False";
+          question.optionC = "";
+          question.optionD = "";
+          question.correctAnswer = String(question.correctAnswer || "true").toLowerCase() === "false" ? "false" : "true";
+        }
+
+        if (newType === QUESTION_TYPES.FILL_BLANK) {
+          question.optionA = "";
+          question.optionB = "";
+          question.optionC = "";
+          question.optionD = "";
+          question.correctAnswerText = question.correctAnswerText || "";
+          question.correctAnswer = "";
+        }
+
+        syncDataToField();
+        renderInterface();
+      }
+
+      function randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function chooseRandom(items) {
+        return items[Math.floor(Math.random() * items.length)];
+      }
+
+      function shuffle(values) {
+        const copy = [...values];
+        for (let i = copy.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function buildMathQuestion(questionType, operations, minValue, maxValue, allowNegatives) {
+        const op = chooseRandom(operations);
+        let first = randomInt(minValue, maxValue);
+        let second = randomInt(minValue, maxValue);
+        let prompt = "";
+        let answer = 0;
+
+        if (op === "+") {
+          prompt = `What is ${first} + ${second}?`;
+          answer = first + second;
+        } else if (op === "-") {
+          if (!allowNegatives && first < second) { [first, second] = [second, first]; }
+          prompt = `What is ${first} - ${second}?`;
+          answer = first - second;
+        } else if (op === "x") {
+          prompt = `What is ${first} × ${second}?`;
+          answer = first * second;
+        } else if (op === "÷") {
+          second = randomInt(Math.max(1, minValue), Math.max(1, maxValue));
+          const quotient = randomInt(minValue, maxValue);
+          first = second * quotient;
+          prompt = `What is ${first} ÷ ${second}?`;
+          answer = quotient;
+        }
+
+        const question = {
+          ...buildEmptyQuestion(),
+          questionType,
+          questionText: prompt,
+          minValue,
+          maxValue,
+          operation: op,
+          generatedBy: "math-generator"
+        };
+
+        if (questionType === QUESTION_TYPES.MULTIPLE_CHOICE) {
+          const distractorSet = new Set([answer]);
+          while (distractorSet.size < 4) {
+            const drift = randomInt(1, Math.max(3, Math.round(Math.abs(answer) * 0.25) + 2));
+            const direction = Math.random() > 0.5 ? 1 : -1;
+            distractorSet.add(answer + drift * direction);
+          }
+          const optionValues = shuffle([...distractorSet]).slice(0, 4);
+          question.optionA = String(optionValues[0]);
+          question.optionB = String(optionValues[1]);
+          question.optionC = String(optionValues[2]);
+          question.optionD = String(optionValues[3]);
+          const answerIndex = optionValues.findIndex((v) => v === answer);
+          question.correctAnswer = ["A", "B", "C", "D"][answerIndex === -1 ? 0 : answerIndex];
+        } else if (questionType === QUESTION_TYPES.TRUE_FALSE) {
+          const displayAnswer = Math.random() > 0.5 ? answer : answer + chooseRandom([-2, -1, 1, 2]);
+          question.questionText = `${prompt.replace("?", "")} = ${displayAnswer}.`;
+          question.optionA = "True";
+          question.optionB = "False";
+          question.correctAnswer = String(displayAnswer === answer);
+        } else {
+          question.questionText = prompt.replace("What is", "Solve").replace("?", "") + " = __";
+          question.correctAnswerText = String(answer);
+          question.correctAnswer = "";
+        }
+
+        return question;
+      }
+
+      function generateMathDeck() {
+        const questionType = document.getElementById("generatorQuestionType").value;
+        const minValue = Number.parseInt(document.getElementById("minRange").value, 10);
+        const maxValue = Number.parseInt(document.getElementById("maxRange").value, 10);
+        const questionCount = Number.parseInt(document.getElementById("questionCount").value, 10);
+        const selectedOps = [...document.querySelectorAll('input[name="operations"]:checked')].map((input) => input.value);
+        const allowNegatives = document.getElementById("allowNegatives").checked;
+        const previewContainer = document.getElementById("generatorPreview");
+
+        if (!selectedOps.length) {
+          previewContainer.innerHTML = '<p class="generator-message">Select at least one operation.</p>';
+          return;
+        }
+
+        if (Number.isNaN(minValue) || Number.isNaN(maxValue) || minValue > maxValue) {
+          previewContainer.innerHTML = '<p class="generator-message">Enter a valid number range.</p>';
+          return;
+        }
+
+        if (Number.isNaN(questionCount) || questionCount < 1 || questionCount > 50) {
+          previewContainer.innerHTML = '<p class="generator-message">Question count must be between 1 and 50.</p>';
+          return;
+        }
+
+        deckData.questions = [];
+        for (let i = 0; i < questionCount; i += 1) {
+          deckData.questions.push(buildMathQuestion(questionType, selectedOps, minValue, maxValue, allowNegatives));
+        }
+
+        activeIndex = 0;
+        syncDataToField();
+        renderInterface();
+        renderGeneratedPreview();
+      }
+
+      function renderGeneratedPreview() {
+        const previewContainer = document.getElementById("generatorPreview");
+        previewContainer.innerHTML = "";
+
+        if (!deckData.questions.length) { return; }
+
+        const list = document.createElement("ol");
+        list.className = "generated-preview-list";
+
+        deckData.questions.slice(0, 5).forEach((question) => {
+          const item = document.createElement("li");
+          item.textContent = question.questionText;
+          list.appendChild(item);
+        });
+
+        const hint = document.createElement("p");
+        hint.className = "generator-message";
+        hint.textContent = deckData.questions.length > 5
+          ? `Showing 5 of ${deckData.questions.length} generated questions.`
+          : `Showing all ${deckData.questions.length} generated questions.`;
+
+        previewContainer.appendChild(list);
+        previewContainer.appendChild(hint);
+      }
+
+      function renderSidebar() {
+        questionListContainer.innerHTML = "";
+
+        for (let i = 0; i < deckData.questions.length; i += 1) {
+          const navItem = document.createElement("button");
+          navItem.type = "button";
+          navItem.className = "question-nav-item";
+          if (i === activeIndex) { navItem.classList.add("is-active"); }
+          navItem.textContent = `Question ${i + 1}`;
+          navItem.addEventListener("click", () => {
+            activeIndex = i;
+            renderInterface();
+          });
+          questionListContainer.appendChild(navItem);
+        }
+      }
+
+      function renderQuestionTypeControls(currentQuestion) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "question-type-toggle";
+
+        const label = document.createElement("label");
+        label.className = "form-field";
+        const span = document.createElement("span");
+        span.textContent = "Question Type";
+
+        const select = document.createElement("select");
+        const typeOptions = [
+          { label: "Multiple Choice", value: QUESTION_TYPES.MULTIPLE_CHOICE },
+          { label: "True / False",    value: QUESTION_TYPES.TRUE_FALSE },
+          { label: "Fill in the Blank", value: QUESTION_TYPES.FILL_BLANK }
+        ];
+
+        typeOptions.forEach((optionConfig) => {
+          const option = document.createElement("option");
+          option.value = optionConfig.value;
+          option.textContent = optionConfig.label;
+          option.selected = currentQuestion.questionType === optionConfig.value;
+          select.appendChild(option);
+        });
+
+        select.addEventListener("change", (event) => setQuestionType(event.target.value));
+        label.appendChild(span);
+        label.appendChild(select);
+        wrapper.appendChild(label);
+        return wrapper;
+      }
+
+      function renderDetailPane() {
+        questionDetailContainer.innerHTML = "";
+
+        const currentQuestion = deckData.questions[activeIndex];
+        if (!currentQuestion) {
+          questionDetailContainer.innerHTML = `<div class="editor-empty-state">No question selected.</div>`;
+          return;
+        }
+
+        const headerDiv = document.createElement("div");
+        headerDiv.className = "question-header";
+
+        const title = document.createElement("h2");
+        title.textContent = `Editing Question ${activeIndex + 1}`;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "btn btn-primary btn-compact";
+        removeBtn.textContent = "Delete Question";
+        removeBtn.addEventListener("click", () => removeQuestion(activeIndex));
+
+        headerDiv.appendChild(title);
+        headerDiv.appendChild(removeBtn);
+
+        const promptLabel = document.createElement("label");
+        promptLabel.className = "form-field";
+        const promptSpan = document.createElement("span");
+        promptSpan.textContent = "Question Prompt";
+        const promptInput = document.createElement("input");
+        promptInput.type = "text";
+        promptInput.value = currentQuestion.questionText;
+        promptInput.addEventListener("input", (e) => updateActiveQuestionProperty("questionText", e.target.value));
+        promptLabel.appendChild(promptSpan);
+        promptLabel.appendChild(promptInput);
+
+        questionDetailContainer.appendChild(headerDiv);
+        questionDetailContainer.appendChild(renderQuestionTypeControls(currentQuestion));
+        questionDetailContainer.appendChild(promptLabel);
+
+        if (currentQuestion.questionType === QUESTION_TYPES.MULTIPLE_CHOICE) {
+          const options = ["A", "B", "C", "D"];
+          const optionKeys = ["optionA", "optionB", "optionC", "optionD"];
+
+          const answerSection = document.createElement("div");
+          answerSection.className = "answer-section";
+
+          const answerHeader = document.createElement("div");
+          answerHeader.className = "answer-header";
+          answerHeader.textContent = "Answer Options";
+          answerSection.appendChild(answerHeader);
+
+          const answerList = document.createElement("div");
+          answerList.className = "answer-list";
+
+          for (let j = 0; j < options.length; j += 1) {
+            const rowDiv = document.createElement("div");
+            rowDiv.className = "answer-row";
+
+            const radioInput = document.createElement("input");
+            radioInput.type = "radio";
+            radioInput.name = "correctAnswerSelect";
+            radioInput.value = options[j];
+            radioInput.checked = currentQuestion.correctAnswer === options[j];
+            radioInput.addEventListener("change", (e) => updateActiveQuestionProperty("correctAnswer", e.target.value));
+
+            const letterSpan = document.createElement("span");
+            letterSpan.className = "answer-label";
+            letterSpan.textContent = options[j];
+
+            const textInput = document.createElement("input");
+            textInput.type = "text";
+            textInput.value = currentQuestion[optionKeys[j]];
+            textInput.addEventListener("input", (e) => updateActiveQuestionProperty(optionKeys[j], e.target.value));
+
+            rowDiv.appendChild(radioInput);
+            rowDiv.appendChild(letterSpan);
+            rowDiv.appendChild(textInput);
+            answerList.appendChild(rowDiv);
+          }
+
+          answerSection.appendChild(answerList);
+          questionDetailContainer.appendChild(answerSection);
+
+        } else if (currentQuestion.questionType === QUESTION_TYPES.TRUE_FALSE) {
+          const trueFalseSection = document.createElement("div");
+          trueFalseSection.className = "answer-section";
+
+          const header = document.createElement("div");
+          header.className = "answer-header";
+          header.textContent = "Correct Answer";
+          trueFalseSection.appendChild(header);
+
+          const row = document.createElement("div");
+          row.className = "true-false-row";
+
+          ["true", "false"].forEach((optionValue) => {
+            const label = document.createElement("label");
+            label.className = "tf-option";
+            const input = document.createElement("input");
+            input.type = "radio";
+            input.name = "trueFalseAnswer";
+            input.value = optionValue;
+            input.checked = String(currentQuestion.correctAnswer).toLowerCase() === optionValue;
+            input.addEventListener("change", (event) => updateActiveQuestionProperty("correctAnswer", event.target.value));
+
+            const text = document.createElement("span");
+            text.textContent = optionValue === "true" ? "True" : "False";
+
+            label.appendChild(input);
+            label.appendChild(text);
+            row.appendChild(label);
+          });
+
+          trueFalseSection.appendChild(row);
+          questionDetailContainer.appendChild(trueFalseSection);
+
+        } else {
+          const fillLabel = document.createElement("label");
+          fillLabel.className = "form-field";
+          const span = document.createElement("span");
+          span.textContent = "Correct Answer";
+          const input = document.createElement("input");
+          input.type = "text";
+          input.value = currentQuestion.correctAnswerText || "";
+          input.addEventListener("input", (event) => updateActiveQuestionProperty("correctAnswerText", event.target.value));
+          fillLabel.appendChild(span);
+          fillLabel.appendChild(input);
+          questionDetailContainer.appendChild(fillLabel);
+        }
+      }
+
+      function renderInterface() {
+        renderSidebar();
+        renderDetailPane();
+      }
+
+      addQuestionBtn.addEventListener("click", () => {
+        appendEmptyQuestion();
+        activeIndex = deckData.questions.length - 1;
+        syncDataToField();
+        renderInterface();
+      });
+
+      document.getElementById("toggleMathGeneratorBtn").addEventListener("click", function () {
+        const body = document.getElementById("mathGeneratorBody");
+        const isHidden = body.classList.toggle("is-collapsed");
+        this.textContent = isHidden ? "Show" : "Hide";
+      });
+
+      document.getElementById("generateMathDeckBtn").addEventListener("click", generateMathDeck);
+
+      loadInitialData();
+      renderInterface();
+      renderGeneratedPreview();
+      syncDataToField();
+    </script>
+  </body>
+</html>

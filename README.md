@@ -2,7 +2,60 @@
 
 Card Clash is an educational party game. A teacher hosts a session and students join with a short code. Gameplay runs in real time via Photon Cloud. When the game ends, the Teacher client uploads the game log and the backend generates a 3-paragraph AI summary.
 
-To run locally: `npm install && npm start` then open `https://localhost:3000`. No database required.
+**To run locally:** Navigate to `Backend/` (where `app.js` is located — our Node.js/Express server), then run:
+
+```bash
+cd Backend
+npm install
+npm start
+```
+
+Open `https://localhost:3000` in your browser. No database required for local development.
+
+---
+
+## Features
+
+### Deck Builder
+Teachers can create and edit flashcard decks with three question types:
+- **Multiple Choice** — four answer options, one correct answer
+- **True / False** — students pick true or false
+- **Fill in the Blank** — students type the correct answer
+
+### Basic Math Generator
+The deck builder includes a built-in math question generator. Select the operators you want (`+`, `−`, `×`, `÷`), set a number range and how many questions to generate, then click **Generate Math Deck**. The generator creates randomized math problems with plausible distractors for multiple choice, or correct/incorrect statements for true/false.
+
+**Features:**
+- **Operator Selection** — Choose which operations to include (addition, subtraction, multiplication, division)
+- **Number Range** — Set minimum and maximum values for generated numbers
+- **Negative Answers** — Optional checkbox to allow negative results in subtraction (default: disabled, automatically swaps operands to avoid negatives)
+- **Question Count** — Generate 1-50 questions at once
+- **Preview** — See a sample of generated questions before adding them to your deck
+
+### AI Question Generation *(Coming Soon)*
+AI-powered question generation will allow teachers to describe a topic and have the system automatically produce a full deck of quiz questions. This feature is planned for a future release.
+
+### AI Session Reports
+After each game session, the backend sends the game log to an LLM and generates a 3-paragraph summary covering performance, trends, and next steps. Reports are available in the Sessions view.
+
+### Dark Mode
+Full dark mode support across all pages with a toggle button. Dark mode preference is saved to browser localStorage and persists across sessions. All UI elements, including panels, buttons, and text, maintain proper contrast and readability in both light and dark themes.
+
+### Teacher Account Management
+- **Landing Page** — Choose between Student or Teacher role
+- **Teacher Portal** — Sign in or create a new account
+- **Registration** — New teachers can create accounts with username, email, and password
+- **Authentication** — Session-based login with secure logout
+
+---
+
+## Known Bugs
+
+### Math Generator
+- **Input Focus Glow Clipping** — The focus outline/glow on input fields (e.g., "Lowest Number") renders partially under the side padding of the math generator panel. The glow should appear fully on top of the panel boundaries. *(Note: `overflow: visible` has been added but may need additional z-index or padding adjustments)*
+
+### General
+- *Add known bugs here as they are discovered*
 
 ---
 
@@ -15,9 +68,10 @@ To run locally: `npm install && npm start` then open `https://localhost:3000`. N
 
 ### Install and run
 
-Install dependencies:
+Navigate to the `Backend/` directory (where `app.js` is located — our Node.js/Express server) and install dependencies:
 
 ```bash
+cd Backend
 npm install
 npm start
 ```
@@ -44,11 +98,11 @@ kill -9 <PID>
 
 ### Unity WebGL build
 
-The Unity build is already in `public/Unity/`. If you export a new build, drop the files there — it needs an `index.html` at the root. The server serves it at `/Unity/index.html` and handles Brotli-compressed assets (`.wasm.br`, `.js.br`, `.data.br`) automatically.
+The Unity build is already in `Frontend/public/Unity/`. If you export a new build, drop the files there — it needs an `index.html` at the root. The server serves it at `/Unity/index.html` and handles Brotli-compressed assets (`.wasm.br`, `.js.br`, `.data.br`) automatically.
 
 ### Database Setup (MySQL)
 
-The app uses mock data in `data.js` by default and runs without a database. Only do this if you're working on database integration.
+The app uses mock data in `Backend/mockdata.js` by default and runs without a database. Only do this if you're working on database integration.
 
 ---
 
@@ -69,7 +123,7 @@ The app uses mock data in `data.js` by default and runs without a database. Only
 - **Realtime** — Photon PUN 2 (Photon Cloud). The Teacher's Unity client is the authoritative host for game logic, scoring, and timing. The backend handles storage and AI only.
 - **Database** — MySQL (OSU server). JSON columns for game logs and deck content to avoid complex joins.
 - **AI** — LLM generates a 3-paragraph summary from the uploaded game log. Must complete within 60 seconds (NFR-2).
-- **Hosting** — Dashboard + API on OSU Node.js server, DB on OSU MySQL. Unity WebGL served statically from `public/Unity/`.
+- **Hosting** — Dashboard + API on OSU Node.js server, DB on OSU MySQL. Unity WebGL served statically from `Frontend/public/Unity/`.
 
 HTTPS is required. Photon uses WSS/443 — classroom networks need outbound 443 open.
 
@@ -164,18 +218,22 @@ The backend mostly serves HTML. JSON endpoints are limited to auth and game data
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/` | Login page |
+| GET | `/` | Landing page — role selector |
+| GET | `/teacher` | Teacher portal (Sign In / Create Account) |
+| GET | `/login` | Teacher login form |
+| POST | `/login` | Authenticate and set session cookie |
+| GET | `/register` | New account registration |
+| POST | `/register` | Submit new account |
 | GET | `/dashboard` | Teacher dashboard |
-| GET | `/game/play` | Unity WebGL player |
-| GET | `/report/:id` | Game report |
+| GET | `/sessions` | All past game sessions |
+| GET | `/report/:id` | Game report + AI summary |
+| GET | `/deck/new` | Create a new deck |
+| GET | `/deck/:id/edit` | Edit an existing deck |
+| POST | `/deck` | Save deck |
+| GET | `/game/play` | Unity WebGL game view (Teacher) |
+| GET | `/join` | Unity WebGL game view (Student) |
 
 ### Data routes
-
-**POST /api/login**
-```json
-{ "username": "...", "password": "..." }
-```
-Sets a session cookie on success.
 
 **GET /api/decks**
 ```json
@@ -191,6 +249,10 @@ Triggered by Unity when the game ends. Saves the log and starts async LLM proces
 ```json
 { "reportId": 101, "status": "PROCESSING" }
 ```
+
+**POST /api/ai/summarize** — Triggers Ollama AI analysis (stub, not yet connected)
+
+**GET /api/ai/report/:sessionID** — Returns cached AI report for a session
 
 ---
 
@@ -225,7 +287,7 @@ The primary focus is gameplay mechanics and real-time sync for the presentation.
 
 If we want to be more secure for after the demo, you'll need to:
 - Replace hardcoded logins with secure database authentication
-- Add request validation middleware across the Node backend, React web app, and Unity client
+- Add request validation middleware across the Node backend, EJS views, and Unity client
 
 ---
 
@@ -233,37 +295,55 @@ If we want to be more secure for after the demo, you'll need to:
 
 ```
 Card-Clash-Repo/
-├── app.js                  # Express server — routes, auth, API
-├── data.js                 # Mock data layer (swap with MySQL queries later)
-├── schema.sql              # MySQL schema and table definitions
-├── package.json
-├── .env                    # Local environment variables (not committed)
+├── Backend/                # Node.js/Express server
+│   ├── app.js              # Main server file — routes, auth, API
+│   ├── database.js         # MySQL connection pool (ready, not active)
+│   ├── database.sql        # MySQL schema and table definitions
+│   ├── mockdata.js         # Mock data layer (currently active)
+│   ├── package.json        # Node dependencies
+│   └── node_modules/       # Installed by npm install — do not edit
+│
+├── Frontend/
+│   ├── public/
+│   │   ├── styles.css      # Main stylesheet with dark mode support
+│   │   ├── darkmode.js     # Dark mode toggle logic with localStorage
+│   │   ├── fonts/          # Andika font files
+│   │   │   └── Andika/     # TTF files for all weights
+│   │   └── Unity/          # Unity WebGL build
+│   │       ├── index.html
+│   │       └── Build/
+│   │           ├── WebGL_Dev_Build.data
+│   │           ├── WebGL_Dev_Build.framework.js
+│   │           ├── WebGL_Dev_Build.loader.js
+│   │           └── WebGL_Dev_Build.wasm
+│   │
+│   └── views/              # EJS templates
+│       ├── index.ejs       # Landing page (Student vs Teacher)
+│       ├── teacher.ejs     # Teacher portal (Sign In / Create Account)
+│       ├── login.ejs       # Teacher sign in
+│       ├── register.ejs    # Teacher registration
+│       ├── dashboard.ejs   # Teacher dashboard
+│       ├── deck.ejs        # Deck editor with math generator
+│       ├── game.ejs        # Teacher game view
+│       ├── student.ejs     # Student game view
+│       ├── sessions.ejs    # Past sessions list
+│       └── report.ejs      # Session report + AI summary
 │
 ├── certs/                  # Auto-generated self-signed HTTPS cert
-├── node_modules/           # Installed by npm install — do not edit
+│   ├── localhost-cert.pem
+│   └── localhost-key.pem
 │
-├── public/
-│   ├── styles.css
-│   ├── fonts/              # Andika font files
-│   └── Unity/              # Unity WebGL build
-│       ├── index.html
-│       ├── Build/
-│       └── TemplateData/
+├── Documentation/
+│   ├── ARCHITECTURE.md
+│   ├── SRS.md
+│   ├── Presentation.md
+│   ├── Tasks1-3.docx
+│   └── Market_Research/
 │
-├── views/                  # EJS templates
-│   ├── index.ejs           # Landing page
-│   ├── login.ejs           # Teacher login
-│   ├── dashboard.ejs       # Teacher dashboard
-│   ├── deck.ejs            # Deck editor
-│   ├── game.ejs            # Teacher game view
-│   ├── student.ejs         # Student game view
-│   ├── sessions.ejs        # Past sessions list
-│   └── report.ejs          # Session report + AI summary
-│
-└── Documentation/
-    ├── ARCHITECTURE.md
-    ├── SRS.md
-    └── Tasks1-3.docx
+├── .env                    # Local environment variables (not committed)
+├── .gitignore
+├── LICENSE
+└── README.md
 ```
 
 ---

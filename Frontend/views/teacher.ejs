@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Teacher Portal | Card Clash</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/darkmode.js"></script>
+  </head>
+  <body class="page page-login">
+    <div class="background-glow"></div>
+    <div class="login-midline"></div>
+    <div class="login-layout">
+      <div class="login-brand">
+        <div class="brand-title">Card Clash</div>
+      </div>
+      <section class="panel login-panel">
+        <div>
+          <h1>Teacher Portal</h1>
+          <p>Sign in to your existing account or create a new one to get started.</p>
+        </div>
+        <div class="form-actions" style="margin-top: 1.5rem; flex-direction: column; gap: 14px;">
+          <div style="display: flex; gap: 12px; width: 100%;">
+            <a class="btn btn-primary" href="/login" style="flex: 1; justify-content: center;">Sign In</a>
+            <a class="btn btn-primary" href="/register" style="flex: 1; justify-content: center;">Create Account</a>
+          </div>
+          <div style="display: flex; gap: 12px; width: 100%;">
+            <a class="btn btn-primary nav-link--danger" href="/" style="flex: 1; justify-content: center;">&#8592; Back to Home</a>
+            <button id="darkModeBtn" type="button" class="btn-darkmode" style="flex: 1;">Dark Mode</button>
+          </div>
+        </div>
+      </section>
+    </div>
+    <script>
+      const togglePassword = document.getElementById("togglePassword");
+    </script>
+  </body>
+</html>
