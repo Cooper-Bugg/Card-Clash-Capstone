@@ -7,7 +7,7 @@
   </head>
   <body style="text-align: center; padding: 0; border: 0; margin: 0;">
     <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1" style="width: 1920px; height: 1080px; background: #231F20"></canvas>
-    <script src="Build/WebGL_Dev_Build.loader.js"></script>
+    <script src="Build/Senior_Capstone.loader.js"></script>
     <script>
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         // Mobile device style: fill the whole browser client area with the game canvas:
@@ -25,9 +25,9 @@
       }
 
       createUnityInstance(document.querySelector("#unity-canvas"), {
-        dataUrl: "Build/WebGL_Dev_Build.data",
-        frameworkUrl: "Build/WebGL_Dev_Build.framework.js",
-        codeUrl: "Build/WebGL_Dev_Build.wasm",
+        dataUrl: "Build/Senior_Capstone.data",
+        frameworkUrl: "Build/Senior_Capstone.framework.js",
+        codeUrl: "Build/Senior_Capstone.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "2nd-Floor-Studios",
         productName: "CardClash",
