@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Create Account | Card Clash</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/darkmode.js"></script>
+  </head>
+  <body class="page page-login">
+    <div class="background-glow"></div>
+    <div class="login-midline"></div>
+    <div class="login-layout">
+      <div class="login-brand">
+        <div class="brand-title">Card Clash</div>
+      </div>
+      <section class="panel login-panel">
+        <div>
+          <h1>Create Account</h1>
+          <p>Set up your teacher account to manage decks and sessions.</p>
+        </div>
+        <form class="form" method="post" action="/register">
+          <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
+            <div style="background: rgba(230,57,70,0.12); border: 1px solid var(--coral); border-radius: 10px; padding: 10px 14px; color: var(--coral); font-weight: 600;">
+              <%= errorMessage %>
+            </div>
+          <% } %>
+          <% if (typeof successMessage !== 'undefined' && successMessage) { %>
+            <div style="background: rgba(29,53,87,0.08); border: 1px solid #1D3557; border-radius: 10px; padding: 10px 14px; color: #1D3557; font-weight: 600;">
+              <%= successMessage %>
+            </div>
+          <% } %>
+          <label class="form-field">
+            <span>Username</span>
+            <input type="text" name="username" placeholder="teacher_name" autocomplete="username" required />
+          </label>
+          <label class="form-field">
+            <span>Email</span>
+            <input type="email" name="email" placeholder="teacher@school.edu" autocomplete="email" required />
+          </label>
+          <label class="form-field">
+            <span>Password</span>
+            <div class="input-reveal">
+              <input id="passwordInput" type="password" name="password" placeholder="••••••••" autocomplete="new-password" required />
+              <button type="button" class="input-reveal-btn" id="togglePassword" aria-label="Toggle password visibility">
+                <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </label>
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit" style="width: 100%;">Create Account</button>
+            <div style="display: flex; gap: 12px; width: 100%;">
+              <a class="btn btn-primary nav-link--danger" href="/teacher" style="flex: 1; justify-content: center;">&#8592; Back</a>
+              <button id="darkModeBtn" type="button" class="btn-darkmode" style="flex: 1;">Dark Mode</button>
+            </div>
+          </div>
+        </form>
+      </section>
+    </div>
+    <script>
+      const togglePassword = document.getElementById("togglePassword");
+      const passwordInput = document.getElementById("passwordInput");
+      const eyeIcon = document.getElementById("eyeIcon");
+
+      const eyeOpen = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+      const eyeSlash = `<line x1="1" y1="1" x2="23" y2="23"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 11 7 11 7a13.16 13.16 0 0 1-1.67 2.68M6.61 6.61A13.526 13.526 0 0 0 1 12s4 7 11 7a9.74 9.74 0 0 0 5.39-1.61"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 7 11 7a9.74 9.74 0 0 0 5.39-1.61"/>`;
+
+      togglePassword.addEventListener("click", () => {
+        const isPassword = passwordInput.type === "password";
+        passwordInput.type = isPassword ? "text" : "password";
+        eyeIcon.innerHTML = isPassword ? eyeSlash : eyeOpen;
+      });
+    </script>
+  </body>
+</html>

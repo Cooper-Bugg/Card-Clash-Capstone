@@ -1,0 +1,20 @@
+{
+	"name": "card-clash-capstone",
+	"version": "1.0.0",
+	"description": "Card Clash ready for class presentation",
+	"main": "app.js",
+	"scripts": {
+		"start": "node app.js"
+	},
+	"dependencies": {
+		"dotenv": "^17.3.1",
+		"ejs": "^3.0.2",
+		"express": "^4.22.1",
+		"express-session": "^1.19.0",
+		"mysql": "^2.18.1",
+		"selfsigned": "^2.4.1"
+	},
+	"overrides": {
+		"minimatch": "^10.2.1"
+	}
+}
