@@ -22,9 +22,8 @@ dist/
 build/
 
 # This is needed to NOT ignore the Unity/Build folder
-!public/Unity/Build/
-!public/Unity/Build/**
-
+!Frontend/public/Unity/Build/
+!Frontend/public/Unity/Build/**
 # HTTPS self-signed certificates (generated automatically on startup)
 certs/
 
