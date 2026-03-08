@@ -53,7 +53,7 @@ The deck editor supports three question types: Multiple Choice, True/False, and 
 
 ### Unity WebGL Game Client
 
-The core gameplay executes within the browser via a Unity WebGL build. The server delivers compressed assets to optimize load times. The Unity client acts as the authoritative host for game logic. The teacher client validates answers, calculates scores, and manages round timing. This design places trust on the teacher client for the Minimum Viable Product.
+The core gameplay executes within the browser via a Unity WebGL build. The server delivers compressed assets to optimize load times. The Unity client acts as the authoritative host for game logic. The teacher client cordinates client event signals, calculates scores, and manages round timing. This design places trust on the teacher client for the Minimum Viable Product.
 
 ### Real-Time Synchronization
 
