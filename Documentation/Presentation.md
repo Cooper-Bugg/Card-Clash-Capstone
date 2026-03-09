@@ -1,17 +1,19 @@
 # Card Clash Presentation
 
-Card Clash is an educational party game designed for real-time classroom environments. A teacher hosts a session via a web dashboard and students join using a short code. The system relies on a hybrid architecture combining a web-based management platform with a Unity WebGL game client.
+Card Clash is an educational party game designed for real time classroom environments. A teacher hosts a session through a web dashboard where they manage question decks and start game sessions. When a session begins the platform generates a short join code that students use to connect from their own devices through a browser. Once connected, students participate in the game in real time. Questions are delivered simultaneously to all players and their responses are tracked throughout the session, allowing teachers to run interactive review sessions while also collecting performance data.
+
+The system uses a hybrid architecture. The teacher tools and account management features run on a Node.js server, while the gameplay itself runs inside a Unity WebGL client embedded directly in the browser. This separation allows the management platform and the game engine to operate independently while still communicating through the backend server.
 
 ---
 
 ## Core Dependencies and Technology Stack
 
 - **Backend:** Node.js server with Express for API routing
-- **Frontend:** Web dashboard using Server-Side Rendering (EJS templates)
+- **Frontend:** Web dashboard using EJS templates which are rendered server-side
 - **Game Client:** Unity, exported as WebGL
 - **Multiplayer:** Photon PUN 2 for real-time synchronization
 - **Database:** MySQL for data persistence
-- **AI:** Large Language Model for data summarization
+- **AI:** Ollama for data summarization
 - **Security:** HTTPS required for Unity WebGL Brotli-compressed assets
 
 ---
@@ -20,7 +22,7 @@ Card Clash is an educational party game designed for real-time classroom environ
 
 ### Web Frontend and Dashboard
 
-The web interface provides teachers with a complete account and session management system. The frontend relies on Server-Side Rendering served by the Node.js backend, ensuring rapid initial page loads and secure session management.
+The web interface provides teachers with a complete account and session management system. It acts as the central control panel where teachers create question decks, manage sessions, and review results. The frontend uses Server-Side Rendering through the Node.js backend with EJS templates, meaning the server generates the full HTML pages before sending them to the browser. This approach keeps authentication and session data handled securely on the server while also allowing pages to load quickly and consistently.
 
 **Implemented pages:**
 - **Landing Page** (`/`) — Role selector: Student or Teacher
@@ -34,11 +36,11 @@ The web interface provides teachers with a complete account and session manageme
 - **Game View** (`/game/play`) — Hosts the Unity WebGL game client in-browser
 - **Student View** (`/join`) — Student-facing Unity game client
 
-**UI/UX features shipped:**
-- System-wide **dark mode** with localStorage persistence across all pages
-- All panel text uses hardcoded colors to maintain contrast in both light and dark themes
-- Operator selection in the math generator defaults to unchecked (user must choose)
-- Compact button layouts on auth pages using flex grids
+**UI/UX features:**
+- Responsive layouts so dashboard, deck editor and Unity WebGL resize cleanly across various devices and screen sizes
+- Consistent high-contrast panel text and accessible color to ensure legibility in both light and dark themes
+- Tactile buttons and micro-interactions: hover, focus and active states with subtle transitions and visible keyboard focus outlines for clear feedback
+- Compact, accessible button layouts on auth pages implemented with flex grids, adequate hit targets and spacing for touch devices
 
 ### Deck Builder and Math Generator
 
