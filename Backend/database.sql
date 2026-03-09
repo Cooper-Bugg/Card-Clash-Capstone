@@ -118,7 +118,7 @@ CREATE TABLE question_metrics (
     times_correct INT UNSIGNED,
     difficulty_index DECIMAL(5,2), #computed as (times_correct - times_seen) / (times_seen * 100)
     avg_response_ms INT UNSIGNED,
-    answer_distribution JSON, #e.g. {"A": 40, "B": 35, "C": 15, "D": 10} for MC; can be empty for TF/SA
+    answer_dist JSON, #e.g. {"A": 40, "B": 35, "C": 15, "D": 10} for MC; can be empty for TF/SA
     sessions_used_in INT UNSIGNED,
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (question_id) REFERENCES questions(question_id) ON DELETE CASCADE

@@ -265,53 +265,6 @@ That means both the backend and Unity need to handle something like:
 If we add this, the AI summary can give more specific feedback for each student or the class.
 */
 
-/*
-Need to create MySQL functions for the following scenarios:
-- Viewing personal decks
-SELECT *
-FROM decks
-WHERE owner_id = ?;
-- Viewing public decks
-SELECT *
-FROM decks
-WHERE is_public = TRUE;
-- Viewing deck contents (also for sending to Unity game)
-SELECT *
-FROM questions
-WHERE deck_id = ?;
-- Viewing session history
-SELECT *
-FROM game_sessions
-WHERE teacher_id = ?;
-- Viewing session details (check with frontend on what info and what functions)
-?
-
-- Creating/updating decks
-INSERT INTO decks (owner_id, deck_name, description, subject_tag, is_public, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, NOW(), NOW())
-ON DUPLICATE KEY UPDATE deck_name = ?, description = ?, subject_tag = ?, is_public = ?, updated_at = NOW();
-- Creating/updating questions (part of above)
-- Creating teacher accounts
-INSERT INTO teachers (username, email, password_hash, display_name, created_at, last_login)
-VALUES (?, ?, ?, ?, NOW(), NULL)
-ON DUPLICATE KEY UPDATE
-
-
-- Deleting decks (potentially)
-
-
-- Uploading new session info
-
-
-- Parsing data and calculating metrics from Unity game logs
-- Comparing teacher login credentials to database
-
-
-
-DO NEED to work with others on what format data should be received and sent in
-*/
-
-
 
 /*
 Retrieve all available question decks.

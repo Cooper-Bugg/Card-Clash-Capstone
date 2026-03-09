@@ -11,13 +11,13 @@ const https = require("https");
 const express = require("express");
 const expressSession = require("express-session");
 const selfsigned = require("selfsigned");
-// TODO after demo: switch data routes from data.js to database.js
-// Replace the line below with: const dataStore = require("./database");
+// TODO after demo: switch data routes from data.js to dbController.js
+// Replace the line below with: const dataStore = require("./dbController");
 const dataStore = require("./mockdata");
 
 // Loads environment variables from a .env file into process.env
 // .env lives at the repo root, one level above Backend/
-require("dotenv").config({ path: path.join(__dirname, "../.env") });
+//require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
 // Use PORT env var if set (e.g. for deployment), otherwise default to 3000 for local dev
@@ -208,6 +208,9 @@ On success it marks the session as authenticated and redirects to the dashboard.
 On failure it re-renders the login page with an error message.
 Credentials are read from environment variables (ADMIN_USERNAME / ADMIN_PASSWORD).
 For production, replace with hashed password lookup against the Users table.
+*/
+/*
+store teacher id in req.session.accountID for future retrieval; already destroyed in session.destroy on logout, so good there
 */
 async function processAuthenticationRequest(req, res) {
     const submittedUsername = req.body.username;
