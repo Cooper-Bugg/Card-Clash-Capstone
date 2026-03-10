@@ -116,3 +116,11 @@ The AI service is currently deployed on a virtual machine hosted on personal har
 - **Error Handling:** Fallback message provided in report view if inference fails or times out
 
 While the current implementation prioritizes a self hosted environment for efficiency and control, the architecture is designed to remain flexible and may be changed in the future to support other strategies as the project changes.
+
+##Server Setup & Usage
+
+The server is hosted on a virtual machine and is intended to run fully on local hardware, without the need for external API calls. This server is the central backend for the Card Clash, receiving session logs from the Unity client and generating performance summaries using the AI model. It also integrates with Stabase, the analytics platform, allowing structured data and insights to be stored, queried, and visualized for player performance tracking and game balance analysis.
+
+The server is designed to be self-contained it includes all pre-configured prompts and command scripts required to process gameplay data, run AI inference, and return structured results. The system ensures low latency and predictable output while maintaining full control over the AI workflow. Developers or testers can interact with the server directly via secure local connections to perform additional testing, debugging, or custom analysis as needed.
+
+To connect the Unity client to the server, gameplay sessions are uploaded via JSON payloads over a designated network interface. The server processes these logs automatically and returns structured three-paragraph summaries that can be rendered in the game's report view or stored in Stabase for further analytics. This setup allows Card Clash to integrate AI-powered performance insights directly into the player experience while maintaining full control over hardware and data privacy.
