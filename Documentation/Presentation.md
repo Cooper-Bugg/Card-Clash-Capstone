@@ -117,7 +117,9 @@ The AI service is currently deployed on a virtual machine hosted on personal har
 
 While the current implementation prioritizes a self hosted environment for efficiency and control, the architecture is designed to remain flexible and may be changed in the future to support other strategies as the project changes.
 
-##Server Setup & Usage
+---
+
+## Server Setup & Usage
 
 The server is hosted on a virtual machine and is intended to run fully on local hardware, without the need for external API calls. This server is the central backend for the Card Clash, receiving session logs from the Unity client and generating performance summaries using the AI model. It also integrates with Stabase, the analytics platform, allowing structured data and insights to be stored, queried, and visualized for player performance tracking and game balance analysis.
 
