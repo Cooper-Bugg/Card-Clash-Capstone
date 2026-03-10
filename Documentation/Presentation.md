@@ -107,8 +107,12 @@ Data persistence relies on a MySQL relational database optimized for the current
 
 ## Artificial Intelligence Integration
 
-The system employs a Large Language Model to process gameplay data. When a game ends, the Unity client uploads the session log to the backend. The backend submits this JSON payload to the AI model to generate a structured performance summary.
+The system employs a Large Language Model to process gameplay data and generate automated performance insights. When a game session ends, the Unity client uploads a structured session log to the backend server in JSON format. The backend then forwards this payload to a locally hosted AI inference service, where the model analyzes gameplay patterns, player decisions, and session outcomes to produce a structured performance summary.
+
+The AI service is currently deployed on a virtual machine hosted on personal hardware using Ollama 3 model. By running on an internal server, the system avoids using external API calls and performs all calculations locally using existing hardware resources. This architecture improves data privacy, reduces costs, and provides consistent response latency. The interaction with the model is preconfigured through internal prompts and command structures to ensure predictable and stable output.
 
 - **Output Constraint:** Three-paragraph summary
 - **Timeout:** Completion required within sixty seconds
 - **Error Handling:** Fallback message provided in report view if inference fails or times out
+
+While the current implementation prioritizes a self hosted environment for efficiency and control, the architecture is designed to remain flexible and may be changed in the future to support other strategies as the project changes.
