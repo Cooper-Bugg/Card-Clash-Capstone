@@ -10,8 +10,8 @@ CREATE TABLE teachers (
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     display_name VARCHAR(64),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_login TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_login DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 # Question decks table
@@ -21,9 +21,10 @@ CREATE TABLE decks (
     deck_name VARCHAR(128) NOT NULL,
     description TEXT,
     subject_tag VARCHAR(64), # e.g. "math", "history", etc. IF SUBJECT TAG IS MATH, SHOULD SEARCH MATH DECKS INSTEAD OF QUESTIONS TABLE
+    number_of_questions INT UNSIGNED, #for math decks, this governs how many questions are generated; for others, it is just a counter
     is_public TINYINT(1) DEFAULT 0, #0 = private, 1 = public
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (owner_id) REFERENCES teachers(teacher_id) ON DELETE SET NULL #set null?
 );
 
@@ -32,10 +33,10 @@ CREATE TABLE questions (
     question_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     deck_id INT UNSIGNED,
     question_text TEXT NOT NULL,
-    question_type ENUM('MC', 'TF', 'SA') NOT NULL, #multiple choice, true/false, short answer
+    #question_type ENUM('MC', 'TF', 'SA') NOT NULL, #multiple choice, true/false, short answer
     correct_answer TEXT NOT NULL,
     answer_options JSON, #for MC
-    points_value SMALLINT NOT NULL, #maybe replace this with difficulty level?
+    #points_value SMALLINT NOT NULL DEFAULT 1, #maybe replace this with difficulty level?
     FOREIGN KEY (deck_id) REFERENCES decks(deck_id) ON DELETE CASCADE
 );
 
@@ -47,7 +48,6 @@ CREATE TABLE math_decks (
     lowest_number INT NOT NULL,
     highest_number INT NOT NULL,
     number_of_operands INT UNSIGNED NOT NULL,
-    number_of_questions INT UNSIGNED NOT NULL,
     subject_tag VARCHAR(64), #e.g. "arithmetic", "algebra", etc. #do I need this?
     FOREIGN KEY (deck_id) REFERENCES decks(deck_id) ON DELETE CASCADE
 );
@@ -57,8 +57,7 @@ CREATE TABLE game_sessions (
     session_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     host_teacher_id INT UNSIGNED,
     deck_id INT UNSIGNED,
-    started_at TIMESTAMP,
-    ended_at TIMESTAMP, #combine into date played?
+    date_played DATE DEFAULT CURRENT_DATE,
     player_count SMALLINT,
     rounds_played SMALLINT,
     average_accuracy DECIMAL(5,2),
@@ -87,7 +86,7 @@ CREATE TABLE deck_saves (
     save_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     teacher_id INT UNSIGNED,
     deck_id INT UNSIGNED,
-    saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    saved_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (teacher_id) REFERENCES teachers(teacher_id) ON DELETE CASCADE,
     FOREIGN KEY (deck_id) REFERENCES decks(deck_id) ON DELETE CASCADE
 );
@@ -95,19 +94,20 @@ CREATE TABLE deck_saves (
 #V2 Metrics
 
 # Session Summaries table
+#NOT accurate... as far as primary key goes
 CREATE TABLE session_summaries (
     summary_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     session_id INT UNSIGNED,
     player_name VARCHAR(64),
     final_score INT,
-    rank SMALLINT,
+    final_rank SMALLINT,
     accuracy_pct DECIMAL(5,2),
     avg_response_ms INT UNSIGNED,
     fastest_response_ms INT UNSIGNED,
     longest_streak SMALLINT,
     questions_answered SMALLINT,
     questions_correct SMALLINT,
-    computed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    computed_at DATETIME DEFAULT CURRENT_TIMESTAMP
     FOREIGN KEY (session_id) REFERENCES game_sessions(session_id) ON DELETE CASCADE
 );
 
@@ -120,7 +120,7 @@ CREATE TABLE question_metrics (
     avg_response_ms INT UNSIGNED,
     answer_dist JSON, #e.g. {"A": 40, "B": 35, "C": 15, "D": 10} for MC; can be empty for TF/SA
     sessions_used_in INT UNSIGNED,
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (question_id) REFERENCES questions(question_id) ON DELETE CASCADE
 );
 
@@ -133,7 +133,7 @@ CREATE TABLE deck_metrics (
     hardest_question_id INT UNSIGNED,
     easiest_question_id INT UNSIGNED,
     save_count INT UNSIGNED,
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (deck_id) REFERENCES decks(deck_id) ON DELETE CASCADE,
     FOREIGN KEY (hardest_question_id) REFERENCES questions(question_id) ON DELETE SET NULL,
     FOREIGN KEY (easiest_question_id) REFERENCES questions(question_id) ON DELETE SET NULL

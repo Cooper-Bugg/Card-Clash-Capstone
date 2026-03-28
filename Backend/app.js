@@ -121,9 +121,9 @@ async function buildDashboardViewModel() {
     const decks = [];
     const sessions = [];
     const storedDecks = await dataStore.getDecks();
-    // TODO after demo: switch data routes from data.js to database.js — replace above with database.getDecks()
+    // TODO after demo: switch data routes from data.js to dbConnect.js — replace above with database.getDecks()
     const storedSessions = await dataStore.getSessions();
-    // TODO after demo: switch data routes from data.js to database.js — replace above with database.getSessions()
+    // TODO after demo: switch data routes from data.js to dbConnect.js — replace above with database.getSessions()
 
     for (let i = 0; i < storedDecks.length; i += 1) {
         const deck = storedDecks[i];
@@ -395,7 +395,7 @@ async function saveDeck(req, res) {
             res.status(400).send("Deck could not be saved: contentJson is not valid JSON.");
             return;
         }
-
+        
         if (!parsed || !Array.isArray(parsed.questions)) {
             res.status(400).send("Deck could not be saved: contentJson must contain a 'questions' array.");
             return;

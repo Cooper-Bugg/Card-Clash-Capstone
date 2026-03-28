@@ -1,0 +1,142 @@
+For future reference, this is a way to prevent deck_ids
+from being updated:
+CREATE TRIGGER prevent_column_update
+BEFORE UPDATE ON your_table
+FOR EACH ROW
+BEGIN
+  IF NEW.your_column <> OLD.your_column THEN
+    SET NEW.your_column = OLD.your_column;
+  END IF;
+END;
+
+
+The largest amount of information present in a JSON response
+would look like this:
+{
+  "deck_id": 12,
+  "owner_id": 5,
+  "deck_name": "Intro to History",
+  "description": "A basic quiz on US history.",
+  "subject_tag": "history",
+  "number_of_questions": 3,
+  "is_public": 0,
+  "created_at": "2024-06-01T12:00:00Z",
+  "updated_at": "2024-06-01T12:00:00Z",
+  "questions": [
+    {
+      "question_id": 34,
+      "deck_id": 12,
+      "question_text": "Who was the first US President?",
+      "question_type": 'MC',
+      "correct_answer": "George Washington",
+      "answer_options": ["George Washington", "Abraham Lincoln", "Thomas Jefferson", "John Adams"],
+      "points_value": 1
+    },
+    {
+      "question_id": 34,
+      "deck_id": 12,
+      "question_text": "The titanic sank in 1912.",
+      "question_type": 'TF',
+      "correct_answer": "true",
+      "answer_options": ["true", "false"],
+      "points_value": 1
+    },
+    {
+      "question_id": 34,
+      "deck_id": 12,
+      "question_text": "The capital of France is __.",
+      "question_type": 'FB',
+      "correct_answer": "Paris",
+      "answer_options": NULL,
+      "points_value": 1
+    }
+  ]
+}
+
+For the Unity Export, it would look like this:
+{
+  "deck": {
+            "deck_id": 12,
+            "deck_name": "Intro to History",
+            "subject_tag": "history",
+            "number_of_questions": 3
+  },
+  "questions": [
+    {
+      "question_id": 34,
+      "question_text": "Who was the first US President?",
+      "correct_answer": "George Washington",
+      "answer_options": ["George Washington", "Abraham Lincoln", "Thomas Jefferson", "John Adams"]
+    },
+    {
+      "question_id": 34,
+      "question_text": "The titanic sank in 1912.",
+      "correct_answer": "true",
+      "answer_options": ["true", "false"]
+    },
+    {
+      "question_id": 34,
+      "question_text": "The capital of France is __.",
+      "correct_answer": "Paris",
+      "answer_options": NULL
+    }
+  ]
+}
+
+
+Need functions for:
+teachers:
+- insert:
+- update:
+- select:
+decks:
+- insert: saveDeck -> upsertRecord
+- update: saveDeck -> upsertRecord
+- select:
+questions:
+- insert: saveQuestions -> upsertRecord
+- update: saveQuestions -> upsertRecord
+- select:
+math_decks:
+- insert:
+- update:
+- select:
+deck_saves:
+- insert:
+- update:
+- select:
+game_sessions:
+- insert:
+- update:
+- select:
+session_results:
+- insert:
+- update:
+- select:
+session_summaries:
+- insert:
+- update:
+- select:
+deck_metrics:
+- insert:
+- update:
+- select:
+question_metrics:
+- insert:
+- update:
+- select:
+
+
+How MySQL works, so I don't forget:
+- As long as the values follow the order of the specified columns, inserts can be in any order
+- Upsert: Default is insert. MySQL only checks primary and unique keys, so if none are included, it assumes an insert.
+    If, however, a primary or unique key (like deck_id for decks) is included, MySQL will check for duplicates. If
+    there is a duplicate, it will update instead. Be careful of this for teacher table; but for all other tables, the
+    only time there should be a primary or unique key in the upsert statement is when a primary key has been pulled from
+    the database and is being used to specify an update.
+
+To think about for next steps:
+- Time... 2 issues: 1. last_login in teachers needs to be updated every time they log in. Should be fairly easy.
+        2. Need to translate back to current time zone when pulling from db still. Don't forget that.
+- Go over saveDeck infoPackage with Cooper
+- Deleting decks and questions... we don't have any methods or flags for that as of now
