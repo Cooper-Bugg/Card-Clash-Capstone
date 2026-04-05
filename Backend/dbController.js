@@ -179,6 +179,53 @@ const pool = require('./dbConnect').pool; //TODO: switch to ES6 import syntax af
 //OR require('./dbConnect'), and then use pool.getConnection() and stuff
 
 /*
+Unity ingest contract (DB-side planning only):
+
+Expected incoming session payload from Unity:
+{
+  teacher_id,          // server should prefer authenticated teacher identity
+  deck_id,
+  date_played,
+  player_count,
+  rounds_played,
+  player_data: [
+    {
+      player_name,
+      final_score,
+      final_rank,
+      questions_answered, // server-computed when omitted
+      questions_correct,  // server-computed when omitted
+      longest_streak      // server-computed when omitted
+    }
+  ],
+  question_data: [
+    {
+      question_id,
+      times_seen,         // server-computed when omitted
+      times_correct,      // server-computed when omitted
+      player_responses: [
+        {
+          player_name,
+          answer_given,
+          is_correct,
+          response_time
+        }
+      ]
+    }
+  ]
+}
+
+Teacher ownership rule for current scope:
+- Students do not have accounts yet.
+
+SQL migration plan:
+1) INSERT game_sessions row (host_teacher_id, deck_id, date_played, player_count, rounds_played, aggregate metrics).
+2) INSERT/UPSERT one session_summaries row per player_data entry.
+3) INSERT one session_results row per player_responses entry.
+4) UPSERT question_metrics for each question_id (times_seen, times_correct, avg_response_ms, answer_dist).
+*/
+
+/*
 Function used to insert a new record or update an existing one based on unique key constraints.
 Inserts if a record with the same key doesn't exist, updates if it does.
 

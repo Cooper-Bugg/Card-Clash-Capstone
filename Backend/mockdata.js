@@ -4,10 +4,8 @@ This module will be refactored to execute asynchronous MySQL queries
 targeting the production database.
 
 NOTE: This file is a mock data layer for local development and UI prototyping.
-Replace all in-memory arrays and functions with real MySQL queries for production.
-When adding new analytics (e.g. per-player stats), update both this mock and schema.sql.
 
-The question schema maps directly to the SQL structure:
+The question schema:
 questionText, optionA, optionB, optionC, optionD, correctAnswer (A/B/C/D)
 */
 const mockDecks = [

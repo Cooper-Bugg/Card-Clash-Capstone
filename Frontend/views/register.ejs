@@ -21,12 +21,12 @@
         </div>
         <form class="form" method="post" action="/register">
           <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
-            <div style="background: rgba(230,57,70,0.12); border: 1px solid var(--coral); border-radius: 10px; padding: 10px 14px; color: var(--coral); font-weight: 600;">
+            <div class="alert alert-error">
               <%= errorMessage %>
             </div>
           <% } %>
           <% if (typeof successMessage !== 'undefined' && successMessage) { %>
-            <div style="background: rgba(29,53,87,0.08); border: 1px solid #1D3557; border-radius: 10px; padding: 10px 14px; color: #1D3557; font-weight: 600;">
+            <div class="alert alert-success">
               <%= successMessage %>
             </div>
           <% } %>

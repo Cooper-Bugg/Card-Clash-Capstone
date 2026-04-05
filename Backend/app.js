@@ -11,7 +11,7 @@ const https = require("https");
 const express = require("express");
 const expressSession = require("express-session");
 const selfsigned = require("selfsigned");
-// TODO after demo: switch data routes from data.js to dbController.js
+// TODO after demo: switch data routes from mockdata.js to dbController.js
 // Replace the line below with: const dataStore = require("./dbController");
 const dataStore = require("./mockdata");
 
@@ -20,14 +20,52 @@ const dataStore = require("./mockdata");
 //require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
-// Use PORT env var if set (e.g. for deployment), otherwise default to 3000 for local dev
-const port = process.env.PORT || 3000;
+
+// Script mode controls default network/certificate behavior.
+// local (default): localhost-friendly for Unity team testing.
+// server: VM/domain defaults for hosted deployment.
+function getRuntimeMode() {
+    const modeArg = process.argv.find((arg) => arg.startsWith("--mode="));
+    const modeFromArg = modeArg ? modeArg.split("=")[1] : "";
+    const mode = process.env.RUN_MODE || modeFromArg;
+    return mode === "server" ? "server" : "local";
+}
+
+const runtimeMode = getRuntimeMode();
+// Use PORT env var if set (e.g. for deployment), otherwise default to 3000.
+const port = Number.parseInt(process.env.PORT || "3000", 10);
 
 app.set("view engine", "ejs");
 // Views now live in Frontend/views — one level up from Backend/
 app.set("views", path.join(__dirname, "../Frontend/views"));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+// Keep API contracts machine-readable: malformed request bodies should return JSON, not HTML.
+app.use((err, req, res, next) => {
+    if (!err || !req.path.startsWith("/api/")) {
+        next(err);
+        return;
+    }
+
+    if (err.type === "entity.parse.failed") {
+        res.status(400).json({
+            error: "Malformed JSON in request body.",
+            code: "BAD_JSON"
+        });
+        return;
+    }
+
+    if (err.type === "entity.too.large") {
+        res.status(413).json({
+            error: "Request body is too large.",
+            code: "PAYLOAD_TOO_LARGE"
+        });
+        return;
+    }
+
+    next(err);
+});
 
 /*
 Brotli middleware: Unity WebGL exports compressed .br files.
@@ -168,6 +206,168 @@ function sendServerError(res, message) {
     res.status(500).send(message);
 }
 
+function toPositiveInteger(value) {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+function parseBooleanFlag(value) {
+    if (typeof value === "boolean") {
+        return value;
+    }
+
+    if (typeof value === "number") {
+        return value === 1;
+    }
+
+    if (typeof value === "string") {
+        const normalized = value.trim().toLowerCase();
+        return normalized === "true" || normalized === "1";
+    }
+
+    return false;
+}
+
+function mapQuestionTypeToUnity(questionType) {
+    if (questionType === "true_false") {
+        return "TF";
+    }
+
+    if (questionType === "fill_blank") {
+        return "FB";
+    }
+
+    return "MC";
+}
+
+function normalizeUnitySessionPayload(rawPayload, teacherIdentity) {
+    if (!rawPayload || typeof rawPayload !== "object" || Array.isArray(rawPayload)) {
+        return { error: "Payload must be a JSON object." };
+    }
+
+    const deckID = toPositiveInteger(rawPayload.deck_id);
+    if (!deckID) {
+        return { error: "deck_id is required and must be a positive integer." };
+    }
+
+    const rawDate = rawPayload.date_played ? new Date(rawPayload.date_played) : new Date();
+    const datePlayed = Number.isNaN(rawDate.getTime()) ? new Date().toISOString() : rawDate.toISOString();
+
+    const incomingPlayers = Array.isArray(rawPayload.player_data) ? rawPayload.player_data : [];
+    const incomingQuestions = Array.isArray(rawPayload.question_data) ? rawPayload.question_data : [];
+
+    const playerStatsByName = new Map();
+    const playerOrder = [];
+
+    function ensurePlayer(name) {
+        const normalizedName = String(name || "Unknown Player").trim() || "Unknown Player";
+
+        if (!playerStatsByName.has(normalizedName)) {
+            playerStatsByName.set(normalizedName, {
+                player_name: normalizedName,
+                final_score: 0,
+                final_rank: null,
+                questions_answered: 0,
+                questions_correct: 0,
+                longest_streak: 0,
+                current_streak: 0
+            });
+            playerOrder.push(normalizedName);
+        }
+
+        return playerStatsByName.get(normalizedName);
+    }
+
+    for (let i = 0; i < incomingPlayers.length; i += 1) {
+        const player = incomingPlayers[i] || {};
+        const stats = ensurePlayer(player.player_name);
+        const score = Number(player.final_score);
+        const rank = toPositiveInteger(player.final_rank);
+
+        stats.final_score = Number.isFinite(score) ? score : stats.final_score;
+        stats.final_rank = rank || stats.final_rank;
+    }
+
+    const normalizedQuestions = [];
+
+    for (let i = 0; i < incomingQuestions.length; i += 1) {
+        const questionEntry = incomingQuestions[i] || {};
+        const questionID = toPositiveInteger(questionEntry.question_id);
+        if (!questionID) {
+            continue;
+        }
+
+        const incomingResponses = Array.isArray(questionEntry.player_responses) ? questionEntry.player_responses : [];
+        const normalizedResponses = [];
+        let computedTimesSeen = 0;
+        let computedTimesCorrect = 0;
+
+        for (let j = 0; j < incomingResponses.length; j += 1) {
+            const response = incomingResponses[j] || {};
+            const playerName = String(response.player_name || "Unknown Player").trim() || "Unknown Player";
+            const isCorrect = parseBooleanFlag(response.is_correct);
+            const responseTime = Number(response.response_time);
+            const stats = ensurePlayer(playerName);
+
+            stats.questions_answered += 1;
+            if (isCorrect) {
+                stats.questions_correct += 1;
+                stats.current_streak += 1;
+                stats.longest_streak = Math.max(stats.longest_streak, stats.current_streak);
+            } else {
+                stats.current_streak = 0;
+            }
+
+            computedTimesSeen += 1;
+            if (isCorrect) {
+                computedTimesCorrect += 1;
+            }
+
+            normalizedResponses.push({
+                player_name: playerName,
+                answer_given: response.answer_given !== undefined ? response.answer_given : null,
+                is_correct: isCorrect,
+                response_time: Number.isFinite(responseTime) ? responseTime : null
+            });
+        }
+
+        const incomingTimesSeen = Number(questionEntry.times_seen);
+        const incomingTimesCorrect = Number(questionEntry.times_correct);
+
+        normalizedQuestions.push({
+            question_id: questionID,
+            times_seen: Number.isFinite(incomingTimesSeen) ? incomingTimesSeen : computedTimesSeen,
+            times_correct: Number.isFinite(incomingTimesCorrect) ? incomingTimesCorrect : computedTimesCorrect,
+            player_responses: normalizedResponses
+        });
+    }
+
+    const normalizedPlayers = playerOrder.map((playerName) => {
+        const stats = playerStatsByName.get(playerName);
+        return {
+            player_name: stats.player_name,
+            final_score: stats.final_score,
+            final_rank: stats.final_rank,
+            questions_answered: stats.questions_answered,
+            questions_correct: stats.questions_correct,
+            longest_streak: stats.longest_streak
+        };
+    });
+
+    const playerCount = toPositiveInteger(rawPayload.player_count) || normalizedPlayers.length;
+    const roundsPlayed = toPositiveInteger(rawPayload.rounds_played) || normalizedQuestions.length;
+
+    return {
+        teacher_id: teacherIdentity,
+        deck_id: deckID,
+        date_played: datePlayed,
+        player_count: playerCount,
+        rounds_played: roundsPlayed,
+        player_data: normalizedPlayers,
+        question_data: normalizedQuestions
+    };
+}
+
 /*
 Shows the teacher login page.
 This is the gate you have to go through before you can see the dashboard.
@@ -221,6 +421,8 @@ async function processAuthenticationRequest(req, res) {
 
     if (submittedUsername === expectedUsername && submittedPassword === expectedPassword) {
         req.session.isAuthenticated = true;
+        // TODO: Until SQL auth is wired in, keep username in session so Unity payloads stay teacher-owned.
+        req.session.teacherUsername = submittedUsername;
         res.redirect("/dashboard");
     } else {
         res.status(401).render("login", {
@@ -473,8 +675,15 @@ Falls back to plain HTTP if certificate generation fails for any reason.
 async function startServer() {
     // certs/ lives at the repo root, one level above Backend/
     const certsDir = path.join(__dirname, "../certs");
-    const keyPath = path.join(certsDir, "localhost-key.pem");
-    const certPath = path.join(certsDir, "localhost-cert.pem");
+    // HOST controls bind address; TLS_HOST controls certificate identity.
+    // local mode defaults to localhost. server mode defaults to VM/domain values.
+    const host = process.env.HOST || (runtimeMode === "server" ? "0.0.0.0" : "127.0.0.1");
+    const tlsHost = process.env.TLS_HOST
+        || (runtimeMode === "server" ? (process.env.PUBLIC_HOST || "ajc40.info") : "localhost");
+    const tlsIp = process.env.TLS_IP || (runtimeMode === "server" ? "74.208.236.122" : "127.0.0.1");
+    const certBase = tlsHost.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const keyPath = path.join(certsDir, `${certBase}-key.pem`);
+    const certPath = path.join(certsDir, `${certBase}-cert.pem`);
 
     // Make sure certs directory exists
     if (!fs.existsSync(certsDir)) {
@@ -484,15 +693,33 @@ async function startServer() {
     // Generate self-signed cert if not already present
     if (!fs.existsSync(keyPath) || !fs.existsSync(certPath)) {
         try {
-            const attrs = [{ name: "commonName", value: "localhost" }];
-            const pems = selfsigned.generate(attrs, { days: 365, keySize: 2048 });
+            const attrs = [{ name: "commonName", value: tlsHost }];
+            const isTlsHostIp = /^\d{1,3}(\.\d{1,3}){3}$/.test(tlsHost);
+            const isTlsIpValid = /^\d{1,3}(\.\d{1,3}){3}$/.test(tlsIp);
+            const altNames = [{ type: 2, value: "localhost" }];
+
+            if (isTlsHostIp) {
+                altNames.push({ type: 7, ip: tlsHost });
+            } else {
+                altNames.push({ type: 2, value: tlsHost });
+            }
+
+            if (isTlsIpValid && tlsIp !== tlsHost) {
+                altNames.push({ type: 7, ip: tlsIp });
+            }
+
+            const pems = selfsigned.generate(attrs, {
+                days: 365,
+                keySize: 2048,
+                extensions: [{ name: "subjectAltName", altNames }]
+            });
             fs.writeFileSync(keyPath, pems.private, "utf8");
             fs.writeFileSync(certPath, pems.cert, "utf8");
-            console.log("Generated self-signed HTTPS certificates in /certs.");
+            console.log(`Generated self-signed HTTPS certificates for '${tlsHost}' in /certs.`);
         } catch (err) {
             console.warn("Certificate generation failed, falling back to HTTP.", err);
-            app.listen(port, () => {
-                console.log(`Server started on http://localhost:${port}.`);
+            app.listen(port, host, () => {
+                console.log(`Server started on http://${tlsHost}:${port}.`);
             });
             return;
         }
@@ -505,10 +732,9 @@ async function startServer() {
         cert: fs.readFileSync(certPath, "utf8")
     };
 
-    https.createServer(serverOptions, app).listen(httpsPort, () => {
-        console.log(`Server started on https://localhost:${httpsPort}.`);
-        console.log("Note: Your browser will show a security warning for the self-signed cert.");
-        console.log("Click 'Advanced' and 'Proceed' to continue - this is safe on localhost.");
+    https.createServer(serverOptions, app).listen(httpsPort, host, () => {
+        console.log(`Server started on https://${tlsHost}:${httpsPort}.`);
+        console.log("Note: Your browser will show a security warning for self-signed certs unless trusted.");
     });
 }
 
@@ -534,13 +760,14 @@ app.get("/teacher", (req, res) => {
 });
 
 /*
-Teacher registration page — create a new account.
-For now this just renders the form; real persistence happens after
+Teacher registration page - create a new account
+For now this just renders the form real persistence happens after
 the database layer is wired up.
 */
 app.get("/register", (req, res) => {
     res.render("register", { pageTitle: "Create Account", errorMessage: null, successMessage: null });
 });
+
 app.post("/register", (req, res) => {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
@@ -566,6 +793,7 @@ app.post("/logout", processLogoutRequest);
 /*
 Student game page. Just the game, no dashboard.
 Students do not need to authenticate.
+Students currently have no accounts, so session analytics still belong to the host teacher.
 */
 app.get("/join", (req, res) => {
     res.render("student", {
@@ -588,6 +816,101 @@ app.get("/report/:id", requireTeacherAuthentication, renderReport);
 app.get("/deck/new", requireTeacherAuthentication, renderNewDeck);
 app.get("/deck/:id/edit", requireTeacherAuthentication, renderEditDeck);
 app.post("/deck", requireTeacherAuthentication, saveDeck);
+
+/*
+Unity API routes.
+The authenticated teacher is the owner for all game data at this stage.
+Students are guest players for now, so player_name text should be saved without requiring student IDs.
+*/
+app.get("/api/unity/deck/:deckID", requireTeacherAuthentication, async (req, res) => {
+    try {
+        const deckID = toPositiveInteger(req.params.deckID);
+        if (!deckID) {
+            res.status(400).json({ error: "deckID must be a positive integer." });
+            return;
+        }
+
+        const deck = await dataStore.getDeckById(deckID);
+        if (!deck) {
+            res.status(404).json({ error: "Deck not found." });
+            return;
+        }
+
+        let parsedContent;
+        try {
+            parsedContent = JSON.parse(deck.contentJson || "{}");
+        } catch (parseError) {
+            res.status(500).json({ error: "Deck contentJson is not valid JSON." });
+            return;
+        }
+
+        const questions = Array.isArray(parsedContent.questions)
+            ? parsedContent.questions.map((question, index) => {
+                const type = mapQuestionTypeToUnity(question.questionType || "multiple_choice");
+                let answerOptions = null;
+
+                if (type === "MC") {
+                    answerOptions = [question.optionA, question.optionB, question.optionC, question.optionD].filter((opt) => typeof opt === "string");
+                } else if (type === "TF") {
+                    answerOptions = ["true", "false"];
+                }
+
+                return {
+                    question_id: toPositiveInteger(question.id) || index + 1,
+                    deck_id: deck.id,
+                    question_text: question.questionText || "",
+                    question_type: type,
+                    correct_answer: question.correctAnswerText || question.correctAnswer || "",
+                    answer_options: answerOptions,
+                    points_value: Number.isFinite(Number(question.pointsValue)) ? Number(question.pointsValue) : 1
+                };
+            })
+            : [];
+
+        // SQL TODO: read owner_id, timestamps, and question IDs directly from MySQL tables (decks/questions).
+        res.json({
+            deck_id: deck.id,
+            owner_id: null,
+            deck_name: deck.title || "Untitled Deck",
+            description: null,
+            subject_tag: null,
+            number_of_questions: questions.length,
+            is_public: 0,
+            created_at: null,
+            updated_at: null,
+            questions
+        });
+    } catch (error) {
+        console.error("Unity deck export failed.", error);
+        res.status(500).json({ error: "Unity deck export failed." });
+    }
+});
+
+app.post("/api/unity/session/ingest", requireTeacherAuthentication, async (req, res) => {
+    try {
+        const teacherIdentity = req.session.teacherUsername || process.env.ADMIN_USERNAME || "admin";
+        const normalizedPayload = normalizeUnitySessionPayload(req.body, teacherIdentity);
+
+        if (normalizedPayload.error) {
+            res.status(400).json({ error: normalizedPayload.error });
+            return;
+        }
+        // TODO: save session/player/question rows in one transaction
+        // SQL TODO: use a transaction in dbController to:
+        // 1) INSERT into game_sessions (teacher-owned session metadata)
+        // 2) INSERT/UPSERT per-player rows in session_summaries
+        // 3) INSERT per-response rows in session_results
+        // 4) UPSERT aggregated counters in question_metrics
+        res.status(202).json({
+            ok: true,
+            note: "Unity payload accepted and normalized. SQL persistence is the next step in dbController.",
+            payload: normalizedPayload
+        });
+    } catch (error) {
+        console.error("Unity session ingest failed.", error);
+        res.status(500).json({ error: "Unity session ingest failed." });
+    }
+});
 
 /*
 Ollama and LLM API routes.
@@ -629,7 +952,7 @@ app.get("/api/ai/report/:sessionID", requireTeacherAuthentication, async (req, r
 
 app.post("/api/ai/report/:sessionID", requireTeacherAuthentication, async (req, res) => {
     try {
-        // Implement MySQL UPDATE query here to save the completed AI summary.
+        // TODO: Implement MySQL UPDATE query here to save the completed AI summary.
         res.json({ ok: true, note: "Save stub — MySQL not connected yet." });
     } catch (error) {
         console.error("AI report save failed.", error);

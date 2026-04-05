@@ -108,17 +108,32 @@ body.dark-mode .game-nav .nav-link:active {
   transform: translateY(2px);
 }
 
-body.dark-mode .top-bar .nav-link.is-active {
-  background: #1D3557;
-  color: #F1FAEE;
-  border-color: #14253d;
+body.dark-mode .top-bar .nav-link.is-active,
+body.dark-mode .game-nav .nav-link.is-active {
+  background: #F1FAEE;
+  color: #14253d;
+  border-color: rgba(20, 37, 61, 0.55);
   box-shadow: 0 3px 0 var(--gold-dark);
 }
 
 body.dark-mode .top-bar .nav-link.is-active:hover,
-body.dark-mode .top-bar .nav-link.is-active:focus-visible {
+body.dark-mode .top-bar .nav-link.is-active:focus-visible,
+body.dark-mode .game-nav .nav-link.is-active:hover,
+body.dark-mode .game-nav .nav-link.is-active:focus-visible {
+  background: #F1FAEE;
+  color: #14253d;
+  border-color: rgba(20, 37, 61, 0.55);
   box-shadow: 0 4px 0 var(--gold-dark);
   transform: translateY(-1px);
+}
+
+body.dark-mode .top-bar .nav-link.is-active:active,
+body.dark-mode .game-nav .nav-link.is-active:active {
+  background: #F1FAEE;
+  color: #14253d;
+  border-color: rgba(20, 37, 61, 0.55);
+  box-shadow: 0 1px 0 var(--gold-dark);
+  transform: translateY(2px);
 }
 
 /* Keep Log Out red on hover in dark mode */
@@ -167,10 +182,32 @@ body.dark-mode .question-nav-item:not(.is-active) {
   color: #1D3557;
 }
 
+body.dark-mode .btn-darkmode {
+  background: #FFC300;
+  color: #14253d;
+  border-color: rgba(179, 138, 0, 0.5);
+  box-shadow: 0 3px 0 rgba(241, 250, 238, 0.5);
+}
+
+body.dark-mode .btn-darkmode:hover,
+body.dark-mode .btn-darkmode:focus-visible {
+  background: #1D3557;
+  color: #F1FAEE;
+  border-color: #14253d;
+  box-shadow: 0 4px 0 var(--gold-dark);
+  transform: translateY(-1px);
+}
+
+body.dark-mode .btn-darkmode:active {
+  background: #14253d;
+  color: #F1FAEE;
+  border-color: #0d1a2b;
+  box-shadow: 0 1px 0 var(--gold-dark);
+  transform: translateY(2px);
+}
+
 /* ── Dark Mode Toggle Button ────────────────────────────────────────────────── */
-/* Shares all base .btn mechanics (pill, padding, transition, shadow lift).     */
-/* Color scheme is inverted: navy bg + cream text in light mode,                */
-/* cream bg + navy text in dark mode, same hover/active physics as .btn-primary */
+/* Matches .btn-primary colors/behavior so it looks consistent with other CTAs. */
 .btn-darkmode {
   display: inline-flex;
   align-items: center;
@@ -186,9 +223,8 @@ body.dark-mode .question-nav-item:not(.is-active) {
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
   line-height: 1;
-  /* Light mode: navy background, cream text */
-  background: #1D3557;
-  color: #F1FAEE;
+  background: #F1FAEE;
+  color: #1D3557;
   border: 1px solid rgba(29, 53, 87, 0.35);
   box-shadow: 0 3px 0 rgba(29, 53, 87, 0.2);
   transform: translateY(0);
@@ -196,42 +232,17 @@ body.dark-mode .question-nav-item:not(.is-active) {
 
 .btn-darkmode:hover,
 .btn-darkmode:focus-visible {
-  background: #F1FAEE;
-  color: #1D3557;
-  border-color: rgba(29, 53, 87, 0.35);
+  background: #1D3557;
+  color: #fff;
+  border-color: #14253d;
   transform: translateY(-1px);
   box-shadow: 0 4px 0 var(--gold-dark);
 }
 
 .btn-darkmode:active {
-  background: #F1FAEE;
-  color: #14253d;
-  border-color: rgba(29, 53, 87, 0.35);
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--gold-dark);
-}
-
-/* Dark mode: cream background, navy text — same physics */
-body.dark-mode .btn-darkmode {
-  background: #F1FAEE;
-  color: #1D3557;
-  border-color: rgba(29, 53, 87, 0.35);
-  box-shadow: 0 3px 0 rgba(29, 53, 87, 0.2);
-}
-
-body.dark-mode .btn-darkmode:hover,
-body.dark-mode .btn-darkmode:focus-visible {
-  background: #1D3557;
-  color: #F1FAEE;
-  border-color: rgba(29, 53, 87, 0.35);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 0 var(--gold-dark);
-}
-
-body.dark-mode .btn-darkmode:active {
-  background: #14253d;
-  color: #F1FAEE;
-  border-color: rgba(29, 53, 87, 0.35);
+  background: var(--blue-dark);
+  color: #fff;
+  border-color: var(--blue-dark);
   transform: translateY(2px);
   box-shadow: 0 1px 0 var(--gold-dark);
 }
@@ -832,6 +843,24 @@ friendly feel of the rest of the app.
   flex-direction: column;
   gap: 16px;
   margin-top: 16px;
+}
+
+.alert {
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+}
+
+.alert-error {
+  background: rgba(230, 57, 70, 0.12);
+  border: 1px solid var(--coral);
+  color: var(--coral);
+}
+
+.alert-success {
+  background: rgba(29, 53, 87, 0.08);
+  border: 1px solid #1D3557;
+  color: #1D3557;
 }
 
 .form-field {

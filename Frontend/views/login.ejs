@@ -35,7 +35,7 @@
         -->
         <form class="form" method="post" action="/login">
           <% if (typeof errorMessage !== 'undefined' && errorMessage) { %>
-            <div style="background: rgba(230,57,70,0.12); border: 1px solid var(--coral); border-radius: 10px; padding: 10px 14px; color: var(--coral); font-weight: 600;">
+            <div class="alert alert-error">
               <%= errorMessage %>
             </div>
           <% } %>

@@ -3,7 +3,6 @@
 Card Clash is an educational party game designed for real time classroom environments. A teacher hosts a session through a web dashboard where they manage question decks and start game sessions. When a session begins the platform generates a short join code that students use to connect from their own devices through a browser. Once connected, students participate in the game in real time. Questions are delivered simultaneously to all players and their responses are tracked throughout the session, allowing teachers to run interactive review sessions while also collecting performance data.
 
 The system uses a hybrid architecture. The teacher tools and account management features run on a Node.js server, while the gameplay itself runs inside a Unity WebGL client embedded directly in the browser. This separation allows the management platform and the game engine to operate independently while still communicating through the backend server.
-
 ---
 
 ## Core Dependencies and Technology Stack
@@ -13,7 +12,7 @@ The system uses a hybrid architecture. The teacher tools and account management 
 - **Game Client:** Unity, exported as WebGL
 - **Multiplayer:** Photon PUN 2 for real-time synchronization
 - **Database:** MySQL for data persistence
-- **AI:** Ollama for data summarization
+- **AI:** Large Language Model for data summarization
 - **Security:** HTTPS required for Unity WebGL Brotli-compressed assets
 
 ---
@@ -37,6 +36,9 @@ The web interface provides teachers with a complete account and session manageme
 - **Student View** (`/join`) — Student-facing Unity game client
 
 **UI/UX features:**
+
+These interface improvements focus on usability and consistency across the platform so teachers can navigate the dashboard quickly while setting up or managing a session.
+
 - Responsive layouts so dashboard, deck editor and Unity WebGL resize cleanly across various devices and screen sizes
 - Consistent high-contrast panel text and accessible color to ensure legibility in both light and dark themes
 - Tactile buttons and micro-interactions: hover, focus and active states with subtle transitions and visible keyboard focus outlines for clear feedback
@@ -55,7 +57,7 @@ The deck editor supports three question types: Multiple Choice, True/False, and 
 
 ### Unity WebGL Game Client
 
-The core gameplay executes within the browser via a Unity WebGL build. The server delivers compressed assets to optimize load times. The Unity client acts as the authoritative host for game logic. The teacher client cordinates client event signals, calculates scores, and manages round timing. This design places trust on the teacher client for the Minimum Viable Product.
+The core gameplay executes within the browser via a Unity WebGL build. The server delivers compressed assets to optimize load times. The Unity client acts as the authoritative host for game logic. The teacher client validates answers, calculates scores, and manages round timing. This design places trust on the teacher client for the Minimum Viable Product.
 
 ### Real-Time Synchronization
 
@@ -107,22 +109,8 @@ Data persistence relies on a MySQL relational database optimized for the current
 
 ## Artificial Intelligence Integration
 
-The system employs a Large Language Model to process gameplay data and generate automated performance insights. When a game session ends, the Unity client uploads a structured session log to the backend server in JSON format. The backend then forwards this payload to a locally hosted AI inference service, where the model analyzes gameplay patterns, player decisions, and session outcomes to produce a structured performance summary.
-
-The AI service is currently deployed on a virtual machine hosted on personal hardware using Ollama 3 model. By running on an internal server, the system avoids using external API calls and performs all calculations locally using existing hardware resources. This architecture improves data privacy, reduces costs, and provides consistent response latency. The interaction with the model is preconfigured through internal prompts and command structures to ensure predictable and stable output.
+The system employs a Large Language Model to process gameplay data. When a game ends, the Unity client uploads the session log to the backend. The backend submits this JSON payload to the AI model to generate a structured performance summary.
 
 - **Output Constraint:** Three-paragraph summary
 - **Timeout:** Completion required within sixty seconds
 - **Error Handling:** Fallback message provided in report view if inference fails or times out
-
-While the current implementation prioritizes a self hosted environment for efficiency and control, the architecture is designed to remain flexible and may be changed in the future to support other strategies as the project changes.
-
----
-
-## Server Setup & Usage
-
-The server is hosted on a virtual machine and is intended to run fully on local hardware, without the need for external API calls. This server is the central backend for the Card Clash, receiving session logs from the Unity client and generating performance summaries using the AI model. It also integrates with Stabase, the analytics platform, allowing structured data and insights to be stored, queried, and visualized for player performance tracking and game balance analysis.
-
-The server is designed to be self-contained it includes all pre-configured prompts and command scripts required to process gameplay data, run AI inference, and return structured results. The system ensures low latency and predictable output while maintaining full control over the AI workflow. Developers or testers can interact with the server directly via secure local connections to perform additional testing, debugging, or custom analysis as needed.
-
-To connect the Unity client to the server, gameplay sessions are uploaded via JSON payloads over a designated network interface. The server processes these logs automatically and returns structured summaries that can be rendered in the game's report view or stored in the database for further use. This setup allows Card Clash to integrate AI powered performance insights directly into the player experience while maintaining full control over hardware and data privacy.
