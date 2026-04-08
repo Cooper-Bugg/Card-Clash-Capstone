@@ -13,11 +13,11 @@ const expressSession = require("express-session");
 const selfsigned = require("selfsigned");
 // TODO after demo: switch data routes from mockdata.js to dbController.js
 // Replace the line below with: const dataStore = require("./dbController");
-const dataStore = require("./mockdata");
+const dataStore = require("./dbController");
 
 // Loads environment variables from a .env file into process.env
 // .env lives at the repo root, one level above Backend/
-//require("dotenv").config({ path: path.join(__dirname, "../.env") });
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
 
@@ -410,16 +410,23 @@ Credentials are read from environment variables (ADMIN_USERNAME / ADMIN_PASSWORD
 For production, replace with hashed password lookup against the Users table.
 */
 /*
-store teacher id in req.session.accountID for future retrieval; already destroyed in session.destroy on logout, so good there
+store teacher id in req.session.accountID for future retrieval; already destroyed in session.destroy on logout, so good there.
+Maybe use username instead?
 */
 async function processAuthenticationRequest(req, res) {
     const submittedUsername = req.body.username;
     const submittedPassword = req.body.password;
 
+    console.log(`Authentication attempt for username: '${submittedUsername}'`); // Log the attempted username
+
     const expectedUsername = process.env.ADMIN_USERNAME || "admin";
     const expectedPassword = process.env.ADMIN_PASSWORD || "password";
 
-    if (submittedUsername === expectedUsername && submittedPassword === expectedPassword) {
+    const result = await dataStore.validateTeacherCredentials(submittedUsername, submittedPassword);
+
+    console.log(`Authentication result for username '${submittedUsername}': ${result.success ? "SUCCESS" : "FAILURE"}`); // Log the result of authentication attempt
+
+    if (result.success) {
         req.session.isAuthenticated = true;
         // TODO: Until SQL auth is wired in, keep username in session so Unity payloads stay teacher-owned.
         req.session.teacherUsername = submittedUsername;
@@ -764,26 +771,47 @@ Teacher registration page - create a new account
 For now this just renders the form real persistence happens after
 the database layer is wired up.
 */
+// Load up existing usernames from db to check here before sending to db controller?
 app.get("/register", (req, res) => {
     res.render("register", { pageTitle: "Create Account", errorMessage: null, successMessage: null });
 });
 
-app.post("/register", (req, res) => {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) {
+app.post("/register", async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+        if (!username || !email || !password) {
+            return res.render("register", {
+                pageTitle: "Create Account",
+                errorMessage: "All fields are required.",
+                successMessage: null
+            });
+        }
+        
+        // TODO: persist to database and hash password before storing
+        // Currently just ads username as display name; maybe can be changed later?
+        const result = await dataStore.registerTeacherAccount(username, email, password, username);
+        if (result.success) {
+            return res.render("register", {
+                pageTitle: "Create Account",
+                errorMessage: null,
+                successMessage: "Account created! You can now sign in."
+            });
+        } else {
+            return res.render("register", {
+                pageTitle: "Create Account",
+                errorMessage: "There was some problem with the database...",
+                successMessage: null
+            });
+        }
+    } catch (error) {
+        console.error("Error registering teacher account:", error);
         return res.render("register", {
             pageTitle: "Create Account",
-            errorMessage: "All fields are required.",
+            errorMessage: "An unexpected error occurred.",
             successMessage: null
         });
     }
-    // TODO: persist to database and hash password before storing
-    res.render("register", {
-        pageTitle: "Create Account",
-        errorMessage: null,
-        successMessage: "Account created! You can now sign in."
-    });
-});
+} )
 
 /*
 Logout route — destroys the session and redirects to login.

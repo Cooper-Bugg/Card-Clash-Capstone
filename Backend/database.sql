@@ -33,7 +33,7 @@ CREATE TABLE questions (
     question_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     deck_id INT UNSIGNED,
     question_text TEXT NOT NULL,
-    #question_type ENUM('MC', 'TF', 'SA') NOT NULL, #multiple choice, true/false, short answer
+    question_type ENUM('MC', 'TF', 'FB') NOT NULL, #multiple choice, true/false, fill-in-the-blank
     correct_answer TEXT NOT NULL,
     answer_options JSON, #for MC
     #points_value SMALLINT NOT NULL DEFAULT 1, #maybe replace this with difficulty level?
@@ -57,7 +57,7 @@ CREATE TABLE game_sessions (
     session_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     host_teacher_id INT UNSIGNED,
     deck_id INT UNSIGNED,
-    date_played DATE DEFAULT CURRENT_DATE,
+    date_played DATETIME DEFAULT CURRENT_TIMESTAMP,
     player_count SMALLINT,
     rounds_played SMALLINT,
     average_accuracy DECIMAL(5,2),
@@ -94,7 +94,7 @@ CREATE TABLE deck_saves (
 #V2 Metrics
 
 # Session Summaries table
-#NOT accurate... as far as primary key goes
+#NOT accurate... as far as primary key goes. maybe
 CREATE TABLE session_summaries (
     summary_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     session_id INT UNSIGNED,

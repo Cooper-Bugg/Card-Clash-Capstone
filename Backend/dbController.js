@@ -31,7 +31,17 @@ That means both the backend and Unity need to handle something like:
 If we add this, the AI summary can give more specific feedback for each student or the class.
 */
 
-// Helper Functions (for date formatting) -------------------------------------------------
+//Try to console.log or console.error things
+
+//import { hash, compare } from 'bcryptjs';
+const bcrypt = require('bcryptjs');
+
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
+
+const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10
+
+// Helper Functions -------------------------------------------------
 // Likely that only the third one will be useful now; db automatically updates timestamps, except for last_login in teachers
 function padZero(num) {
     return num.toString().padStart(2, '0');
@@ -61,6 +71,15 @@ function convertFromMySQLUTC(mysqlDateStr) {
     return d
 }
 
+async function hashPassword(plainTextPassword) {
+  const hashedPassword = await bcrypt.hash(plainTextPassword, saltRounds);
+  return hashedPassword;
+}
+
+function verifyPassword(plainTextPassword, storedHash) {
+  const match = bcrypt.compare(plainTextPassword, storedHash);
+  return match;
+}
 
 /*
 Need to create MySQL functions for the following scenarios:
@@ -175,8 +194,31 @@ async function updateRecord(tableName, idValue, fields, allowedFields, idColumn 
 
 //Be sure to include dbConnect.js in I think this file...
 
-const pool = require('./dbConnect').pool; //TODO: switch to ES6 import syntax after demo
+//import { pool } from './dbConnect.js';
+
+const { pool } = require('./dbConnect'); //TODO: switch to ES6 import syntax after demo
 //OR require('./dbConnect'), and then use pool.getConnection() and stuff
+
+// ********************** GENERIC DATABASE FUNCTIONS FOR REUSE ACROSS TABLES AND FUNCTIONS ******************************
+
+function buildUpsertFields(fields, allowedFields) {
+  // 1. Validation & Filtering
+  const validFields = Object.keys(fields)
+      .filter(key => allowedFields.includes(key) && fields[key] !== undefined);
+    if (!validFields.length) {
+      return { success: false, error: "No valid fields provided", code: 400 };
+    }
+
+    // 2. Build Query
+    const allFields = [...validFields];
+    const allValues = [...validFields.map(f => fields[f])];
+
+    const columnList = allFields.join(", ");
+    const placeholders = allFields.map(() => "?").join(", ");
+    const updateClause = allFields.map(f => `${f} = VALUES(${f})`).join(", ");
+
+    return { success: true, allValues, columnList, placeholders, updateClause }
+}
 
 /*
 Unity ingest contract (DB-side planning only):
@@ -232,10 +274,11 @@ Inserts if a record with the same key doesn't exist, updates if it does.
 FOR NOW, this works best for decks and questions upserts. Make sure it is compatible
 with all other tables as well.
 */
-//Have a time field?
 //Separate functions, maybe, for dealing with teacher accounts...
 async function upsertRecord(tableName, fields, allowedFields) {
   try {
+
+    /*
     // 1. Validation & Filtering
     const validFields = Object.keys(fields)
       .filter(key => allowedFields.includes(key) && fields[key] !== undefined);
@@ -250,6 +293,15 @@ async function upsertRecord(tableName, fields, allowedFields) {
     const columnList = allFields.join(", ");
     const placeholders = allFields.map(() => "?").join(", ");
     const updateClause = allFields.map(f => `${f} = VALUES(${f})`).join(", ");
+
+    */
+
+    const response = buildUpsertFields(fields, allowedFields)
+    if (!response.success) {
+      return response
+    }
+
+    const { success, allValues, columnList, placeholders, updateClause } = response
 
     const sql = `
       INSERT INTO ${tableName} (${columnList})
@@ -290,7 +342,7 @@ Arguments:
 
 Returns:
 - On success: { success: true, code: 200, data: [...] }
-- On client error (e.g. no valid fields): { success: false, error: "message", code: 400 }
+- On client error (e.g. no valid conditions): { success: false, error: "message", code: 400 }
 - On not found: { success: false, error: "No records found", code: 404 }
 - On server error: { success: false, error: "message", code: 500 or 503 }
 */
@@ -304,6 +356,10 @@ async function getRecords(tableName, allowedFields, conditions = {}, allowedCond
     // 2. Build WHERE clause from conditions
     const validConditions = Object.keys(conditions)
       .filter(key => allowedConditionFields.includes(key) && conditions[key] !== undefined);
+
+    if (!validConditions.length) {
+      return { success: false, error: "No valid conditions provided", code: 400 };
+    }
 
     const whereClause = validConditions.length
       ? `WHERE ${validConditions.map(f => `${f} = ?`).join(" AND ")}`
@@ -340,6 +396,37 @@ NOTES:
 - pool.query() works as just a single query, but for multiple queries or transactions,
   we need to use pool.getConnection() and connection.query() with proper error handling and connection release.
 */
+
+// ********************* RETRIEVE FUNCTIONS FOR FRONTEND/UNITY REQUESTS ***********************************************
+
+/*
+Not sure how to use this function...
+*/
+async function validateTeacherCredentials(username, password) {
+  const allowedFields = ['password_hash']
+  const allowedConditionFields = ['username']
+  const response = await getRecords('teachers', allowedFields, { username: username }, allowedConditionFields)
+
+  if (!response.success) {
+    console.error('Error validating account credentials', response.error)
+    return { success: false, error: response.error, code: response.code }
+  }
+
+  const passwordHash = response.data[0].password_hash
+
+  const isValid = verifyPassword(password, passwordHash)
+
+  if (isValid) {
+    // Optionally, update last_login timestamp here with another query
+    console.log('Credentials valid for username: ' + username)
+    return { success: true, code: 200, message: "Credentials valid" }
+  }
+
+  console.log('Invalid credentials for username: ' + username)
+
+  return { success: false, error: "Invalid username or password", code: 401 }
+}
+
 
 /*
 Retrieve all available question decks.
@@ -401,11 +488,92 @@ function getDeckById(deckID) {
 
 
 /*
-Insert or update a question record.
-Used only in saveDeck for now.
+Retrieve a specific session object by its primary key.
+This function must be refactored to execute: SELECT * FROM game_sessions WHERE session_id = ?
+// TODO after demo: switch data routes from data.js to database.js — replace with database.getSessionById(sessionID)
+*/
+function getSessionById(sessionID) {
+  return Promise.resolve((() => {
+    for (let i = 0; i < mockSessions.length; i += 1) {
+      const session = mockSessions[i];
+      if (session.id === sessionID) {
+        return session;
+      }
+    }
+    return null;
+  })());
+}
+
+//What about a math deck????????
+function getExportForUnity(deckID) {
+  const allowedDeckFields = ['deck_id', 'deck_name', 'description', 'number_of_questions']
+  const allowedDeckConditions = ['deck_id']
+  const deck = getRecords('decks', allowedDeckFields, {"deck_id": deckID}, allowedDeckConditions)
+
+  if (!deck.success) {
+    return { success: false, error: "Deck not found", code: 404 };
+  }
+
+  const allowedQuestionFields = ['question_id', 'question_text', 'question_type','correct_answer', 'answer_options']
+  const allowedQuestionConditions = ['deck_id']
+  const questions = getRecords('questions', allowedQuestionFields, {"deck_id": deckID}, allowedQuestionConditions)
+
+  if (!questions.success) {
+    return { success: false, error: "Questions not found for deck", code: 404 };
+  }
+
+  return { //Not correct format, maybe.....
+    deck: deck.data[0],  // Assuming deck_id is unique, so we take the first result
+    questions: questions.data
+  }
+
+}
+
+// ********************* SAVE/UPDATE FUNCTIONS WITH CLIENT DATA INPUT ***********************************************
+
+/*
+Registers a teacher account to the database.
+Recheck this to make sure it works for updates too, although that may not happen anytime soon...
+NEED TO HAVE WAY TO UPDATE LAST LOGIN... WHEN WILL THAT FUNCTION BE CALLED AND WHAT WILL IT TAKE?
+Arguments:
+- username: string, unique username for the teacher
+- email: string, teacher's email address
+- password: string, plaintext password (will be hashed before storing)
+- displayName: string, name to display in the Unity game
+
+Returns:
+- not sure yet
+*/
+// MAYBE NOT GOOD>>> WHAT ABOUT UNIQUE USERNAME/EMAIL CONSTRAINTS?
+async function registerTeacherAccount(username, email, password, displayName) {
+  const allowedFields = ['username', 'email', 'password_hash', 'display_name']
+  const hashedPassword = hashPassword(password)
+  const response = await upsertRecord('teachers', { username: username, email: email, password_hash: hashedPassword, display_name: displayName }, allowedFields)
+
+  if (!response.success) {
+    console.error('Error registering teacher account: ' + response.error)
+    return response
+  }
+
+  console.log("Teacher account " + username + " registered successfully.")
+  
+  return { success: true, code: 200, message: "Teacher account registered successfully" }
+}
+
+/*
+Insert or update a question record. Calls upsertRecord with the correct parameters for
+the questions table.
+Arguments:
+- fields: object containing question fields. Include question_id for updates, omit for inserts.
+
+Returns:
+- On success: { success: true, code: 200, action: "inserted" or "updated" }
+- On client error (e.g. no valid fields): { success: false, error: "message", code: 400 }
+- On not found (e.g. trying to update a question that doesn't exist): { success: false, error: "Question not found", code: 404 }
+- On server error: { success: false, error: "message", code: 500 or 503 }
 */
 function saveQuestion(fields) {
-  //tablename, fields, allowedFields
+
   const allowedFields = ['question_id', 'deck_id', 'question_text', 'correct_answer', 'answer_options']
   response = upsertRecord('questions', fields, allowedFields)
 
@@ -507,54 +675,13 @@ function saveDeck(infoPackage) {
 }
 
 
-/*
-Retrieve a specific session object by its primary key.
-This function must be refactored to execute: SELECT * FROM game_sessions WHERE session_id = ?
-// TODO after demo: switch data routes from data.js to database.js — replace with database.getSessionById(sessionID)
-*/
-function getSessionById(sessionID) {
-  return Promise.resolve((() => {
-    for (let i = 0; i < mockSessions.length; i += 1) {
-      const session = mockSessions[i];
-      if (session.id === sessionID) {
-        return session;
-      }
-    }
-    return null;
-  })());
-}
-
-//What about a math deck????????
-function getExportForUnity(deckID) {
-  const allowedDeckFields = ['deck_id', 'deck_name', 'subject_tag', 'number_of_questions']
-  const allowedDeckConditions = ['deck_id']
-  const deck = getRecords('decks', allowedDeckFields, {"deck_id": deckID}, allowedDeckConditions)
-
-  if (!deck.success) {
-    return { success: false, error: "Deck not found", code: 404 };
-  }
-
-  const allowedQuestionFields = ['question_id', 'question_text', 'correct_answer', 'answer_options']
-  const allowedQuestionConditions = ['deck_id']
-  const questions = getRecords('questions', allowedQuestionFields, {"deck_id": deckID}, allowedQuestionConditions)
-
-  if (!questions.success) {
-    return { success: false, error: "Questions not found for deck", code: 404 };
-  }
-
-  return { //Not correct format, maybe.....
-    deck: deck.data[0],  // Assuming deck_id is unique, so we take the first result
-    questions: questions.data
-  }
-
-}
-
-
-module.exports = {
+module.exports ={
   getDecks,
   getSessions,
   getDeckById,
   getSessionById,
   saveDeck,
-  getExportForUnity
+  getExportForUnity,
+  validateTeacherCredentials,
+  registerTeacherAccount
 };

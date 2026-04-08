@@ -140,3 +140,104 @@ To think about for next steps:
         2. Need to translate back to current time zone when pulling from db still. Don't forget that.
 - Go over saveDeck infoPackage with Cooper
 - Deleting decks and questions... we don't have any methods or flags for that as of now
+- Login functions for teachers; definitely need next. Talk to Ahmad about security
+- Need to see which functions need to by async or not...
+
+
+
+Post-game data processing:
+*Keep in mind: how much of this can we offload to AI safely?
+*For math decks, maybe just do deck metrics, modified...
+
+Unity response JSON Draft:
+(~ indicates data that might be gotten from server instead)
+(-> indicates data that server might be able to compute)
+Some things depend on the ordering of the response (if it's in
+order of when questions appeared or something, but that might be
+hard to logically figure out...)
+{
+  ~teacher_id: <data>,
+  ~deck_id: <data>,
+  ~date_played: <data>,
+  player_count: <data>,
+  rounds_played: <data>,
+  player_data: [
+    {
+      player_name: <data>,
+      final_score: <data>,
+      final_rank: <data>,
+      ->questions_answered: <data>,
+      ->questions_correct: <data>,
+      ->longest_streak: <data>,
+    },...
+  ],
+  question_data: [
+    {
+      question_id: <data>,
+      ->times_seen: <data>,
+      ->times_correct: <data>,
+      player_responses: [
+        {
+          player_name: <data>,
+          answer_given: <data>,
+          is_correct: <data>,
+          response_time: <data>,
+        }
+      ]
+    }
+  ]
+}
+
+Refactor for players holding question data?
+
+
+Need to compute:
+Per game:
+- average accuracy_pct
+- average response time
+- ai summary
+Per player:
+- accuracy_pct
+- avg_response_ms
+- fastest_response_ms
+- longest_streak
+- questions_answered
+- questions_correct
+Per question (add to total):
+- times_seen
+- times_correct
+- difficulty_index (times_correct - times_seen) / (times_seen * 100)
+- avg_response_ms
+- answer_dist (of the options, which was chosen more often)
+- sessions used
+Per deck (add to total):
+- total_session
+- avg_accuracy_pct
+- avg_session_score
+- hardest_question_id
+- easiest_question_id
+
+(separate: save_count)
+
+
+function save_metrics(infoPackage) {
+  parse data from infoPackage
+  use pre-defined array of stats
+  for each question:
+    get times seen
+    get times correct
+    calculate average response ms and answer_dist at the same time
+      (be adding data to player array of stats during this process)
+    calculate difficulty index
+  for each player:
+    Use stats to get questions_answered and questions_correct
+    compute average response time
+      Get fastest_response_ms during this too
+    longest streak
+    compute accuracy_pct
+
+  calculate per deck stats
+  calculate per game stats
+  //AI summary here? Maybe sooner, whenever enough information is had, for
+  an async result or something
+}

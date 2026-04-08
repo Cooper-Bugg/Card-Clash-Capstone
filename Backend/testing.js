@@ -49,4 +49,37 @@ function convertFromMySQLUTC(mysqlDateStr) {
     return d
 }
 
-testDateConversion()
+function testResponseStuffA() {
+    const response = {
+        success: false,
+        message: "This is a test message"
+    }
+
+    return response
+}
+
+function testResponseStuffB() {
+
+    const response = testResponseStuffA()
+    if (!response.nonexistentField) {
+        console.log("Field does not exist, still returns response")
+    }
+}
+
+
+const dataStore = require('./dbController');
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
+
+
+async function test() {
+    const result = await dataStore.registerTeacherAccount('testuser', 'test@test.com', 'password123', 'Test User');
+    console.log(result);
+
+    const authResult = await dataStore.validateTeacherCredentials('testuser', 'password123');
+    console.log(authResult);
+}
+
+test();
+
+
