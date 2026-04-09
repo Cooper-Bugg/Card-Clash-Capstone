@@ -73,13 +73,18 @@ require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
 
 async function test() {
-    const result = await dataStore.registerTeacherAccount('testuser', 'test@test.com', 'password123', 'Test User');
-    console.log(result);
+    const result = await dataStore.getDeckById(1, 1)
+    console.log(result)
+}
 
-    const authResult = await dataStore.validateTeacherCredentials('testuser', 'password123');
-    console.log(authResult);
+function rt(n) {
+
+    return { first: n, second: n * 2, third: n * 3, fourth: n * 4 }
+}
+
+function randomTest() {
+    const { second, third, fourth } = rt(4);
+    console.log(second, third, fourth)
 }
 
 test();
-
-

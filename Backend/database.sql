@@ -63,6 +63,7 @@ CREATE TABLE game_sessions (
     average_accuracy DECIMAL(5,2),
     average_response_time_ms INT UNSIGNED,
     ai_summary_text TEXT,
+    unity_data_json JSON,
     FOREIGN KEY (host_teacher_id) REFERENCES teachers(teacher_id) ON DELETE SET NULL,
     FOREIGN KEY (deck_id) REFERENCES decks(deck_id) ON DELETE SET NULL
 );
@@ -107,7 +108,7 @@ CREATE TABLE session_summaries (
     longest_streak SMALLINT,
     questions_answered SMALLINT,
     questions_correct SMALLINT,
-    computed_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    computed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (session_id) REFERENCES game_sessions(session_id) ON DELETE CASCADE
 );
 

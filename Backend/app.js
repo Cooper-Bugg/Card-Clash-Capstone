@@ -147,7 +147,7 @@ function formatSessionDate(rawDate) {
         return "Unknown date";
     }
 
-    return rawDate;
+    return rawDate
 }
 
 /*
@@ -155,22 +155,36 @@ Gathers all the deck and session data for the dashboard.
 Pulls from the data store (async so it will work when MySQL replaces mock data),
 counts the questions in each deck, and formats everything for the dashboard view.
 */
-async function buildDashboardViewModel() {
+async function buildDashboardViewModel(teacherID) {
     const decks = [];
     const sessions = [];
-    const storedDecks = await dataStore.getDecks();
+    const decksResponse = await dataStore.getDecks(teacherID);
     // TODO after demo: switch data routes from data.js to dbConnect.js — replace above with database.getDecks()
-    const storedSessions = await dataStore.getSessions();
+    const sessionsResponse = await dataStore.getSessions(teacherID);
     // TODO after demo: switch data routes from data.js to dbConnect.js — replace above with database.getSessions()
+
+    if (!decksResponse.success) {
+        console.error("Error fetching decks for dashboard:", decksResponse.error);
+        return { decks: [], sessions: [] };
+    }
+
+    if (!sessionsResponse.success) {
+        console.error("Error fetching sessions for dashboard:", sessionsResponse.error);
+        return { decks: [], sessions: [] };
+    }
+
+    const storedDecks = decksResponse.data;
+    const storedSessions = sessionsResponse.data;
 
     for (let i = 0; i < storedDecks.length; i += 1) {
         const deck = storedDecks[i];
         const deckSummary = {
             id: deck.id,
-            title: deck.title,
-            questionCount: 0
+            title: deck.deck_name,
+            questionCount: deck.number_of_questions || 0
         };
 
+        /*
         try {
             const parsed = JSON.parse(deck.contentJson);
             if (parsed && Array.isArray(parsed.questions)) {
@@ -179,6 +193,7 @@ async function buildDashboardViewModel() {
         } catch (error) {
             deckSummary.questionCount = 0;
         }
+        */
 
         decks.push(deckSummary);
     }
@@ -186,12 +201,16 @@ async function buildDashboardViewModel() {
     for (let i = 0; i < storedSessions.length; i += 1) {
         const session = storedSessions[i];
         sessions.push({
-            id: session.id,
-            deckTitle: session.deckTitle || "Untitled Deck",
-            createdAt: formatSessionDate(session.createdAt),
-            summaryPreview: Array.isArray(session.summaryParagraphs) ? session.summaryParagraphs[0] : null,
-            metrics: session.metrics || { roundsPlayed: 0, averageAccuracy: "N/A", averageResponseTime: "N/A" }
-        });
+            id: session.session_id,
+            deckTitle: session.deck_name || "Untitled Deck",
+            createdAt: formatSessionDate(session.date_played),
+            summaryPreview: session.ai_summary_text,//Array.isArray(session.ai_summary) ? session.summaryParagraphs[0] : null,
+            metrics: { //session.metrics || { roundsPlayed: 0, averageAccuracy: "N/A", averageResponseTime: "N/A" }
+                roundsPlayed: session.rounds_played, 
+                averageAccuracy: session.average_accuracy,
+                averageResponseTime: session.average_response_time_ms //convert to seconds?
+            }
+        })
     }
 
     return { decks, sessions };
@@ -390,7 +409,7 @@ This is the main hub where teachers manage everything.
 */
 async function renderDashboard(req, res) {
     try {
-        const viewModel = await buildDashboardViewModel();
+        const viewModel = await buildDashboardViewModel(req.session.teacherID);
         res.render("dashboard", {
             pageTitle: "Dashboard",
             decks: viewModel.decks,
@@ -417,8 +436,6 @@ async function processAuthenticationRequest(req, res) {
     const submittedUsername = req.body.username;
     const submittedPassword = req.body.password;
 
-    console.log(`Authentication attempt for username: '${submittedUsername}'`); // Log the attempted username
-
     const expectedUsername = process.env.ADMIN_USERNAME || "admin";
     const expectedPassword = process.env.ADMIN_PASSWORD || "password";
 
@@ -429,7 +446,7 @@ async function processAuthenticationRequest(req, res) {
     if (result.success) {
         req.session.isAuthenticated = true;
         // TODO: Until SQL auth is wired in, keep username in session so Unity payloads stay teacher-owned.
-        req.session.teacherUsername = submittedUsername;
+        req.session.teacherID= result.id;
         res.redirect("/dashboard");
     } else {
         res.status(401).render("login", {
