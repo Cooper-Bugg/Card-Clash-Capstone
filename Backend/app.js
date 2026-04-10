@@ -679,8 +679,8 @@ async function startServer() {
     // local mode defaults to localhost. server mode defaults to VM/domain values.
     const host = process.env.HOST || (runtimeMode === "server" ? "0.0.0.0" : "127.0.0.1");
     const tlsHost = process.env.TLS_HOST
-        || (runtimeMode === "server" ? (process.env.PUBLIC_HOST || "ajc40.info") : "localhost");
-    const tlsIp = process.env.TLS_IP || (runtimeMode === "server" ? "74.208.236.122" : "127.0.0.1");
+    || (runtimeMode === "server" ? (process.env.PUBLIC_HOST || "45.26.97.159") : "localhost");
+const tlsIp = process.env.TLS_IP || (runtimeMode === "server" ? "45.26.97.159" : "127.0.0.1");
     const certBase = tlsHost.replace(/[^a-zA-Z0-9.-]/g, "_");
     const keyPath = path.join(certsDir, `${certBase}-key.pem`);
     const certPath = path.join(certsDir, `${certBase}-cert.pem`);
