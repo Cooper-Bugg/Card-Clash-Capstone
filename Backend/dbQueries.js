@@ -268,7 +268,8 @@ async function upsertRecord(tableName, fields, allowedFields) {
     return {
       success: true,
       code: 200,
-      action: result.affectedRows === 1 ? "inserted" : "updated"
+      action: result.affectedRows === 1 ? "inserted" : "updated",
+      insertID: result.insertId
     };
 
   } catch (error) {
