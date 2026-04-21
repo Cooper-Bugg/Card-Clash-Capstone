@@ -76,9 +76,11 @@ async function validateTeacherCredentials(username, password) {
 }
 
 async function getDecks(teacher_id) {
+    console.log("getDecks called with teacher_id:", teacher_id);
     const allowedFields = ['deck_id', 'deck_name', 'number_of_questions', 'description', 'subject_tag']
     const allowedConditionFields = ['owner_id']
     const response = await getRecords('decks', allowedFields, { owner_id: teacher_id }, allowedConditionFields)
+    console.log("getDecks response:", JSON.stringify(response));
 
     if (!response.success) {
         console.error('Error fetching decks:', response.error)

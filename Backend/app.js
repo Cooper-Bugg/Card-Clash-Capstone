@@ -125,47 +125,42 @@ Pulls from the data store (async so it will work when MySQL replaces mock data),
 counts the questions in each deck, and formats everything for the dashboard view.
 */
 async function buildDashboardViewModel(teacherID) {
-    const decks = [];
-    const sessions = [];
-
     const decksResponse = await dataStore.getDecks(teacherID);
     const sessionsResponse = await dataStore.getSessions(teacherID);
 
+    const decks = [];
+    const sessions = [];
+
     if (!decksResponse.success) {
         console.error("Error fetching decks for dashboard:", decksResponse.error);
-        return { decks: [], sessions: [] };
+    } else {
+        for (let i = 0; i < decksResponse.data.length; i += 1) {
+            const deck = decksResponse.data[i];
+            decks.push({
+                id: deck.deck_id,
+                title: deck.deck_name,
+                questionCount: deck.number_of_questions || 0
+            });
+        }
     }
 
     if (!sessionsResponse.success) {
         console.error("Error fetching sessions for dashboard:", sessionsResponse.error);
-        return { decks: [], sessions: [] };
-    }
-
-    const storedDecks = decksResponse.data;
-    const storedSessions = sessionsResponse.data;
-
-    for (let i = 0; i < storedDecks.length; i += 1) {
-        const deck = storedDecks[i];
-        decks.push({
-            id: deck.deck_id,
-            title: deck.deck_name,
-            questionCount: deck.number_of_questions || 0
-        });
-    }
-
-    for (let i = 0; i < storedSessions.length; i += 1) {
-        const session = storedSessions[i];
-        sessions.push({
-            id: session.session_id,
-            deckTitle: session.deck_name || "Untitled Deck",
-            createdAt: formatSessionDate(session.date_played),
-            summaryPreview: session.ai_summary_text,
-            metrics: {
-                roundsPlayed: session.rounds_played,
-                averageAccuracy: session.average_accuracy,
-                averageResponseTime: session.average_response_time_ms
-            }
-        });
+    } else {
+        for (let i = 0; i < sessionsResponse.data.length; i += 1) {
+            const session = sessionsResponse.data[i];
+            sessions.push({
+                id: session.session_id,
+                deckTitle: session.deck_name || "Untitled Deck",
+                createdAt: formatSessionDate(session.date_played),
+                summaryPreview: session.ai_summary_text,
+                metrics: {
+                    roundsPlayed: session.rounds_played,
+                    averageAccuracy: session.average_accuracy,
+                    averageResponseTime: session.average_response_time_ms
+                }
+            });
+        }
     }
 
     return { decks, sessions };
@@ -335,6 +330,7 @@ Shows the main dashboard with all the decks and past game sessions.
 This is the main hub where teachers manage everything.
 */
 async function renderDashboard(req, res) {
+    console.log("teacherID from session:", req.session.teacherID);
     try {
         const viewModel = await buildDashboardViewModel(req.session.teacherID);
         res.render("dashboard", {
