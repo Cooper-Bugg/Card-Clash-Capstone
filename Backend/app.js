@@ -11,19 +11,12 @@ const https = require("https");
 const express = require("express");
 const expressSession = require("express-session");
 const selfsigned = require("selfsigned");
-// TODO after demo: switch data routes from mockdata.js to dbController.js
-// Replace the line below with: const dataStore = require("./dbController");
-const dataStore = require("./mockdata");
+const dataStore = require("./dbController");
 
-// Loads environment variables from a .env file into process.env
-// .env lives at the repo root, one level above Backend/
-//require("dotenv").config({ path: path.join(__dirname, "../.env") });
+require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
 
-// Script mode controls default network/certificate behavior.
-// local (default): localhost-friendly for Unity team testing.
-// server: VM/domain defaults for hosted deployment.
 function getRuntimeMode() {
     const modeArg = process.argv.find((arg) => arg.startsWith("--mode="));
     const modeFromArg = modeArg ? modeArg.split("=")[1] : "";
@@ -32,38 +25,26 @@ function getRuntimeMode() {
 }
 
 const runtimeMode = getRuntimeMode();
-// Use PORT env var if set (e.g. for deployment), otherwise default to 3000.
 const port = Number.parseInt(process.env.PORT || "3000", 10);
 
 app.set("view engine", "ejs");
-// Views now live in Frontend/views — one level up from Backend/
 app.set("views", path.join(__dirname, "../Frontend/views"));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// Keep API contracts machine-readable: malformed request bodies should return JSON, not HTML.
 app.use((err, req, res, next) => {
     if (!err || !req.path.startsWith("/api/")) {
         next(err);
         return;
     }
-
     if (err.type === "entity.parse.failed") {
-        res.status(400).json({
-            error: "Malformed JSON in request body.",
-            code: "BAD_JSON"
-        });
+        res.status(400).json({ error: "Malformed JSON in request body.", code: "BAD_JSON" });
         return;
     }
-
     if (err.type === "entity.too.large") {
-        res.status(413).json({
-            error: "Request body is too large.",
-            code: "PAYLOAD_TOO_LARGE"
-        });
+        res.status(413).json({ error: "Request body is too large.", code: "PAYLOAD_TOO_LARGE" });
         return;
     }
-
     next(err);
 });
 
@@ -79,10 +60,8 @@ function attachBrotliHeaders(req, res, next) {
         next();
         return;
     }
-
     res.setHeader("Content-Encoding", "br");
     res.setHeader("Vary", "Accept-Encoding");
-
     if (req.path.endsWith(".wasm.br")) {
         res.type("application/wasm");
     } else if (req.path.endsWith(".js.br")) {
@@ -90,12 +69,10 @@ function attachBrotliHeaders(req, res, next) {
     } else if (req.path.endsWith(".data.br")) {
         res.type("application/octet-stream");
     }
-
     next();
 }
 
 app.use(attachBrotliHeaders);
-// Static assets (CSS, fonts, Unity build) now live in Frontend/public
 app.use(express.static(path.join(__dirname, "../Frontend/public")));
 
 /*
@@ -137,16 +114,8 @@ function requireTeacherAuthentication(req, res, next) {
     }
 }
 
-/*
-Takes a date from our fake data and formats it nicely for display.
-Right now it just returns the date as-is, but later this can
-make dates look prettier without needing an extra library.
-*/
 function formatSessionDate(rawDate) {
-    if (!rawDate) {
-        return "Unknown date";
-    }
-
+    if (!rawDate) return "Unknown date";
     return rawDate;
 }
 
@@ -155,53 +124,53 @@ Gathers all the deck and session data for the dashboard.
 Pulls from the data store (async so it will work when MySQL replaces mock data),
 counts the questions in each deck, and formats everything for the dashboard view.
 */
-async function buildDashboardViewModel() {
+async function buildDashboardViewModel(teacherID) {
     const decks = [];
     const sessions = [];
-    const storedDecks = await dataStore.getDecks();
-    // TODO after demo: switch data routes from data.js to dbConnect.js — replace above with database.getDecks()
-    const storedSessions = await dataStore.getSessions();
-    // TODO after demo: switch data routes from data.js to dbConnect.js — replace above with database.getSessions()
+
+    const decksResponse = await dataStore.getDecks(teacherID);
+    const sessionsResponse = await dataStore.getSessions(teacherID);
+
+    if (!decksResponse.success) {
+        console.error("Error fetching decks for dashboard:", decksResponse.error);
+        return { decks: [], sessions: [] };
+    }
+
+    if (!sessionsResponse.success) {
+        console.error("Error fetching sessions for dashboard:", sessionsResponse.error);
+        return { decks: [], sessions: [] };
+    }
+
+    const storedDecks = decksResponse.data;
+    const storedSessions = sessionsResponse.data;
 
     for (let i = 0; i < storedDecks.length; i += 1) {
         const deck = storedDecks[i];
-        const deckSummary = {
-            id: deck.id,
-            title: deck.title,
-            questionCount: 0
-        };
-
-        try {
-            const parsed = JSON.parse(deck.contentJson);
-            if (parsed && Array.isArray(parsed.questions)) {
-                deckSummary.questionCount = parsed.questions.length;
-            }
-        } catch (error) {
-            deckSummary.questionCount = 0;
-        }
-
-        decks.push(deckSummary);
+        decks.push({
+            id: deck.deck_id,
+            title: deck.deck_name,
+            questionCount: deck.number_of_questions || 0
+        });
     }
 
     for (let i = 0; i < storedSessions.length; i += 1) {
         const session = storedSessions[i];
         sessions.push({
-            id: session.id,
-            deckTitle: session.deckTitle || "Untitled Deck",
-            createdAt: formatSessionDate(session.createdAt),
-            summaryPreview: Array.isArray(session.summaryParagraphs) ? session.summaryParagraphs[0] : null,
-            metrics: session.metrics || { roundsPlayed: 0, averageAccuracy: "N/A", averageResponseTime: "N/A" }
+            id: session.session_id,
+            deckTitle: session.deck_name || "Untitled Deck",
+            createdAt: formatSessionDate(session.date_played),
+            summaryPreview: session.ai_summary_text,
+            metrics: {
+                roundsPlayed: session.rounds_played,
+                averageAccuracy: session.average_accuracy,
+                averageResponseTime: session.average_response_time_ms
+            }
         });
     }
 
     return { decks, sessions };
 }
 
-/*
-Sends back a standard error response.
-Keeps us from writing the same error handling code over and over
-in every route handler.
-*/
 function sendServerError(res, message) {
     res.status(500).send(message);
 }
@@ -212,31 +181,18 @@ function toPositiveInteger(value) {
 }
 
 function parseBooleanFlag(value) {
-    if (typeof value === "boolean") {
-        return value;
-    }
-
-    if (typeof value === "number") {
-        return value === 1;
-    }
-
+    if (typeof value === "boolean") return value;
+    if (typeof value === "number") return value === 1;
     if (typeof value === "string") {
         const normalized = value.trim().toLowerCase();
         return normalized === "true" || normalized === "1";
     }
-
     return false;
 }
 
 function mapQuestionTypeToUnity(questionType) {
-    if (questionType === "true_false") {
-        return "TF";
-    }
-
-    if (questionType === "fill_blank") {
-        return "FB";
-    }
-
+    if (questionType === "TF") return "TF";
+    if (questionType === "FB") return "FB";
     return "MC";
 }
 
@@ -261,7 +217,6 @@ function normalizeUnitySessionPayload(rawPayload, teacherIdentity) {
 
     function ensurePlayer(name) {
         const normalizedName = String(name || "Unknown Player").trim() || "Unknown Player";
-
         if (!playerStatsByName.has(normalizedName)) {
             playerStatsByName.set(normalizedName, {
                 player_name: normalizedName,
@@ -274,7 +229,6 @@ function normalizeUnitySessionPayload(rawPayload, teacherIdentity) {
             });
             playerOrder.push(normalizedName);
         }
-
         return playerStatsByName.get(normalizedName);
     }
 
@@ -283,7 +237,6 @@ function normalizeUnitySessionPayload(rawPayload, teacherIdentity) {
         const stats = ensurePlayer(player.player_name);
         const score = Number(player.final_score);
         const rank = toPositiveInteger(player.final_rank);
-
         stats.final_score = Number.isFinite(score) ? score : stats.final_score;
         stats.final_rank = rank || stats.final_rank;
     }
@@ -293,9 +246,7 @@ function normalizeUnitySessionPayload(rawPayload, teacherIdentity) {
     for (let i = 0; i < incomingQuestions.length; i += 1) {
         const questionEntry = incomingQuestions[i] || {};
         const questionID = toPositiveInteger(questionEntry.question_id);
-        if (!questionID) {
-            continue;
-        }
+        if (!questionID) continue;
 
         const incomingResponses = Array.isArray(questionEntry.player_responses) ? questionEntry.player_responses : [];
         const normalizedResponses = [];
@@ -319,9 +270,7 @@ function normalizeUnitySessionPayload(rawPayload, teacherIdentity) {
             }
 
             computedTimesSeen += 1;
-            if (isCorrect) {
-                computedTimesCorrect += 1;
-            }
+            if (isCorrect) computedTimesCorrect += 1;
 
             normalizedResponses.push({
                 player_name: playerName,
@@ -374,10 +323,7 @@ This is the gate you have to go through before you can see the dashboard.
 */
 async function renderLoginPage(req, res) {
     try {
-        res.render("login", {
-            pageTitle: "Teacher Login",
-            errorMessage: null
-        });
+        res.render("login", { pageTitle: "Teacher Login", errorMessage: null });
     } catch (error) {
         console.error("Login page render failed.", error);
         sendServerError(res, "Login page could not render.");
@@ -390,7 +336,7 @@ This is the main hub where teachers manage everything.
 */
 async function renderDashboard(req, res) {
     try {
-        const viewModel = await buildDashboardViewModel();
+        const viewModel = await buildDashboardViewModel(req.session.teacherID);
         res.render("dashboard", {
             pageTitle: "Dashboard",
             decks: viewModel.decks,
@@ -406,23 +352,17 @@ async function renderDashboard(req, res) {
 Processes the login form. Checks username and password.
 On success it marks the session as authenticated and redirects to the dashboard.
 On failure it re-renders the login page with an error message.
-Credentials are read from environment variables (ADMIN_USERNAME / ADMIN_PASSWORD).
-For production, replace with hashed password lookup against the Users table.
-*/
-/*
-store teacher id in req.session.accountID for future retrieval; already destroyed in session.destroy on logout, so good there
 */
 async function processAuthenticationRequest(req, res) {
     const submittedUsername = req.body.username;
     const submittedPassword = req.body.password;
 
-    const expectedUsername = process.env.ADMIN_USERNAME || "admin";
-    const expectedPassword = process.env.ADMIN_PASSWORD || "password";
+    const result = await dataStore.validateTeacherCredentials(submittedUsername, submittedPassword);
+    console.log(`Authentication result for username '${submittedUsername}': ${result.success ? "SUCCESS" : "FAILURE"}`);
 
-    if (submittedUsername === expectedUsername && submittedPassword === expectedPassword) {
+    if (result.success) {
         req.session.isAuthenticated = true;
-        // TODO: Until SQL auth is wired in, keep username in session so Unity payloads stay teacher-owned.
-        req.session.teacherUsername = submittedUsername;
+        req.session.teacherID = result.id;
         res.redirect("/dashboard");
     } else {
         res.status(401).render("login", {
@@ -448,23 +388,21 @@ Looks up which deck you want to play and displays the game iframe.
 async function renderGame(req, res) {
     try {
         const deckID = Number.parseInt(req.query.deckID, 10);
-        const deck = Number.isNaN(deckID) ? null : await dataStore.getDeckById(deckID);
+        const deckResponse = Number.isNaN(deckID) ? null : await dataStore.getDeckById(deckID, req.session.teacherID);
 
-        let fallbackDeck = deck;
-        if (!fallbackDeck) {
-            // TODO after demo: switch data routes from data.js to database.js — replace below with database.getDecks()
-            const allDecks = await dataStore.getDecks();
-            fallbackDeck = allDecks[0] || null;
-        }
-
-        if (!fallbackDeck) {
-            res.status(404).send("No decks available. Please create a deck first.");
+        if (!deckResponse || !deckResponse.success) {
+            res.status(404).send("No deck found. Please create a deck first.");
             return;
         }
 
+        const deck = {
+            id: deckResponse.data.deck.deck_id,
+            title: deckResponse.data.deck.deck_name
+        };
+
         res.render("game", {
             pageTitle: "Launch Game",
-            deck: fallbackDeck,
+            deck,
             unityPath: "/Unity/index.html"
         });
     } catch (error) {
@@ -475,14 +413,11 @@ async function renderGame(req, res) {
 
 /*
 Shows the AI summary and stats after a game session.
-Looks up which session you want to review and displays the report.
 */
 async function renderReport(req, res) {
     try {
         const sessionID = Number.parseInt(req.params.id, 10);
-        const session = Number.isNaN(sessionID)
-            ? null
-            : await dataStore.getSessionById(sessionID);
+        const session = Number.isNaN(sessionID) ? null : await dataStore.getSessionById(sessionID);
 
         if (!session) {
             res.status(404).send("Report not found.");
@@ -507,25 +442,23 @@ async function renderReport(req, res) {
 
 /*
 Shows all past game sessions so the teacher can pick one to review.
-Pulls from the data store — ready for MySQL implementation.
 */
 async function renderSessions(req, res) {
     try {
-        // TODO after demo: switch data routes from data.js to database.js — replace below with database.getSessions()
-        const storedSessions = await dataStore.getSessions();
-        const sessions = (Array.isArray(storedSessions) ? storedSessions : []).map((s) => ({
-            id: s.id,
-            deckID: s.deckID,
-            deckTitle: s.deckTitle || "Untitled Deck",
-            createdAt: s.createdAt || "Unknown date",
-            summaryPreview: Array.isArray(s.summaryParagraphs) ? s.summaryParagraphs[0] : null,
-            metrics: s.metrics || { roundsPlayed: 0, averageAccuracy: "N/A", averageResponseTime: "N/A" }
-        }));
+        const sessionsResponse = await dataStore.getSessions(req.session.teacherID);
+        const sessions = sessionsResponse.success ? sessionsResponse.data.map((s) => ({
+            id: s.session_id,
+            deckTitle: s.deck_name || "Untitled Deck",
+            createdAt: formatSessionDate(s.date_played),
+            summaryPreview: s.ai_summary_text || null,
+            metrics: {
+                roundsPlayed: s.rounds_played || 0,
+                averageAccuracy: s.average_accuracy || "N/A",
+                averageResponseTime: s.average_response_time_ms || "N/A"
+            }
+        })) : [];
 
-        res.render("sessions", {
-            pageTitle: "Sessions",
-            sessions
-        });
+        res.render("sessions", { pageTitle: "Sessions", sessions });
     } catch (error) {
         console.error("Sessions page render failed.", error);
         sendServerError(res, "Sessions page could not render.");
@@ -534,18 +467,13 @@ async function renderSessions(req, res) {
 
 /*
 Shows a blank deck editor so you can create a new quiz.
-Starts with an empty form ready for you to add questions.
 */
 async function renderNewDeck(req, res) {
     try {
         res.render("deck", {
             pageTitle: "Create Deck",
             mode: "create",
-            deck: {
-                id: null,
-                title: "",
-                contentJson: "{\n  \"questions\": []\n}"
-            }
+            deck: { id: null, title: "", contentJson: "{\n  \"questions\": []\n}" }
         });
     } catch (error) {
         console.error("Deck create page render failed.", error);
@@ -555,22 +483,49 @@ async function renderNewDeck(req, res) {
 
 /*
 Shows the deck editor loaded with an existing deck.
-Lets you edit questions and answers for a deck you already created.
 */
 async function renderEditDeck(req, res) {
     try {
         const deckID = Number.parseInt(req.params.id, 10);
-        const deck = Number.isNaN(deckID) ? null : await dataStore.getDeckById(deckID);
+        const deckResponse = Number.isNaN(deckID) ? null : await dataStore.getDeckById(deckID, req.session.teacherID);
 
-        if (!deck) {
+        if (!deckResponse || !deckResponse.success) {
             res.status(404).send("Deck not found.");
             return;
         }
 
+        // Rebuild contentJson from database questions for the editor
+        const deck = deckResponse.data.deck;
+        const questions = deckResponse.data.questions;
+
+        const contentJson = JSON.stringify({
+            questions: questions.map((q) => {
+                const options = q.answer_options
+                    ? (typeof q.answer_options === "string" ? JSON.parse(q.answer_options) : q.answer_options)
+                    : [];
+                return {
+                    id: q.question_id,
+                    questionType: q.question_type === "MC" ? "multiple_choice" :
+                                  q.question_type === "TF" ? "true_false" : "fill_blank",
+                    questionText: q.question_text,
+                    optionA: options[0] || "",
+                    optionB: options[1] || "",
+                    optionC: options[2] || "",
+                    optionD: options[3] || "",
+                    correctAnswer: q.correct_answer,
+                    correctAnswerText: q.correct_answer
+                };
+            })
+        }, null, 2);
+
         res.render("deck", {
             pageTitle: "Edit Deck",
             mode: "edit",
-            deck
+            deck: {
+                id: deck.deck_id,
+                title: deck.deck_name,
+                contentJson
+            }
         });
     } catch (error) {
         console.error("Deck edit page render failed.", error);
@@ -579,17 +534,14 @@ async function renderEditDeck(req, res) {
 }
 
 /*
-Saves a deck from the form and stores it in memory.
-Validates the contentJson shape before saving to prevent broken payloads
-from reaching the game or Unity integration.
+Saves a deck and its questions to the database.
+Maps the frontend question format to the database format.
 */
 async function saveDeck(req, res) {
     try {
         const title = (req.body.title || "").trim() || "Untitled Deck";
         const contentJson = (req.body.contentJson || "").trim() || "{\n  \"questions\": []\n}";
 
-        // Validate deck JSON shape before saving.
-        // Ensures downstream game and Unity logic receives well-formed data.
         let parsed;
         try {
             parsed = JSON.parse(contentJson);
@@ -597,7 +549,7 @@ async function saveDeck(req, res) {
             res.status(400).send("Deck could not be saved: contentJson is not valid JSON.");
             return;
         }
-        
+
         if (!parsed || !Array.isArray(parsed.questions)) {
             res.status(400).send("Deck could not be saved: contentJson must contain a 'questions' array.");
             return;
@@ -605,6 +557,7 @@ async function saveDeck(req, res) {
 
         const validAnswers = new Set(["A", "B", "C", "D"]);
         const validQuestionTypes = new Set(["multiple_choice", "true_false", "fill_blank"]);
+
         for (let i = 0; i < parsed.questions.length; i += 1) {
             const q = parsed.questions[i];
 
@@ -621,7 +574,7 @@ async function saveDeck(req, res) {
 
             if (questionType === "multiple_choice") {
                 if (!q.optionA || !q.optionB || !q.optionC || !q.optionD || !validAnswers.has(q.correctAnswer)) {
-                    res.status(400).send(`Deck could not be saved: multiple-choice question at index ${i} is missing required fields (optionA-D, correctAnswer A-D).`);
+                    res.status(400).send(`Deck could not be saved: multiple-choice question at index ${i} is missing required fields.`);
                     return;
                 }
             }
@@ -641,26 +594,44 @@ async function saveDeck(req, res) {
                     return;
                 }
             }
-
-            if (q.minValue !== undefined && !Number.isFinite(Number(q.minValue))) {
-                res.status(400).send(`Deck could not be saved: question at index ${i} has invalid minValue.`);
-                return;
-            }
-
-            if (q.maxValue !== undefined && !Number.isFinite(Number(q.maxValue))) {
-                res.status(400).send(`Deck could not be saved: question at index ${i} has invalid maxValue.`);
-                return;
-            }
         }
 
-        // TODO after demo: switch data routes from data.js to database.js — replace below with database.saveDeck(...)
-        const savedDeck = await dataStore.saveDeck({
-            id: req.body.id,
-            title,
-            contentJson
-        });
+        // Map frontend question format to database format
+        const questions = parsed.questions.map((q) => ({
+            question_id: q.id || undefined,
+            question_text: q.questionText || "",
+            question_type: q.questionType === "multiple_choice" ? "MC" :
+                           q.questionType === "true_false" ? "TF" : "FB",
+            correct_answer: q.correctAnswerText || q.correctAnswer || "",
+            answer_options: (q.optionA || q.optionB || q.optionC || q.optionD)
+                ? JSON.stringify([q.optionA, q.optionB, q.optionC, q.optionD].filter(Boolean))
+                : null
+        }));
 
-        res.redirect(`/deck/${savedDeck.id}/edit`);
+        const deckIdFromForm = toPositiveInteger(req.body.id);
+
+        const infoPackage = {
+            deck_id: deckIdFromForm || undefined,
+            owner_id: req.session.teacherID,
+            deck_name: title,
+            number_of_questions: questions.length,
+            questions
+        };
+
+        const savedDeck = await dataStore.saveDeck(infoPackage);
+
+        console.log("infoPackage:", JSON.stringify(infoPackage));
+        console.log("savedDeck result:", JSON.stringify(savedDeck));
+
+        if (!savedDeck.success) {
+            console.error("Deck save failed:", savedDeck.error);
+            res.status(500).send("Deck could not be saved.");
+            return;
+        }
+
+        const deckId = savedDeck.insertID || deckIdFromForm;
+        console.log("deckId:", deckId)
+        res.redirect(`/deck/${deckId}/edit`);
     } catch (error) {
         console.error("Deck save failed.", error);
         sendServerError(res, "Deck could not be saved.");
@@ -673,10 +644,7 @@ Generates a self-signed certificate in the /certs folder if one does not exist.
 Falls back to plain HTTP if certificate generation fails for any reason.
 */
 async function startServer() {
-    // certs/ lives at the repo root, one level above Backend/
     const certsDir = path.join(__dirname, "../certs");
-    // HOST controls bind address; TLS_HOST controls certificate identity.
-    // local mode defaults to localhost. server mode defaults to VM/domain values.
     const host = process.env.HOST || (runtimeMode === "server" ? "0.0.0.0" : "127.0.0.1");
     const tlsHost = process.env.TLS_HOST
     || (runtimeMode === "server" ? (process.env.PUBLIC_HOST || "45.26.97.159") : "localhost");
@@ -685,12 +653,10 @@ const tlsIp = process.env.TLS_IP || (runtimeMode === "server" ? "45.26.97.159" :
     const keyPath = path.join(certsDir, `${certBase}-key.pem`);
     const certPath = path.join(certsDir, `${certBase}-cert.pem`);
 
-    // Make sure certs directory exists
     if (!fs.existsSync(certsDir)) {
         fs.mkdirSync(certsDir, { recursive: true });
     }
 
-    // Generate self-signed cert if not already present
     if (!fs.existsSync(keyPath) || !fs.existsSync(certPath)) {
         try {
             const attrs = [{ name: "commonName", value: tlsHost }];
@@ -725,7 +691,6 @@ const tlsIp = process.env.TLS_IP || (runtimeMode === "server" ? "45.26.97.159" :
         }
     }
 
-    // Start HTTPS server
     const httpsPort = Number.parseInt(process.env.HTTPS_PORT || port, 10);
     const serverOptions = {
         key: fs.readFileSync(keyPath, "utf8"),
@@ -738,6 +703,10 @@ const tlsIp = process.env.TLS_IP || (runtimeMode === "server" ? "45.26.97.159" :
     });
 }
 
+// ============================================================
+// ROUTES
+// ============================================================
+
 /*
 Home page. Everyone lands here first.
 Choose if you're a student or a teacher.
@@ -746,70 +715,63 @@ app.get("/", (req, res) => {
     res.render("index");
 });
 
-/*
-Teacher login page route.
-*/
 app.get("/login", renderLoginPage);
 app.post("/login", processAuthenticationRequest);
 
-/*
-Teacher portal — choose to sign in or create an account.
-*/
 app.get("/teacher", (req, res) => {
     res.render("teacher", { pageTitle: "Teacher Portal" });
 });
 
-/*
-Teacher registration page - create a new account
-For now this just renders the form real persistence happens after
-the database layer is wired up.
-*/
 app.get("/register", (req, res) => {
     res.render("register", { pageTitle: "Create Account", errorMessage: null, successMessage: null });
 });
 
-app.post("/register", (req, res) => {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) {
+app.post("/register", async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+        if (!username || !email || !password) {
+            return res.render("register", {
+                pageTitle: "Create Account",
+                errorMessage: "All fields are required.",
+                successMessage: null
+            });
+        }
+        const result = await dataStore.registerTeacherAccount(username, email, password, username);
+        if (result.success) {
+            return res.render("register", {
+                pageTitle: "Create Account",
+                errorMessage: null,
+                successMessage: "Account created! You can now sign in."
+            });
+        } else {
+            return res.render("register", {
+                pageTitle: "Create Account",
+                errorMessage: "There was some problem with the database...",
+                successMessage: null
+            });
+        }
+    } catch (error) {
+        console.error("Error registering teacher account:", error);
         return res.render("register", {
             pageTitle: "Create Account",
-            errorMessage: "All fields are required.",
+            errorMessage: "An unexpected error occurred.",
             successMessage: null
         });
     }
-    // TODO: persist to database and hash password before storing
-    res.render("register", {
-        pageTitle: "Create Account",
-        errorMessage: null,
-        successMessage: "Account created! You can now sign in."
-    });
 });
 
-/*
-Logout route — destroys the session and redirects to login.
-*/
 app.post("/logout", processLogoutRequest);
 
 /*
 Student game page. Just the game, no dashboard.
 Students do not need to authenticate.
-Students currently have no accounts, so session analytics still belong to the host teacher.
 */
 app.get("/join", (req, res) => {
-    res.render("student", {
-        unityPath: "/Unity/index.html"
-    });
+    res.render("student", { unityPath: "/Unity/index.html" });
 });
 
-/*
-Game page. Protected — teacher must be logged in.
-*/
 app.get("/game/play", requireTeacherAuthentication, renderGame);
 
-/*
-Protected teacher routes. requireTeacherAuthentication blocks
-anyone who is not logged in and redirects them to /login.
-*/
 app.get("/dashboard", requireTeacherAuthentication, renderDashboard);
 app.get("/sessions", requireTeacherAuthentication, renderSessions);
 app.get("/report/:id", requireTeacherAuthentication, renderReport);
@@ -819,10 +781,9 @@ app.post("/deck", requireTeacherAuthentication, saveDeck);
 
 /*
 Unity API routes.
-The authenticated teacher is the owner for all game data at this stage.
-Students are guest players for now, so player_name text should be saved without requiring student IDs.
+Authentication removed for demo — Unity WebGL runs in same browser session.
 */
-app.get("/api/unity/deck/:deckID", requireTeacherAuthentication, async (req, res) => {
+app.get("/api/unity/deck/:deckID", async (req, res) => {
     try {
         const deckID = toPositiveInteger(req.params.deckID);
         if (!deckID) {
@@ -830,54 +791,45 @@ app.get("/api/unity/deck/:deckID", requireTeacherAuthentication, async (req, res
             return;
         }
 
-        const deck = await dataStore.getDeckById(deckID);
-        if (!deck) {
+        // Fetch deck and questions directly from database
+        const deckResponse = await dataStore.getDeckById(deckID, req.session.teacherID);
+        if (!deckResponse || !deckResponse.success) {
             res.status(404).json({ error: "Deck not found." });
             return;
         }
 
-        let parsedContent;
-        try {
-            parsedContent = JSON.parse(deck.contentJson || "{}");
-        } catch (parseError) {
-            res.status(500).json({ error: "Deck contentJson is not valid JSON." });
-            return;
-        }
+        const deck = deckResponse.data.deck;
+        const questions = deckResponse.data.questions.map((q, index) => {
+            const type = mapQuestionTypeToUnity(q.question_type);
+            let answerOptions = null;
 
-        const questions = Array.isArray(parsedContent.questions)
-            ? parsedContent.questions.map((question, index) => {
-                const type = mapQuestionTypeToUnity(question.questionType || "multiple_choice");
-                let answerOptions = null;
+            if (type === "MC" || type === "TF") {
+                answerOptions = q.answer_options
+                    ? (typeof q.answer_options === "string" ? JSON.parse(q.answer_options) : q.answer_options)
+                    : null;
+            }
 
-                if (type === "MC") {
-                    answerOptions = [question.optionA, question.optionB, question.optionC, question.optionD].filter((opt) => typeof opt === "string");
-                } else if (type === "TF") {
-                    answerOptions = ["true", "false"];
-                }
+            return {
+                question_id: q.question_id || index + 1,
+                deck_id: deck.deck_id,
+                question_text: q.question_text || "",
+                question_type: type,
+                correct_answer: q.correct_answer || "",
+                answer_options: answerOptions,
+                points_value: 1
+            };
+        });
 
-                return {
-                    question_id: toPositiveInteger(question.id) || index + 1,
-                    deck_id: deck.id,
-                    question_text: question.questionText || "",
-                    question_type: type,
-                    correct_answer: question.correctAnswerText || question.correctAnswer || "",
-                    answer_options: answerOptions,
-                    points_value: Number.isFinite(Number(question.pointsValue)) ? Number(question.pointsValue) : 1
-                };
-            })
-            : [];
-
-        // SQL TODO: read owner_id, timestamps, and question IDs directly from MySQL tables (decks/questions).
         res.json({
-            deck_id: deck.id,
-            owner_id: null,
-            deck_name: deck.title || "Untitled Deck",
-            description: null,
-            subject_tag: null,
+            deck_id: deck.deck_id,
+            owner_id: deck.owner_id || null,
+            deck_name: deck.deck_name || "Untitled Deck",
+            description: deck.description || null,
+            subject_tag: deck.subject_tag || null,
             number_of_questions: questions.length,
-            is_public: 0,
-            created_at: null,
-            updated_at: null,
+            is_public: deck.is_public || 0,
+            created_at: deck.created_at || null,
+            updated_at: deck.updated_at || null,
             questions
         });
     } catch (error) {
@@ -886,21 +838,16 @@ app.get("/api/unity/deck/:deckID", requireTeacherAuthentication, async (req, res
     }
 });
 
-app.post("/api/unity/session/ingest", requireTeacherAuthentication, async (req, res) => {
+app.post("/api/unity/session/ingest", async (req, res) => {
     try {
-        const teacherIdentity = req.session.teacherUsername || process.env.ADMIN_USERNAME || "admin";
+        const teacherIdentity = req.session.teacherID || process.env.ADMIN_USERNAME || "admin";
         const normalizedPayload = normalizeUnitySessionPayload(req.body, teacherIdentity);
 
         if (normalizedPayload.error) {
             res.status(400).json({ error: normalizedPayload.error });
             return;
         }
-        // TODO: save session/player/question rows in one transaction
-        // SQL TODO: use a transaction in dbController to:
-        // 1) INSERT into game_sessions (teacher-owned session metadata)
-        // 2) INSERT/UPSERT per-player rows in session_summaries
-        // 3) INSERT per-response rows in session_results
-        // 4) UPSERT aggregated counters in question_metrics
+
         res.status(202).json({
             ok: true,
             note: "Unity payload accepted and normalized. SQL persistence is the next step in dbController.",
@@ -912,17 +859,9 @@ app.post("/api/unity/session/ingest", requireTeacherAuthentication, async (req, 
     }
 });
 
-/*
-Ollama and LLM API routes.
-These are the endpoints the server will use to talk to Ollama locally.
-Right now they return stub responses so the rest of the application can be built.
-*/
 app.post("/api/ai/summarize", requireTeacherAuthentication, async (req, res) => {
     try {
-        // Implement Ollama API connection here to fetch the AI summary.
-        res.json({
-            summary: "AI summary stub — Ollama not connected yet."
-        });
+        res.json({ summary: "AI summary stub — Ollama not connected yet." });
     } catch (error) {
         console.error("AI summarize failed.", error);
         res.status(500).json({ error: "AI summarize request failed." });
@@ -931,7 +870,6 @@ app.post("/api/ai/summarize", requireTeacherAuthentication, async (req, res) => 
 
 app.get("/api/ai/report/:sessionID", requireTeacherAuthentication, async (req, res) => {
     try {
-        // Implement MySQL SELECT query here to retrieve the session summary.
         const sessionID = Number.parseInt(req.params.sessionID, 10);
         const session = await dataStore.getSessionById(sessionID);
 
@@ -952,7 +890,6 @@ app.get("/api/ai/report/:sessionID", requireTeacherAuthentication, async (req, r
 
 app.post("/api/ai/report/:sessionID", requireTeacherAuthentication, async (req, res) => {
     try {
-        // TODO: Implement MySQL UPDATE query here to save the completed AI summary.
         res.json({ ok: true, note: "Save stub — MySQL not connected yet." });
     } catch (error) {
         console.error("AI report save failed.", error);

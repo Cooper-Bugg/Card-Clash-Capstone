@@ -140,3 +140,383 @@ To think about for next steps:
         2. Need to translate back to current time zone when pulling from db still. Don't forget that.
 - Go over saveDeck infoPackage with Cooper
 - Deleting decks and questions... we don't have any methods or flags for that as of now
+- Login functions for teachers; definitely need next. Talk to Ahmad about security
+- Need to see which functions need to by async or not...
+
+
+
+Post-game data processing:
+*Keep in mind: how much of this can we offload to AI safely?
+*For math decks, maybe just do deck metrics, modified...
+
+Unity response JSON Draft:
+(~ indicates data that might be gotten from server instead)
+(-> indicates data that server might be able to compute)
+Some things depend on the ordering of the response (if it's in
+order of when questions appeared or something, but that might be
+hard to logically figure out...)
+{
+  ~teacher_id: <data>,
+  ~deck_id: <data>,
+  ~date_played: <data>,
+  player_count: <data>,
+  rounds_played: <data>,
+  player_data: [
+    {
+      player_name: <data>,
+      final_score: <data>,
+      final_rank: <data>,
+      ->questions_answered: <data>,
+      ->questions_correct: <data>,
+      ->longest_streak: <data>,
+    },...
+  ],
+  question_data: [
+    {
+      question_id: <data>,
+      ->times_seen: <data>,
+      ->times_correct: <data>,
+      player_responses: [
+        {
+          player_name: <data>,
+          answer_given: <data>,
+          is_correct: <data>,
+          response_time: <data>,
+        }
+      ]
+    }
+  ]
+}
+
+Refactor for players holding question data?
+
+
+Need to compute:
+Per game:
+- average accuracy_pct
+- average response time
+- ai summary
+Per player:
+- accuracy_pct
+- avg_response_ms
+- fastest_response_ms
+- longest_streak
+- questions_answered
+- questions_correct
+Per question (add to total):
+- times_seen
+- times_correct
+- difficulty_index (times_correct - times_seen) / (times_seen * 100)
+- avg_response_ms
+- answer_dist (of the options, which was chosen more often)
+- sessions used
+Per deck (add to total):
+- total_session
+- avg_accuracy_pct
+- avg_session_score
+- hardest_question_id
+- easiest_question_id
+
+(separate: save_count)
+
+
+function save_metrics(infoPackage) {
+  parse data from infoPackage
+  use pre-defined array of stats
+  for each question:
+    get times seen
+    get times correct
+    calculate average response ms and answer_dist at the same time
+      (be adding data to player array of stats during this process)
+    calculate difficulty index
+  for each player:
+    Use stats to get questions_answered and questions_correct
+    compute average response time
+      Get fastest_response_ms during this too
+    longest streak
+    compute accuracy_pct
+
+  calculate per deck stats
+  calculate per game stats
+  //AI summary here? Maybe sooner, whenever enough information is had, for
+  an async result or something
+}
+
+
+
+
+
+
+
+// =========================================================================================
+// OLD STUFF! DELETE soon. REPLACED BY dbQueries.js
+// =========================================================================================
+
+function buildUpsertFields(fields, allowedFields) {
+  // 1. Validation & Filtering
+  const validFields = Object.keys(fields)
+      .filter(key => allowedFields.includes(key) && fields[key] !== undefined);
+    if (!validFields.length) {
+      return { success: false, error: "No valid fields provided", code: 400 };
+    }
+
+    // 2. Build Query
+    const allFields = [...validFields];
+    const allValues = [...validFields.map(f => fields[f])];
+
+    const columnList = allFields.join(", ");
+    const placeholders = allFields.map(() => "?").join(", ");
+    const updateClause = allFields.map(f => `${f} = VALUES(${f})`).join(", ");
+
+    return { success: true, allValues, columnList, placeholders, updateClause }
+}
+
+function buildConditionFields(conditions, allowedConditionFields) {
+  const validConditions = Object.keys(conditions)
+    .filter(key => allowedConditionFields.includes(key) && conditions[key] !== undefined);
+
+  if (!validConditions.length) {
+    return { success: false, error: "No valid condition fields provided", code: 400 };
+  }
+
+  const conditionValues = validConditions.map(f => conditions[f]);
+  const whereClause = validConditions.map(f => `${f} = ?`).join(" AND ");
+
+  return { success: true, conditionValues, whereClause };
+}
+
+function buildSelectClauses(allowedFields, conditions, allowedConditionFields) {
+  const selectClause = allowedFields.length
+      ? allowedFields.join(", ")
+      : "*";
+
+    // 2. Build WHERE clause from conditions
+    const validConditions = Object.keys(conditions)
+      .filter(key => allowedConditionFields.includes(key) && conditions[key] !== undefined);
+
+    if (!validConditions.length) {
+      return { success: false, error: "No valid conditions provided", code: 400 };
+    }
+
+    const whereClause = validConditions.length
+      ? `WHERE ${validConditions.map(f => `${f} = ?`).join(" AND ")}`
+      : "";
+
+    const values = validConditions.map(f => conditions[f]);
+
+    return { success: true, selectClause, whereClause, values }
+}
+
+
+async function updateRecord(tableName, fields, conditions, allowedFields, allowedConditionFields) {
+  try {
+    const fieldsResponse = buildUpdateFields(fields, allowedFields)
+    if (!fieldsResponse.success) {
+      return fieldsResponse
+    }
+
+    const conditionsResponse = buildConditionFields(conditions, allowedConditionFields)
+    if (!conditionsResponse.success) {
+      return conditionsResponse
+    }
+
+    const { setClause, fieldValues } = fieldsResponse
+    const { whereClause, conditionValues } = conditionsResponse
+
+    const sql = `
+      UPDATE ${tableName}
+      SET ${setClause}
+      WHERE ${whereClause}
+    `;
+
+    const [result] = await pool.query(sql, [...fieldValues, ...conditionValues]);
+
+    return {
+      success: true,
+      code: 200,
+      action: result.affectedRows > 0 ? "updated" : "no_change"
+    };
+
+  } catch (error) {
+    console.error(`[DB Error] Update failed on ${tableName}:`, error.message);
+    if (error.code === 'ECONNREFUSED') {
+      return { success: false, error: "Database unavailable", code: 503 };
+    }
+    return { success: false, error: "Internal server error", code: 500 };
+  }
+}
+
+/*
+Function used to insert a new record or update an existing one based on unique key constraints.
+Inserts if a record with the same key doesn't exist, updates if it does.
+
+FOR NOW, this works best for decks and questions upserts. Make sure it is compatible
+with all other tables as well.
+*/
+async function upsertRecord(tableName, fields, allowedFields) {
+  try {
+
+    /*
+    // 1. Validation & Filtering
+    const validFields = Object.keys(fields)
+      .filter(key => allowedFields.includes(key) && fields[key] !== undefined);
+    if (!validFields.length) {
+      return { success: false, error: "No valid fields provided", code: 400 };
+    }
+
+    // 2. Build Query
+    const allFields = [...validFields];
+    const allValues = [...validFields.map(f => fields[f])];
+
+    const columnList = allFields.join(", ");
+    const placeholders = allFields.map(() => "?").join(", ");
+    const updateClause = allFields.map(f => `${f} = VALUES(${f})`).join(", ");
+
+    */
+
+    const response = buildUpsertFields(fields, allowedFields)
+    if (!response.success) {
+      return response
+    }
+
+    const { success, allValues, columnList, placeholders, updateClause } = response
+
+    const sql = `
+      INSERT INTO ${tableName} (${columnList})
+      VALUES (${placeholders})
+      ON DUPLICATE KEY UPDATE ${updateClause}
+    `;
+
+    // 3. Database Execution
+    const [result] = await pool.query(sql, allValues);
+
+    // 4. Result Handling
+    // affectedRows is 1 for insert, 2 for update, 0 for no change
+    return { 
+      success: true, 
+      code: 200,
+      action: result.affectedRows === 1 ? "inserted" : "updated"
+    };
+
+  } catch (error) {
+    console.error(`[DB Error] Upsert failed on ${tableName}:`, error.message);
+    if (error.code === 'ECONNREFUSED') {
+      return { success: false, error: "Database unavailable", code: 503 };
+    }
+    return { success: false, error: "Internal server error", code: 500 };
+  }
+}
+
+
+/* 
+Function used to get records from any table with flexible conditions and field selection. Should
+never be exposed directly to the client, but can be used internally by other functions.
+Arguments:
+- tableName: string, the name of the table to query. Always hardcode in calling functions
+- allowedFields: array of strings, fields that are allowed to be selected. Always hardcode
+- conditions: object, key-value pairs (JSON) for WHERE clause
+- allowedConditionFields: array of strings, fields that are allowed to be used in conditions.
+  Always hardcode
+
+Returns:
+- On success: { success: true, code: 200, data: [...] }
+- On client error (e.g. no valid conditions): { success: false, error: "message", code: 400 }
+- On not found: { success: false, error: "No records found", code: 404 }
+- On server error: { success: false, error: "message", code: 500 or 503 }
+*/
+async function getRecords(tableName, allowedFields, conditions = {}, allowedConditionFields = []) {
+  try {
+
+    const response = buildSelectClauses(allowedFields, conditions, allowedConditionFields)
+    if (!response.success) {
+      return response
+    }
+
+    const { success, selectClause, whereClause, values } = response
+
+    console.log("[DB Debug] Executing query on table:", tableName);
+    // 3. Build and execute query
+    const sql = `SELECT ${selectClause} FROM ${tableName} ${whereClause}`;
+    const [rows] = await pool.query(sql, values);
+
+    console.log("[DB Debug] Query results:", rows);
+
+    // 4. Handle results
+    if (!rows.length) {
+      return { success: false, error: "No records found", code: 404 };
+    }
+
+    return {
+      success: true,
+      code: 200,
+      data: rows  // mysql2 already returns rows as JSON-friendly objects
+    };
+
+  } catch (error) {
+    console.error(`[DB Error] Select failed on ${tableName}:`, error.message);
+    if (error.code === "ECONNREFUSED") {
+      return { success: false, error: "Database unavailable", code: 503 };
+    }
+    return { success: false, error: "Internal server error", code: 500 };
+  }
+}
+
+async function getRecordsWithJoins(tableName, allowedFields, conditions = {}, allowedConditionFields = [], joinClauses = []) {
+  // Similar to getRecords but also takes an array of JOIN clauses to build more complex queries across multiple tables.
+  try {
+
+    for (const join of joinClauses) {
+      const ALLOWED_JOIN_TYPES = ["INNER", "LEFT", "RIGHT", "FULL"];
+      if (!ALLOWED_JOIN_TYPES.includes(join.type.toUpperCase())) {
+        return { success: false, error: `Invalid join type: ${join.type}`, code: 400 };  
+      }
+    }
+
+    const response = buildSelectClauses(allowedFields, conditions, allowedConditionFields)
+    if (!response.success) {
+      return response
+    }
+    const { selectClause, whereClause, values } = response
+
+    // Build JOIN clause
+
+    const joins = []
+
+    for (const join of joinClauses) {
+      // Each join should be an object like the following:
+      // { type: "INNER", table: "decks", on: "game_sessions.deck_id = decks.deck_id" }
+      const { type, table, on } = join;
+
+      const joinClause = ` ${type} JOIN ${table} ON ${on} `;
+
+      joins.push(joinClause);
+
+    }
+
+    // 4. Build and execute query
+    let sql = `SELECT ${selectClause} FROM ${tableName}`;
+    sql += joins.join(" ");
+    sql += ` ${whereClause}`;
+
+    const [rows] = await pool.query(sql, values);
+
+    // 5. Handle results
+    if (!rows.length) {
+      return { success: false, error: "No records found", code: 404 };
+    }
+
+    return {
+      success: true,
+      code: 200,
+      data: rows  // mysql2 already returns rows as JSON-friendly objects
+    };
+
+  } catch (error) {
+    console.error(`[DB Error] Select failed on ${tableName}:`, error.message);
+    if (error.code === "ECONNREFUSED") {
+      return { success: false, error: "Database unavailable", code: 503 };
+    }
+    return { success: false, error: "Internal server error", code: 500 };
+  }
+
+}
