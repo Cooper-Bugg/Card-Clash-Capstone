@@ -16,6 +16,8 @@ const dataStore = require("./dbController");
 require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
+app.set('trust proxy', 1);
+
 
 function getRuntimeMode() {
     const modeArg = process.argv.find((arg) => arg.startsWith("--mode="));
