@@ -314,7 +314,6 @@ function normalizeUnitySessionPayload(rawPayload, teacherIdentity) {
 
 /*
 Shows the teacher login page.
-This is the gate you have to go through before you can see the dashboard.
 */
 async function renderLoginPage(req, res) {
     try {
@@ -327,7 +326,6 @@ async function renderLoginPage(req, res) {
 
 /*
 Shows the main dashboard with all the decks and past game sessions.
-This is the main hub where teachers manage everything.
 */
 async function renderDashboard(req, res) {
     console.log("teacherID from session:", req.session.teacherID);
@@ -345,9 +343,7 @@ async function renderDashboard(req, res) {
 }
 
 /*
-Processes the login form. Checks username and password.
-On success it marks the session as authenticated and redirects to the dashboard.
-On failure it re-renders the login page with an error message.
+Processes the login form.
 */
 async function processAuthenticationRequest(req, res) {
     const submittedUsername = req.body.username;
@@ -379,7 +375,6 @@ function processLogoutRequest(req, res) {
 
 /*
 Shows the game window with the Unity frame.
-Looks up which deck you want to play and displays the game iframe.
 */
 async function renderGame(req, res) {
     try {
@@ -437,7 +432,7 @@ async function renderReport(req, res) {
 }
 
 /*
-Shows all past game sessions so the teacher can pick one to review.
+Shows all past game sessions.
 */
 async function renderSessions(req, res) {
     try {
@@ -462,7 +457,7 @@ async function renderSessions(req, res) {
 }
 
 /*
-Shows a blank deck editor so you can create a new quiz.
+Shows a blank deck editor.
 */
 async function renderNewDeck(req, res) {
     try {
@@ -490,7 +485,6 @@ async function renderEditDeck(req, res) {
             return;
         }
 
-        // Rebuild contentJson from database questions for the editor
         const deck = deckResponse.data.deck;
         const questions = deckResponse.data.questions;
 
@@ -531,7 +525,6 @@ async function renderEditDeck(req, res) {
 
 /*
 Saves a deck and its questions to the database.
-Maps the frontend question format to the database format.
 */
 async function saveDeck(req, res) {
     try {
@@ -592,7 +585,6 @@ async function saveDeck(req, res) {
             }
         }
 
-        // Map frontend question format to database format
         const questions = parsed.questions.map((q) => ({
             question_id: q.id || undefined,
             question_text: q.questionText || "",
@@ -626,7 +618,7 @@ async function saveDeck(req, res) {
         }
 
         const deckId = savedDeck.insertID || deckIdFromForm;
-        console.log("deckId:", deckId)
+        console.log("deckId:", deckId);
         res.redirect(`/deck/${deckId}/edit`);
     } catch (error) {
         console.error("Deck save failed.", error);
@@ -635,16 +627,23 @@ async function saveDeck(req, res) {
 }
 
 /*
-Starts the server with HTTPS so Brotli-compressed Unity assets work.
-Generates a self-signed certificate in the /certs folder if one does not exist.
-Falls back to plain HTTP if certificate generation fails for any reason.
+Starts the server.
+In production (Render), runs plain HTTP and lets Render handle HTTPS.
+Locally, generates a self-signed cert so Brotli/WebGL works in the browser.
 */
 async function startServer() {
+    if (process.env.NODE_ENV === "production") {
+        app.listen(port, "0.0.0.0", () => {
+            console.log(`Server started on http://0.0.0.0:${port}`);
+        });
+        return;
+    }
+
     const certsDir = path.join(__dirname, "../certs");
     const host = process.env.HOST || (runtimeMode === "server" ? "0.0.0.0" : "127.0.0.1");
     const tlsHost = process.env.TLS_HOST
     || (runtimeMode === "server" ? (process.env.PUBLIC_HOST || "45.26.97.159") : "localhost");
-const tlsIp = process.env.TLS_IP || (runtimeMode === "server" ? "45.26.97.159" : "127.0.0.1");
+    const tlsIp = process.env.TLS_IP || (runtimeMode === "server" ? "45.26.97.159" : "127.0.0.1");
     const certBase = tlsHost.replace(/[^a-zA-Z0-9.-]/g, "_");
     const keyPath = path.join(certsDir, `${certBase}-key.pem`);
     const certPath = path.join(certsDir, `${certBase}-cert.pem`);
@@ -703,10 +702,6 @@ const tlsIp = process.env.TLS_IP || (runtimeMode === "server" ? "45.26.97.159" :
 // ROUTES
 // ============================================================
 
-/*
-Home page. Everyone lands here first.
-Choose if you're a student or a teacher.
-*/
 app.get("/", (req, res) => {
     res.render("index");
 });
@@ -758,10 +753,6 @@ app.post("/register", async (req, res) => {
 
 app.post("/logout", processLogoutRequest);
 
-/*
-Student game page. Just the game, no dashboard.
-Students do not need to authenticate.
-*/
 app.get("/join", (req, res) => {
     res.render("student", { unityPath: "/Unity/index.html" });
 });
@@ -777,7 +768,6 @@ app.post("/deck", requireTeacherAuthentication, saveDeck);
 
 /*
 Unity API routes.
-Authentication removed for demo — Unity WebGL runs in same browser session.
 */
 app.get("/api/unity/deck/:deckID", async (req, res) => {
     try {
@@ -787,7 +777,6 @@ app.get("/api/unity/deck/:deckID", async (req, res) => {
             return;
         }
 
-        // Fetch deck and questions directly from database
         const deckResponse = await dataStore.getDeckById(deckID, req.session.teacherID);
         if (!deckResponse || !deckResponse.success) {
             res.status(404).json({ error: "Deck not found." });

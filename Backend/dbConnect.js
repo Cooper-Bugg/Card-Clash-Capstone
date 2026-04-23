@@ -30,8 +30,8 @@ const pool = mysql.createPool({
     host: process.env.DB_HOST,//'localhost',//
     user: process.env.DB_USER,//'root',//
     password: process.env.DB_PASSWORD,//'K#33sh8r/s1ng3n71t6',//
-    database: process.env.DB_DATABASE//'cardclash_db'//
+    database: process.env.DB_DATABASE,//'cardclash_db'//
+    ssl: { rejectUnauthorized: false }
 });
 
 module.exports = { pool }
-
