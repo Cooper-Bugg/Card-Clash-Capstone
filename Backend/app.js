@@ -832,29 +832,32 @@ app.get("/api/unity/deck/:deckID", async (req, res) => {
 app.post("/api/unity/session/ingest", async (req, res) => {
     try {
         const teacherIdentity = req.session.teacherID || null;
+        console.log("Ingest hit — teacherID:", teacherIdentity);
+        console.log("Raw body:", JSON.stringify(req.body));
+
         const normalizedPayload = normalizeUnitySessionPayload(req.body, teacherIdentity);
 
         if (normalizedPayload.error) {
+            console.log("Normalize error:", normalizedPayload.error);
             res.status(400).json({ error: normalizedPayload.error });
             return;
         }
 
+        console.log("Normalized payload:", JSON.stringify(normalizedPayload));
+
         const saveResult = await dataStore.saveSession(normalizedPayload);
+        console.log("Save result:", JSON.stringify(saveResult));
 
         if (!saveResult.success) {
             res.status(500).json({ error: "Failed to save session." });
             return;
         }
 
-        // Trigger summary in background — don't make Unity wait for Gemini
         dataStore.getSessionSummaryFromAI(saveResult.sessionId).catch(err => {
             console.error("Background summary generation failed.", err);
         });
 
-        res.status(202).json({
-            ok: true,
-            sessionId: saveResult.sessionId
-        });
+        res.status(202).json({ ok: true, sessionId: saveResult.sessionId });
     } catch (error) {
         console.error("Unity session ingest failed.", error);
         res.status(500).json({ error: "Unity session ingest failed." });
