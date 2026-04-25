@@ -417,13 +417,17 @@ async function renderReport(req, res) {
             return;
         }
 
+        const summaryParagraphs = session.ai_summary_text
+            ? session.ai_summary_text.split("\n\n").filter(p => p.trim().length > 0)
+            : [];
+
         res.render("report", {
             pageTitle: "Session Report",
             session: {
-                id: session.session_id,                    // ← fixed
-                deckTitle: session.deck_name || "Untitled Deck",  // ← fixed
-                createdAt: session.date_played || "Unknown date", // ← fixed
-                summaryText: session.ai_summary_text || null,     // ← fixed
+                id: session.session_id,
+                deckTitle: session.deck_name || "Untitled Deck",
+                createdAt: session.date_played || "Unknown date",
+                summaryParagraphs,
                 metrics: {
                     roundsPlayed: session.rounds_played || 0,
                     averageAccuracy: session.average_accuracy || "N/A",
