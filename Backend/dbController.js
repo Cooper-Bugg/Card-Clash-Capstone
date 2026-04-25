@@ -94,11 +94,11 @@ async function getDecks(teacher_id) {
 async function getSessions(teacher_id) {
     const allowedFields = ['session_id', 'game_sessions.deck_id', 'deck_name', 'date_played', 'rounds_played',
                           'average_accuracy', 'average_response_time_ms', 'ai_summary_text']
-    const allowedConditionFields = ['owner_id']
+    const allowedConditionFields = ['host_teacher_id']   // ← changed
     const joinClauses = [
         { type: "INNER", table: "decks", on: "game_sessions.deck_id = decks.deck_id" }
     ]
-    const response = await getRecordsWithJoins('game_sessions', allowedFields, { owner_id: teacher_id }, allowedConditionFields, joinClauses)
+    const response = await getRecordsWithJoins('game_sessions', allowedFields, { host_teacher_id: teacher_id }, allowedConditionFields, joinClauses)  // ← changed
 
     if (!response.success) {
         console.error('Error fetching sessions:', response.error)

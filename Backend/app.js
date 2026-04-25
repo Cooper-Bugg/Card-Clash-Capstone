@@ -420,11 +420,15 @@ async function renderReport(req, res) {
         res.render("report", {
             pageTitle: "Session Report",
             session: {
-                id: session.id,
-                deckTitle: session.deckTitle || "Untitled Deck",
-                createdAt: session.createdAt || "Unknown date",
-                summaryParagraphs: Array.isArray(session.summaryParagraphs) ? session.summaryParagraphs : [],
-                metrics: session.metrics || { roundsPlayed: 0, averageAccuracy: "N/A", averageResponseTime: "N/A" }
+                id: session.session_id,                    // ← fixed
+                deckTitle: session.deck_name || "Untitled Deck",  // ← fixed
+                createdAt: session.date_played || "Unknown date", // ← fixed
+                summaryText: session.ai_summary_text || null,     // ← fixed
+                metrics: {
+                    roundsPlayed: session.rounds_played || 0,
+                    averageAccuracy: session.average_accuracy || "N/A",
+                    averageResponseTime: session.average_response_time_ms || "N/A"
+                }
             }
         });
     } catch (error) {
