@@ -45,3 +45,4 @@ Unity_Folders/*/*.csproj
 Unity_Folders/*/*.sln
 Unity_Folders/*/UserSettings/
 *.meta
+Key.env

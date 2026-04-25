@@ -827,7 +827,7 @@ app.get("/api/unity/deck/:deckID", async (req, res) => {
 
 app.post("/api/unity/session/ingest", async (req, res) => {
     try {
-        const teacherIdentity = req.session.teacherID || process.env.ADMIN_USERNAME || "admin";
+        const teacherIdentity = req.session.teacherID || null;
         const normalizedPayload = normalizeUnitySessionPayload(req.body, teacherIdentity);
 
         if (normalizedPayload.error) {
@@ -835,10 +835,21 @@ app.post("/api/unity/session/ingest", async (req, res) => {
             return;
         }
 
+        const saveResult = await dataStore.saveSession(normalizedPayload);
+
+        if (!saveResult.success) {
+            res.status(500).json({ error: "Failed to save session." });
+            return;
+        }
+
+        // Trigger summary in background — don't make Unity wait for Gemini
+        dataStore.getSessionSummaryFromAI(saveResult.sessionId).catch(err => {
+            console.error("Background summary generation failed.", err);
+        });
+
         res.status(202).json({
             ok: true,
-            note: "Unity payload accepted and normalized. SQL persistence is the next step in dbController.",
-            payload: normalizedPayload
+            sessionId: saveResult.sessionId
         });
     } catch (error) {
         console.error("Unity session ingest failed.", error);
@@ -848,7 +859,21 @@ app.post("/api/unity/session/ingest", async (req, res) => {
 
 app.post("/api/ai/summarize", requireTeacherAuthentication, async (req, res) => {
     try {
-        res.json({ summary: "AI summary stub — Ollama not connected yet." });
+        const { sessionId } = req.body;
+
+        if (!sessionId) {
+            res.status(400).json({ error: "sessionId is required." });
+            return;
+        }
+
+        const result = await dataStore.getSessionSummaryFromAI(sessionId);
+
+        if (!result.success) {
+            res.status(result.code || 500).json({ error: result.error });
+            return;
+        }
+
+        res.json({ summary: result.summary });
     } catch (error) {
         console.error("AI summarize failed.", error);
         res.status(500).json({ error: "AI summarize request failed." });

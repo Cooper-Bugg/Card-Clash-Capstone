@@ -319,14 +319,104 @@ async function saveSessionSummary(sessionID, summaryText) {
     return response;
 }
 
+async function saveSession(payload) {
+    // 1. Insert the main session row into game_sessions
+    const sessionFields = {
+        host_teacher_id: payload.teacher_id,
+        deck_id: payload.deck_id,
+        date_played: payload.date_played
+            ? formatToMySQLUTC(new Date(payload.date_played))
+            : formatToMySQLUTC(new Date()),
+        player_count: payload.player_count || 0,
+        rounds_played: payload.rounds_played || 0,
+        average_accuracy: computeAverageAccuracy(payload.player_data),
+        average_response_time_ms: computeAverageResponseTime(payload.question_data),
+        unity_data_json: JSON.stringify(payload)
+    };
+
+    const allowedSessionFields = [
+        'host_teacher_id', 'deck_id', 'date_played', 'player_count',
+        'rounds_played', 'average_accuracy', 'average_response_time_ms', 'unity_data_json'
+    ];
+
+    const sessionResponse = await upsertRecord('game_sessions', sessionFields, allowedSessionFields);
+
+    if (!sessionResponse.success) {
+        console.error('Error saving session:', sessionResponse.error);
+        return { success: false, error: sessionResponse.error, code: 500 };
+    }
+
+    const sessionId = sessionResponse.insertID;
+
+    // 2. Insert one row per player into session_summaries
+    const players = Array.isArray(payload.player_data) ? payload.player_data : [];
+
+    for (const player of players) {
+        const answered = player.questions_answered || 0;
+        const correct = player.questions_correct || 0;
+        const accuracyPct = answered > 0
+            ? parseFloat(((correct / answered) * 100).toFixed(2))
+            : 0;
+
+        const summaryFields = {
+            session_id: sessionId,
+            player_name: player.player_name || 'Unknown Player',
+            final_score: player.final_score || 0,
+            final_rank: player.final_rank || null,
+            accuracy_pct: accuracyPct,
+            longest_streak: player.longest_streak || 0,
+            questions_answered: answered,
+            questions_correct: correct
+        };
+
+        const allowedSummaryFields = [
+            'session_id', 'player_name', 'final_score', 'final_rank',
+            'accuracy_pct', 'longest_streak', 'questions_answered', 'questions_correct'
+        ];
+
+        const summaryResponse = await upsertRecord('session_summaries', summaryFields, allowedSummaryFields);
+
+        if (!summaryResponse.success) {
+            console.error(`Error saving summary for player ${player.player_name}:`, summaryResponse.error);
+        }
+    }
+
+    return { success: true, code: 200, sessionId };
+}
+
+// Averages accuracy across all players
+function computeAverageAccuracy(playerData) {
+    if (!Array.isArray(playerData) || playerData.length === 0) return null;
+    const total = playerData.reduce((sum, p) => {
+        const answered = p.questions_answered || 0;
+        const correct = p.questions_correct || 0;
+        return sum + (answered > 0 ? (correct / answered) * 100 : 0);
+    }, 0);
+    return parseFloat((total / playerData.length).toFixed(2));
+}
+
+// Averages response time across all question responses
+function computeAverageResponseTime(questionData) {
+    if (!Array.isArray(questionData) || questionData.length === 0) return null;
+    const times = [];
+    for (const q of questionData) {
+        for (const r of (q.player_responses || [])) {
+            if (r.response_time != null) times.push(r.response_time);
+        }
+    }
+    if (times.length === 0) return null;
+    return Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+}
+
 module.exports = {
     getDecks,
     getSessions,
     getDeckById,
     getSessionById,
     saveDeck,
+    saveSession,          
     validateTeacherCredentials,
     registerTeacherAccount,
-    getSessionSummaryFromAI,  // ← add this
-    saveSessionSummary         // ← add this
+    getSessionSummaryFromAI,
+    saveSessionSummary
 };
