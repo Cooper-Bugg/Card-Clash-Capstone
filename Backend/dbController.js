@@ -1,4 +1,5 @@
 const { getRecords, getRecordsWithJoins, upsertRecord, updateRecord } = require('./dbQueries');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const bcrypt = require('bcryptjs');
 
@@ -131,8 +132,21 @@ async function getDeckById(deckID, teacher_id) {
     return { success: true, code: 200, data: { deck: deckResponse.data[0], questions: questionResponse.data } }
 }
 
-function getSessionById(sessionID) {
-    return Promise.resolve(null);
+async function getSessionById(sessionID) {
+    const response = await getRecordsWithJoins(
+        'game_sessions',
+        ['session_id', 'game_sessions.deck_id', 'deck_name', 'date_played',
+         'rounds_played', 'average_accuracy', 'average_response_time_ms', 'ai_summary_text'],
+        { session_id: sessionID },
+        ['session_id'],
+        [{ type: "INNER", table: "decks", on: "game_sessions.deck_id = decks.deck_id" }]
+    );
+
+    if (!response.success || !response.data.length) {
+        return null;
+    }
+
+    return response.data[0];
 }
 
 // ============================================================
@@ -208,6 +222,103 @@ async function saveDeck(infoPackage) {
     return { success: true, code: 200, message: "Deck and questions saved successfully", insertID: deckId }
 }
 
+async function getSessionSummaryFromAI(sessionID) {
+    // Fetch session + deck name
+    const sessionResponse = await getRecordsWithJoins(
+        'game_sessions',
+        ['session_id', 'game_sessions.deck_id', 'deck_name', 'date_played',
+         'rounds_played', 'average_accuracy', 'average_response_time_ms', 'ai_summary_text'],
+        { session_id: sessionID },
+        ['session_id'],
+        [{ type: "INNER", table: "decks", on: "game_sessions.deck_id = decks.deck_id" }]
+    );
+
+    if (!sessionResponse.success || !sessionResponse.data.length) {
+        return { success: false, code: 404, error: "Session not found." };
+    }
+
+    const session = sessionResponse.data[0];
+
+    // Return cached summary if it already exists — no API call needed
+    if (session.ai_summary_text) {
+        return { success: true, summary: session.ai_summary_text };
+    }
+
+    // Fetch per-player stats from session_summaries
+    const playerResponse = await getRecords(
+        'session_summaries',
+        ['player_name', 'final_score', 'final_rank', 'accuracy_pct',
+         'longest_streak', 'questions_answered', 'questions_correct'],
+        { session_id: sessionID },
+        ['session_id']
+    );
+
+    const players = playerResponse.success ? playerResponse.data : [];
+
+    // Build player breakdown for the prompt
+    const playerLines = players.length
+        ? players
+            .sort((a, b) => (a.final_rank ?? 99) - (b.final_rank ?? 99))
+            .map(p =>
+                `  - ${p.player_name} (Rank #${p.final_rank ?? "?"}): ` +
+                `score ${p.final_score ?? "?"}, ` +
+                `${p.questions_correct ?? "?"}/${p.questions_answered ?? "?"} correct, ` +
+                `longest streak ${p.longest_streak ?? 0}`
+            )
+            .join("\n")
+        : "  No player data available.";
+
+    const prompt = `
+        You are summarizing a classroom quiz game session for a teacher.
+
+        Deck: "${session.deck_name}"
+        Date played: ${session.date_played}
+        Rounds played: ${session.rounds_played ?? "unknown"}
+        Average accuracy: ${session.average_accuracy != null ? session.average_accuracy + "%" : "unknown"}
+        Average response time: ${session.average_response_time_ms != null ? session.average_response_time_ms + "ms" : "unknown"}
+
+        Player results:
+        ${playerLines}
+
+        Write a friendly 2-3 sentence summary of how the session went.
+        Call out the top performer by name, mention overall accuracy, and flag anything students may need to review.
+        Keep it encouraging and concise for the teacher.
+            `.trim();
+
+
+    // Replace the try block inside getSessionSummaryFromAI
+    try {
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+        const result = await model.generateContent(prompt);
+        const summaryText = result.response.text();
+
+        await saveSessionSummary(sessionID, summaryText);
+        return { success: true, summary: summaryText };
+
+    } catch (error) {
+        console.error("Gemini API call failed.", error);
+        return { success: false, code: 500, error: "AI summary generation failed." };
+    }
+}
+
+async function saveSessionSummary(sessionID, summaryText) {
+    const response = await updateRecord(
+        'game_sessions',
+        { ai_summary_text: summaryText },
+        { session_id: sessionID },
+        ['ai_summary_text'],
+        ['session_id']
+    );
+
+    if (!response.success) {
+        console.error('Error saving AI summary to DB:', response.error);
+    }
+
+    return response;
+}
+
 module.exports = {
     getDecks,
     getSessions,
@@ -215,5 +326,7 @@ module.exports = {
     getSessionById,
     saveDeck,
     validateTeacherCredentials,
-    registerTeacherAccount
+    registerTeacherAccount,
+    getSessionSummaryFromAI,  // ← add this
+    saveSessionSummary         // ← add this
 };
