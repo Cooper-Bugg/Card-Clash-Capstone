@@ -6,13 +6,6 @@
     <title>Unity WebGL Player | CardClash</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
-      #unity-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
-      #unity-canvas { width: 100%; height: 100%; display: block; }
-      #unity-footer { display: none; }
-    </style>
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
@@ -64,11 +57,11 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/WebGL_Build_4-25.loader.js";
+      var loaderUrl = buildUrl + "/WebGLBuild.loader.js";
       var config = {
-        dataUrl: buildUrl + "/WebGL_Build_4-25.data.br",
-        frameworkUrl: buildUrl + "/WebGL_Build_4-25.framework.js.br",
-        codeUrl: buildUrl + "/WebGL_Build_4-25.wasm.br",
+        dataUrl: buildUrl + "/WebGLBuild.data.br",
+        frameworkUrl: buildUrl + "/WebGLBuild.framework.js.br",
+        codeUrl: buildUrl + "/WebGLBuild.wasm.br",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "2nd-Floor-Studios",
         productName: "CardClash",
@@ -106,11 +99,12 @@
         // performance, uncomment the following line:
         // config.devicePixelRatio = 1;
 
+
       } else {
-        // Desktop style: fill the full browser window immediately
-        // (changed from 1px default which required clicking fullscreen to expand)
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+
+        canvas.style.width = "1px";
+        canvas.style.height = "1px";
       }
 
       loadingBar.style.display = "block";
