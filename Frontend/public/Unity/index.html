@@ -6,6 +6,13 @@
     <title>Unity WebGL Player | CardClash</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+      #unity-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+      #unity-canvas { width: 100%; height: 100%; display: block; }
+      #unity-footer { display: none; }
+    </style>
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
@@ -99,12 +106,11 @@
         // performance, uncomment the following line:
         // config.devicePixelRatio = 1;
 
-
       } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-
-        canvas.style.width = "1px";
-        canvas.style.height = "1px";
+        // Desktop style: fill the full browser window immediately
+        // (changed from 1px default which required clicking fullscreen to expand)
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
       }
 
       loadingBar.style.display = "block";
