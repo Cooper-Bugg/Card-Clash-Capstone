@@ -1,8 +1,5 @@
 const { getRecords, getRecordsWithJoins, upsertRecord, updateRecord } = require('./dbQueries');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
 const bcrypt = require('bcryptjs');
-
 const path = require("path");
 require("dotenv").config({ path: path.join(__dirname, "../.env") });
 
@@ -62,7 +59,7 @@ async function validateTeacherCredentials(username, password) {
     const isValid = await verifyPassword(password, passwordHash)
 
     if (isValid) {
-        const response2 = await updateRecord(
+        await updateRecord(
             'teachers',
             { last_login: formatToMySQLUTC(new Date()) },
             { teacher_id: response.data[0].teacher_id },
@@ -94,11 +91,11 @@ async function getDecks(teacher_id) {
 async function getSessions(teacher_id) {
     const allowedFields = ['session_id', 'game_sessions.deck_id', 'deck_name', 'date_played', 'rounds_played',
                           'average_accuracy', 'average_response_time_ms', 'ai_summary_text']
-    const allowedConditionFields = ['host_teacher_id']   // ← changed
+    const allowedConditionFields = ['host_teacher_id']
     const joinClauses = [
         { type: "INNER", table: "decks", on: "game_sessions.deck_id = decks.deck_id" }
     ]
-    const response = await getRecordsWithJoins('game_sessions', allowedFields, { host_teacher_id: teacher_id }, allowedConditionFields, joinClauses)  // ← changed
+    const response = await getRecordsWithJoins('game_sessions', allowedFields, { host_teacher_id: teacher_id }, allowedConditionFields, joinClauses)
 
     if (!response.success) {
         console.error('Error fetching sessions:', response.error)
@@ -180,7 +177,6 @@ async function saveQuestion(fields) {
 }
 
 async function saveDeck(infoPackage) {
-    // First save the deck metadata
     const allowedDeckFields = ['deck_id', 'owner_id', 'deck_name', 'description', 'subject_tag', 'number_of_questions', 'is_public']
     const deckResponse = await upsertRecord('decks', infoPackage, allowedDeckFields)
     console.log("deckResponse:", JSON.stringify(deckResponse))
@@ -190,10 +186,8 @@ async function saveDeck(infoPackage) {
         return deckResponse
     }
 
-    // Get the deck ID — either from the insert or from the original package
     const deckId = deckResponse.insertID || infoPackage.deck_id
 
-    // If math deck, save parameters to math_decks table
     if (infoPackage.subject_tag === 'math') {
         const allowedMathFields = ['deck_id', 'operations', 'lowest_number', 'highest_number', 'number_of_operands', 'subject_tag']
         const mathResponse = await upsertRecord('math_decks', infoPackage.questions[0], allowedMathFields)
@@ -204,7 +198,6 @@ async function saveDeck(infoPackage) {
         return { success: true, code: 200, message: "Math deck saved successfully", insertID: deckId }
     }
 
-    // Save regular questions
     const questions = infoPackage.questions || []
     const questionResponses = []
 
@@ -222,38 +215,12 @@ async function saveDeck(infoPackage) {
     return { success: true, code: 200, message: "Deck and questions saved successfully", insertID: deckId }
 }
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-let lastGeminiCall = 0;
-async function rateLimitGemini() {
-    const now = Date.now();
-    const diff = now - lastGeminiCall;
-
-    if (diff < 1500) {
-        await new Promise(r => setTimeout(r, 1500 - diff));
-    }
-
-    lastGeminiCall = Date.now();
-}
-
-    async function getSessionSummaryFromAI(sessionID) {
+async function getSessionSummaryFromAI(sessionID) {
     try {
-        console.log("Gemini summary request:", sessionID);
-
-        // Fetch session + deck name
         const sessionResponse = await getRecordsWithJoins(
             'game_sessions',
-            [
-                'session_id',
-                'game_sessions.deck_id',
-                'deck_name',
-                'date_played',
-                'rounds_played',
-                'average_accuracy',
-                'average_response_time_ms',
-                'ai_summary_text'
-            ],
+            ['session_id', 'game_sessions.deck_id', 'deck_name', 'date_played',
+             'rounds_played', 'average_accuracy', 'average_response_time_ms', 'ai_summary_text'],
             { session_id: sessionID },
             ['session_id'],
             [{ type: "INNER", table: "decks", on: "game_sessions.deck_id = decks.deck_id" }]
@@ -265,86 +232,72 @@ async function rateLimitGemini() {
 
         const session = sessionResponse.data[0];
 
-  
         if (session.ai_summary_text) {
             return { success: true, summary: session.ai_summary_text };
         }
 
-        // Fetch player stats
         const playerResponse = await getRecords(
             'session_summaries',
-            [
-                'player_name',
-                'final_score',
-                'final_rank',
-                'accuracy_pct',
-                'longest_streak',
-                'questions_answered',
-                'questions_correct'
-            ],
+            ['player_name', 'final_score', 'final_rank', 'accuracy_pct',
+             'longest_streak', 'questions_answered', 'questions_correct'],
             { session_id: sessionID },
             ['session_id']
         );
 
         const players = playerResponse.success ? playerResponse.data : [];
 
-        // limit players (reduces tokens = cheaper + faster + safer)
-        const limitedPlayers = players
-            .slice(0, 10)
-            .sort((a, b) => (a.final_rank ?? 99) - (b.final_rank ?? 99));
-
-        const playerLines = limitedPlayers.length
-            ? limitedPlayers.map(p =>
-                `- ${p.player_name} (Rank #${p.final_rank ?? "?"}): ` +
-                `score ${p.final_score ?? "?"}, ` +
-                `${p.questions_correct ?? "?"}/${p.questions_answered ?? "?"} correct, ` +
-                `longest streak ${p.longest_streak ?? 0}`
-            ).join("\n")
+        const playerLines = players.length
+            ? players
+                .sort((a, b) => (a.final_rank ?? 99) - (b.final_rank ?? 99))
+                .map(p =>
+                    `- ${p.player_name} (Rank #${p.final_rank ?? "?"}): ` +
+                    `score ${p.final_score ?? "?"}, ` +
+                    `${p.questions_correct ?? "?"}/${p.questions_answered ?? "?"} correct, ` +
+                    `longest streak ${p.longest_streak ?? 0}`
+                ).join("\n")
             : "No player data available.";
 
-        const prompt = `
-            You are summarizing a classroom quiz game session for a teacher.
+        const prompt = `You are summarizing a classroom quiz game session for a teacher.
 
-            Deck: "${session.deck_name}"
-            Date played: ${session.date_played}
-            Rounds played: ${session.rounds_played ?? "unknown"}
-            Average accuracy: ${session.average_accuracy != null ? session.average_accuracy + "%" : "unknown"}
-            Average response time: ${session.average_response_time_ms != null ? session.average_response_time_ms + "ms" : "unknown"}
+Deck: "${session.deck_name}"
+Date played: ${session.date_played}
+Rounds played: ${session.rounds_played ?? "unknown"}
+Average accuracy: ${session.average_accuracy != null ? session.average_accuracy + "%" : "unknown"}
+Average response time: ${session.average_response_time_ms != null ? session.average_response_time_ms + "ms" : "unknown"}
 
-            Player results:
-            ${playerLines}
+Player results:
+${playerLines}
 
-            Write a friendly 2-3 sentence summary of how the session went.
-            Mention the top performer, overall performance, and any weak areas.
-            Keep it concise and encouraging.
-        `.trim();
+Write a friendly 2-3 sentence summary of how the session went. Mention the top performer, overall performance, and any weak areas. Keep it concise and encouraging.`;
 
-        await rateLimitGemini();
+        const response = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: {
+                "x-api-key": process.env.ANTHROPIC_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "claude-haiku-4-5-20251001",
+                max_tokens: 1000,
+                messages: [{ role: "user", content: prompt }]
+            })
+        });
 
-        const result = await model.generateContent(prompt);
-        const summaryText = result.response.text();
+        const data = await response.json();
 
+        if (!response.ok) {
+            console.error("Anthropic API error:", data);
+            return { success: false, code: response.status, error: "AI summary generation failed." };
+        }
+
+        const summaryText = data.content[0].text;
         await saveSessionSummary(sessionID, summaryText);
-
         return { success: true, summary: summaryText };
 
     } catch (error) {
-        console.error("Gemini API call failed:", error);
-
-        // helpful debug for 429
-        if (error?.status === 429) {
-            return {
-                success: false,
-                code: 429,
-                error: "Rate limit exceeded. Slow down requests or upgrade quota."
-            };
-        }
-
-        return {
-            success: false,
-            code: 500,
-            error: "AI summary generation failed."
-        };
+        console.error("AI summary generation failed.", error);
+        return { success: false, code: 500, error: "AI summary generation failed." };
     }
 }
 
@@ -365,7 +318,6 @@ async function saveSessionSummary(sessionID, summaryText) {
 }
 
 async function saveSession(payload) {
-    // 1. Insert the main session row into game_sessions
     const sessionFields = {
         host_teacher_id: payload.teacher_id,
         deck_id: payload.deck_id,
@@ -393,7 +345,6 @@ async function saveSession(payload) {
 
     const sessionId = sessionResponse.insertID;
 
-    // 2. Insert one row per player into session_summaries
     const players = Array.isArray(payload.player_data) ? payload.player_data : [];
 
     for (const player of players) {
@@ -429,7 +380,6 @@ async function saveSession(payload) {
     return { success: true, code: 200, sessionId };
 }
 
-// Averages accuracy across all players
 function computeAverageAccuracy(playerData) {
     if (!Array.isArray(playerData) || playerData.length === 0) return null;
     const total = playerData.reduce((sum, p) => {
@@ -440,7 +390,6 @@ function computeAverageAccuracy(playerData) {
     return parseFloat((total / playerData.length).toFixed(2));
 }
 
-// Averages response time across all question responses
 function computeAverageResponseTime(questionData) {
     if (!Array.isArray(questionData) || questionData.length === 0) return null;
     const times = [];
@@ -459,7 +408,7 @@ module.exports = {
     getDeckById,
     getSessionById,
     saveDeck,
-    saveSession,          
+    saveSession,
     validateTeacherCredentials,
     registerTeacherAccount,
     getSessionSummaryFromAI,
