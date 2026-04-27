@@ -237,7 +237,7 @@ async function rateLimitGemini() {
     lastGeminiCall = Date.now();
 }
 
-export async function getSessionSummaryFromAI(sessionID) {
+    async function getSessionSummaryFromAI(sessionID) {
     try {
         console.log("Gemini summary request:", sessionID);
 
