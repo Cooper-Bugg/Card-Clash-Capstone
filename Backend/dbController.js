@@ -222,84 +222,129 @@ async function saveDeck(infoPackage) {
     return { success: true, code: 200, message: "Deck and questions saved successfully", insertID: deckId }
 }
 
-async function getSessionSummaryFromAI(sessionID) {
-    // Fetch session + deck name
-    const sessionResponse = await getRecordsWithJoins(
-        'game_sessions',
-        ['session_id', 'game_sessions.deck_id', 'deck_name', 'date_played',
-         'rounds_played', 'average_accuracy', 'average_response_time_ms', 'ai_summary_text'],
-        { session_id: sessionID },
-        ['session_id'],
-        [{ type: "INNER", table: "decks", on: "game_sessions.deck_id = decks.deck_id" }]
-    );
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    if (!sessionResponse.success || !sessionResponse.data.length) {
-        return { success: false, code: 404, error: "Session not found." };
+let lastGeminiCall = 0;
+async function rateLimitGemini() {
+    const now = Date.now();
+    const diff = now - lastGeminiCall;
+
+    if (diff < 1500) {
+        await new Promise(r => setTimeout(r, 1500 - diff));
     }
 
-    const session = sessionResponse.data[0];
+    lastGeminiCall = Date.now();
+}
 
-    // Return cached summary if it already exists — no API call needed
-    if (session.ai_summary_text) {
-        return { success: true, summary: session.ai_summary_text };
-    }
+export async function getSessionSummaryFromAI(sessionID) {
+    try {
+        console.log("Gemini summary request:", sessionID);
 
-    // Fetch per-player stats from session_summaries
-    const playerResponse = await getRecords(
-        'session_summaries',
-        ['player_name', 'final_score', 'final_rank', 'accuracy_pct',
-         'longest_streak', 'questions_answered', 'questions_correct'],
-        { session_id: sessionID },
-        ['session_id']
-    );
+        // Fetch session + deck name
+        const sessionResponse = await getRecordsWithJoins(
+            'game_sessions',
+            [
+                'session_id',
+                'game_sessions.deck_id',
+                'deck_name',
+                'date_played',
+                'rounds_played',
+                'average_accuracy',
+                'average_response_time_ms',
+                'ai_summary_text'
+            ],
+            { session_id: sessionID },
+            ['session_id'],
+            [{ type: "INNER", table: "decks", on: "game_sessions.deck_id = decks.deck_id" }]
+        );
 
-    const players = playerResponse.success ? playerResponse.data : [];
+        if (!sessionResponse.success || !sessionResponse.data.length) {
+            return { success: false, code: 404, error: "Session not found." };
+        }
 
-    // Build player breakdown for the prompt
-    const playerLines = players.length
-        ? players
-            .sort((a, b) => (a.final_rank ?? 99) - (b.final_rank ?? 99))
-            .map(p =>
-                `  - ${p.player_name} (Rank #${p.final_rank ?? "?"}): ` +
+        const session = sessionResponse.data[0];
+
+  
+        if (session.ai_summary_text) {
+            return { success: true, summary: session.ai_summary_text };
+        }
+
+        // Fetch player stats
+        const playerResponse = await getRecords(
+            'session_summaries',
+            [
+                'player_name',
+                'final_score',
+                'final_rank',
+                'accuracy_pct',
+                'longest_streak',
+                'questions_answered',
+                'questions_correct'
+            ],
+            { session_id: sessionID },
+            ['session_id']
+        );
+
+        const players = playerResponse.success ? playerResponse.data : [];
+
+        // limit players (reduces tokens = cheaper + faster + safer)
+        const limitedPlayers = players
+            .slice(0, 10)
+            .sort((a, b) => (a.final_rank ?? 99) - (b.final_rank ?? 99));
+
+        const playerLines = limitedPlayers.length
+            ? limitedPlayers.map(p =>
+                `- ${p.player_name} (Rank #${p.final_rank ?? "?"}): ` +
                 `score ${p.final_score ?? "?"}, ` +
                 `${p.questions_correct ?? "?"}/${p.questions_answered ?? "?"} correct, ` +
                 `longest streak ${p.longest_streak ?? 0}`
-            )
-            .join("\n")
-        : "  No player data available.";
+            ).join("\n")
+            : "No player data available.";
 
-    const prompt = `
-        You are summarizing a classroom quiz game session for a teacher.
+        const prompt = `
+            You are summarizing a classroom quiz game session for a teacher.
 
-        Deck: "${session.deck_name}"
-        Date played: ${session.date_played}
-        Rounds played: ${session.rounds_played ?? "unknown"}
-        Average accuracy: ${session.average_accuracy != null ? session.average_accuracy + "%" : "unknown"}
-        Average response time: ${session.average_response_time_ms != null ? session.average_response_time_ms + "ms" : "unknown"}
+            Deck: "${session.deck_name}"
+            Date played: ${session.date_played}
+            Rounds played: ${session.rounds_played ?? "unknown"}
+            Average accuracy: ${session.average_accuracy != null ? session.average_accuracy + "%" : "unknown"}
+            Average response time: ${session.average_response_time_ms != null ? session.average_response_time_ms + "ms" : "unknown"}
 
-        Player results:
-        ${playerLines}
+            Player results:
+            ${playerLines}
 
-        Write a friendly 2-3 sentence summary of how the session went.
-        Call out the top performer by name, mention overall accuracy, and flag anything students may need to review.
-        Keep it encouraging and concise for the teacher.
-            `.trim();
+            Write a friendly 2-3 sentence summary of how the session went.
+            Mention the top performer, overall performance, and any weak areas.
+            Keep it concise and encouraging.
+        `.trim();
 
-
-    // Replace the try block inside getSessionSummaryFromAI
-    try {
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        await rateLimitGemini();
 
         const result = await model.generateContent(prompt);
         const summaryText = result.response.text();
 
         await saveSessionSummary(sessionID, summaryText);
+
         return { success: true, summary: summaryText };
 
     } catch (error) {
-        console.error("Gemini API call failed.", error);
-        return { success: false, code: 500, error: "AI summary generation failed." };
+        console.error("Gemini API call failed:", error);
+
+        // helpful debug for 429
+        if (error?.status === 429) {
+            return {
+                success: false,
+                code: 429,
+                error: "Rate limit exceeded. Slow down requests or upgrade quota."
+            };
+        }
+
+        return {
+            success: false,
+            code: 500,
+            error: "AI summary generation failed."
+        };
     }
 }
 
