@@ -399,7 +399,8 @@ function computeAverageResponseTime(questionData) {
         }
     }
     if (times.length === 0) return null;
-    return Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+    const avgSeconds = times.reduce((a, b) => a + b, 0) / times.length;
+    return Math.round(avgSeconds * 1000); // convert seconds to milliseconds
 }
 
 module.exports = {
